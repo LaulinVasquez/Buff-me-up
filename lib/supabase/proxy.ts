@@ -12,6 +12,10 @@ export async function updateSession(request: NextRequest) {
       items.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
     },
   }});
-  await supabase.auth.getClaims();
+  const { data } = await supabase.auth.getClaims();
+  const isAppRoute = request.nextUrl.pathname.startsWith("/app");
+  const isLandingPage = request.nextUrl.pathname === "/";
+  if (!data?.claims && isAppRoute) return NextResponse.redirect(new URL("/", request.url));
+  if (data?.claims && isLandingPage) return NextResponse.redirect(new URL("/app", request.url));
   return response;
 }

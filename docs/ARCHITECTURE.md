@@ -16,13 +16,16 @@ Buff Me Up is one Next.js App Router application. Server Components are the defa
 
 ## Supabase strategy
 
-`@supabase/ssr` supplies separate browser and server factories. The root Next.js proxy refreshes authentication cookies when configured but does not enforce authentication. Only the public URL and publishable key are exposed. Database types will be generated after schemas exist. Milestone 0 configures no tables or providers.
+`@supabase/ssr` supplies separate browser and server factories. The proxy refreshes cookies with verified claims, protects `/app/*`, and redirects authenticated users away from `/`. The PKCE callback exchanges the code and idempotently upserts `gym_profiles`. Only the public URL and publishable key are exposed.
+
+`gym_profiles` and its RLS policies, trigger, and function use the `gym_` prefix to isolate them from FlowDesk in the shared project. Synchronization happens in the Buff Me Up callback rather than through a shared `auth.users` trigger.
 
 ## Planned routes
 
-- `/` — public product and sign-in entry
-- `/app` — future authenticated shell/dashboard
+- `/` — public Google sign-in entry
+- `/auth/callback` — OAuth exchange and profile synchronization
+- `/app` — protected authenticated shell
 - `/app/workouts` — future plans and training days
 - `/app/history` — future completed workouts, attendance, and streaks
 
-Milestone 1 will add Google authentication and protect `/app`. Workout routes will live under `app/app/`, reusable domain UI in `components/`, and data access in `lib/`. No workout implementation exists yet.
+Future workout routes will live under `app/app/`, reusable domain UI in `components/`, and data access in `lib/`. No workout implementation exists yet.

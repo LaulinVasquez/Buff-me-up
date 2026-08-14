@@ -1,255 +1,455 @@
-# Gym App — Milestone 0: Project Foundation
+# Gym App — Milestone 1: Google Authentication
 
-You are building a production-ready MVP gym tracking SaaS application.
+IMPORTANT — SHARED SUPABASE PROJECT
 
-The project must prioritize:
+Buff Me Up shares an existing Supabase project with another application called FlowDesk.
 
-* Fast implementation
-* Clean architecture
-* Mobile-first usability
-* Maintainability
-* Strong TypeScript usage
-* Supabase integration
-* Vercel deployment compatibility
+Do not modify, rename, delete, reference, or depend on any existing FlowDesk application tables.
 
-The owner intends to use this application personally at the gym immediately after deployment.
+Supabase Auth is intentionally shared between the applications.
 
-## Product Vision
+Every database table owned by Buff Me Up must use the `gym_` prefix.
 
-The application allows users to:
+For Milestone 1:
+- Create `gym_profiles`, NOT `profiles`.
+- All RLS policies must apply specifically to `gym_profiles`.
+- Authentication may use the existing Supabase `auth.users`.
+- Existing FlowDesk users/tables must remain unaffected.
 
-* Sign in with Google
-* Choose a recommended workout plan or build their own
-* Organize workouts by training day
-* View today's workout
-* Check off exercises while training
-* Record completed workouts
-* Track gym attendance
-* View workout history and streaks
+Future Buff Me Up tables will follow the same `gym_` naming convention.
 
-Future functionality may include:
+## Objective
 
-* Individual set tracking
-* Progressive overload
-* Personal records
-* Analytics
-* AI-generated plans
-* Exercise libraries
-* Nutrition integrations
+Implement complete Supabase authentication using Google OAuth.
 
-Do not implement those future features unless specifically requested.
+At the end of this milestone, the following flow must work:
+
+1. Logged-out user visits the application.
+2. User selects **Continue with Google**.
+3. Google authentication completes.
+4. Supabase establishes the authenticated session.
+5. User is redirected to `/app`.
+6. `/app` cannot be accessed while logged out.
+7. Logged-in users visiting `/` are redirected to `/app`.
+8. User can sign out.
+9. After signing out, the user returns to `/`.
+
+Do not implement workout plans, exercises, workout tracking, history, or gym statistics yet.
 
 ---
 
-## Technology Stack
+## Existing Architecture
+
+The project already contains:
+
+* Next.js 16 App Router
+* TypeScript
+* Tailwind CSS
+* `@supabase/supabase-js`
+* `@supabase/ssr`
+* Browser Supabase client
+* Server Supabase client
+* Root `proxy.ts`
+* `/app` application shell
+* `.env.example`
+
+Existing architecture should be reused rather than replaced.
+
+Follow the current Supabase SSR authentication architecture.
+
+---
+
+# 1. Google Sign-In
+
+Add a reusable Google authentication component.
+
+Example intent:
+
+`Continue with Google`
 
 Use:
 
-* Next.js
-* App Router
-* TypeScript
-* Tailwind CSS
-* Supabase
-* PostgreSQL through Supabase
-* Vercel for deployment
+`supabase.auth.signInWithOAuth()`
 
-Use the current stable versions compatible with one another.
+with Google as the provider.
 
-Do not introduce unnecessary technologies.
+The OAuth redirect URL should point to an application callback route.
 
-Do not use:
+Do not hard-code localhost URLs.
 
-* Express
-* Separate backend servers
-* Firebase
-* Prisma unless explicitly requested later
-* Redux unless there is a demonstrated need
-* Native mobile frameworks
+Generate redirect URLs from the application's current origin or another deployment-safe strategy.
 
-The application should remain a responsive web application.
+The solution must work for:
+
+* localhost
+* Vercel preview/production
+* mobile browsers accessing the deployed application
 
 ---
 
-## Milestone 0 Objective
+# 2. OAuth Callback
 
-Create the complete project foundation.
+Create an authentication callback route such as:
 
-Do NOT implement the workout system yet.
+`/auth/callback`
 
-The purpose of this milestone is to establish a clean base for subsequent milestones.
+The callback must:
 
----
+1. Receive the authorization code.
+2. Exchange the code for a Supabase session.
+3. Establish the session through the SSR cookie-based architecture.
+4. Redirect successfully authenticated users to `/app`.
+5. Handle callback failures gracefully.
 
-## Requirements
+Use the existing server-side Supabase utilities.
 
-Initialize the Next.js application with:
-
-* TypeScript
-* App Router
-* Tailwind CSS
-* ESLint
-* Strict TypeScript configuration
-
-Install and configure the Supabase dependencies needed for browser and server-side authentication.
-
-Create an organized project structure suitable for the upcoming application.
-
-Suggested areas include:
-
-* app
-* components
-* lib
-* lib/supabase
-* types
-* data
-* supabase/migrations
-
-Do not over-engineer the folder structure.
+Do not expose authentication errors, tokens, authorization codes, or sensitive data unnecessarily.
 
 ---
 
-## Environment Variables
+# 3. Route Protection
 
-Create:
+Protect `/app` and future routes under `/app`.
 
-`.env.example`
+If there is no authenticated user:
 
-Include placeholders for the Supabase environment variables required by the application.
+`/app/* → /`
 
-Never commit actual credentials.
+If the user is authenticated:
 
-The owner will manually configure the real values.
+`/ → /app`
 
-The application should fail gracefully or clearly communicate missing configuration during development.
+Prefer server-side/session-based redirects where appropriate.
 
----
+Avoid client-side flashing where the protected page briefly appears before redirecting.
 
-## Supabase Foundation
-
-Prepare reusable Supabase utilities for:
-
-* Browser/client usage
-* Server-side usage
-* Middleware/session handling if required by the current Supabase SSR architecture
-
-Follow Supabase's current recommended Next.js authentication approach.
-
-Do not implement Google authentication yet.
-
-That will be completed in Milestone 1.
+Do not rely only on React client state for security.
 
 ---
 
-## Application Shell
+# 4. Session Refresh
 
-Create a minimal application shell.
+Review the existing `proxy.ts` session-refresh implementation.
 
-The public root page can simply identify the product and indicate that authentication will be added next.
+Ensure it follows the current Next.js 16 and Supabase SSR approach.
 
-Create the basic protected application route structure under:
+The proxy should refresh authentication state where necessary without performing unnecessary work for static assets.
 
-`/app`
+Use an appropriate matcher configuration if required.
 
-Do not build the dashboard functionality yet.
-
-Prepare the architecture so Milestone 1 can protect this route through authentication.
+Do not replace `proxy.ts` with the deprecated `middleware.ts` convention.
 
 ---
 
-## UI Direction
+# 5. User Profile
 
-The application will be primarily used from a phone while exercising.
+Create a `profiles` table using a Supabase SQL migration.
 
-Design decisions should therefore prioritize:
+Suggested schema:
 
-* Large touch targets
-* Easy one-handed interaction
-* High readability
-* Minimal visual clutter
-* Fast navigation
-* Responsive layouts
+```sql
+profiles
 
-Use a modern SaaS aesthetic.
+id uuid primary key
+full_name text
+avatar_url text
+created_at timestamptz
+updated_at timestamptz
+```
 
-Keep the initial shell simple because the full UI will be developed in later milestones.
+`id` must reference:
 
----
+`auth.users(id)`
 
-## Quality Requirements
+with appropriate cascading behavior.
 
-The project must successfully pass:
+Enable Row Level Security.
 
-* TypeScript checking
-* ESLint
-* Production build
+Users must only be able to access or modify their own profile.
 
-Resolve all errors before considering the milestone complete.
-
-Avoid placeholder code that breaks builds.
-
-Avoid `any` unless genuinely necessary.
-
-Do not leave unused imports or dead code.
+Create appropriate RLS policies.
 
 ---
 
-## Documentation
+# 6. Profile Creation / Synchronization
 
-Update the README with:
+After a successful first login, ensure the user has a profile record.
 
-* Project description
-* Technology stack
-* Local setup instructions
-* Required environment variables
-* Development command
-* Production build command
+Populate available Google metadata such as:
 
-Also create:
+* full name
+* avatar URL
 
-`docs/ARCHITECTURE.md`
+The implementation should be idempotent.
 
-Document:
+Logging in multiple times must not create duplicate profiles.
 
-* Current architecture
-* Application layers
-* Supabase strategy
-* Planned high-level route structure
-* Where future workout functionality will live
+If profile metadata changes, the application may safely update the stored values.
 
-Keep it concise.
+Do not duplicate authentication data unnecessarily.
+
+Supabase Auth remains the source of truth for authentication.
 
 ---
 
-## Important Constraints
+# 7. Application Header
 
-Do not implement authentication yet.
+Update the `/app` shell to display basic authenticated user information.
 
-Do not create database workout tables yet.
+For now show:
 
-Do not build workout plans yet.
+* avatar when available
+* user name
+* sign-out action
 
-Do not build exercise tracking yet.
+Example:
 
-Do not implement AI features.
+```text
+Buff Me Up
 
-Do not add unnecessary dependencies.
+                 [Avatar] Laulin
+                          Sign out
+```
 
-Keep this milestone focused exclusively on the foundation.
+Do not build the final dashboard yet.
+
+The application shell should simply confirm that authentication is functioning.
 
 ---
 
-## Completion Report
+# 8. Landing Page
 
-When finished, provide a concise report containing:
+Improve the existing public landing page enough to support authentication.
+
+Keep it simple.
+
+Suggested structure:
+
+```text
+BUFF ME UP
+
+Your workouts.
+Your progress.
+No unnecessary clutter.
+
+Track your workouts and stay consistent.
+
+[ Continue with Google ]
+```
+
+The page should remain:
+
+* mobile-first
+* clean
+* responsive
+* visually polished
+* fast
+
+Do not spend excessive time designing the landing page.
+
+Workout functionality is more important.
+
+---
+
+# 9. Sign Out
+
+Implement sign out using Supabase Auth.
+
+Expected flow:
+
+```text
+Authenticated user
+      ↓
+Sign Out
+      ↓
+Supabase session removed
+      ↓
+Redirect to /
+```
+
+Ensure authentication cookies/session data are correctly cleared.
+
+---
+
+# 10. Authentication Errors
+
+Handle common authentication failures gracefully.
+
+Examples:
+
+* OAuth provider failure
+* invalid callback
+* expired authentication request
+* Supabase unavailable
+* missing configuration
+
+Do not expose stack traces to users.
+
+A basic error message is sufficient.
+
+Example:
+
+```text
+We couldn't sign you in.
+
+Please try again.
+
+[ Try Again ]
+```
+
+---
+
+# 11. Database Types
+
+Update the existing database TypeScript types to include the `profiles` table if the project manages Supabase types manually.
+
+Keep strong typing throughout the authentication/profile code.
+
+Avoid `any`.
+
+---
+
+# 12. Security Requirements
+
+Ensure:
+
+* RLS is enabled on `profiles`
+* users cannot access another user's profile
+* OAuth credentials are never committed
+* Supabase secret/service-role keys are not introduced
+* authorization codes are not logged
+* access tokens are not logged
+* server-side authentication is used for protected routes
+
+Only the publishable Supabase key should be exposed to the browser.
+
+---
+
+# 13. Environment Variables
+
+Continue using:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+```
+
+Do not add a service-role key.
+
+Update `.env.example` if necessary.
+
+---
+
+# 14. Manual Configuration Documentation
+
+Update the README with a concise **Google OAuth Setup** section.
+
+The owner needs clear instructions for configuring:
+
+## Supabase
+
+Explain where to enable Google authentication.
+
+## Google Cloud
+
+Explain where the owner needs to obtain:
+
+* Google OAuth Client ID
+* Google OAuth Client Secret
+
+## Redirect URLs
+
+Clearly document which redirect URL must be registered with Google/Supabase.
+
+Account for both:
+
+```text
+localhost development
+production/Vercel
+```
+
+Do not place actual credentials in the repository.
+
+---
+
+# 15. Verification
+
+Before completing the milestone, run:
+
+```bash
+npm run typecheck
+npm run lint
+npm run build
+```
+
+Resolve all errors.
+
+If authentication cannot be fully tested because the owner has not yet configured Google OAuth credentials, clearly state what was verified automatically and what requires manual verification.
+
+---
+
+# Do Not Implement Yet
+
+Do not implement:
+
+* workout plans
+* workout days
+* exercises
+* recommended workout plans
+* workout sessions
+* gym attendance
+* streaks
+* history
+* weights/reps tracking
+* analytics
+* AI
+* nutrition features
+
+Those belong to future milestones.
+
+---
+
+# Definition of Done
+
+Milestone 1 is complete when:
+
+```text
+Google login
+     ↓
+OAuth callback
+     ↓
+Supabase session
+     ↓
+Profile exists
+     ↓
+Redirect /app
+     ↓
+Protected application
+     ↓
+Sign out
+     ↓
+Return /
+```
+
+works correctly.
+
+---
+
+# Completion Report
+
+When finished, provide:
 
 1. Files created
 2. Files modified
-3. Dependencies added
-4. Architecture established
-5. Environment variables required
-6. Verification performed
-7. Any manual steps required from the owner
+3. Database migration created
+4. Authentication flow implemented
+5. RLS policies created
+6. Environment variables used
+7. Verification results
+8. Manual steps required from the owner
+9. Exact Google/Supabase OAuth configuration the owner must perform
+10. Any known issues or limitations
 
-Do not proceed to Milestone 1 automatically.
+Do not begin Milestone 2 automatically.
 
-Stop after Milestone 0 and wait for review.
+Stop after Milestone 1.
