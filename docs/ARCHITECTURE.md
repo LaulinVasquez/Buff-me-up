@@ -20,6 +20,8 @@ Buff Me Up is one Next.js App Router application. Server Components are the defa
 
 `gym_profiles` and its RLS policies, trigger, and function use the `gym_` prefix to isolate them from FlowDesk in the shared project. Synchronization happens in the Buff Me Up callback rather than through a shared `auth.users` trigger.
 
+In Capacitor, OAuth uses `com.laurinvasquez.buffmeup://auth/callback` in Capacitor Browser. The App plugin delivers that URL to the deployed WebView. The OAuth request and callback exchange use the same browser Supabase client, so its persisted PKCE verifier is available for the one-time code exchange without exposing secrets to a bridge. The session uses the existing cookie strategy and profile RLS policies. Browser runtimes continue to use the server-side `/auth/callback` unchanged.
+
 ## Main routes
 
 - `/` — public Google sign-in entry

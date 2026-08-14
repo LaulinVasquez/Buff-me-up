@@ -1,449 +1,263 @@
-# Buff Me Up — Capacitor iOS Native Authentication and Deep Linking
+# Buff Me Up — Mac/Xcode Environment Recovery
 
 ## Objective
 
-Fix Google OAuth for the Capacitor iOS version of Buff Me Up.
+Diagnose and fix the current local macOS/Xcode/Capacitor environment errors preventing Buff Me Up from syncing and building for iOS.
 
-The native application currently loads the deployed Vercel application successfully inside Capacitor, but Google authentication leaves the app and returns the user to Safari.
-
-The desired native flow is:
+Current errors include:
 
 ```text
-Buff Me Up iOS app
-      ↓
-Continue with Google
-      ↓
-Google authentication
-      ↓
-Supabase callback
-      ↓
-Deep link back into Buff Me Up
-      ↓
-Authenticated app session
-      ↓
-/app
+ENOSPC: no space left on device
 ```
 
-The existing web authentication flow must continue to work unchanged for normal browser users.
-
----
-
-# Current Architecture
-
-Buff Me Up uses:
-
-* Next.js App Router
-* Supabase Auth
-* Google OAuth
-* PKCE
-* `@supabase/ssr`
-* Vercel
-* Capacitor iOS
-
-Current production web URL:
-
-`https://buff-me-up.vercel.app`
-
-Current native bundle ID:
-
-`com.laurinvasquez.buffmeup`
-
-Capacitor is currently loading the deployed Vercel application using the native WebView.
-
-Do not break existing web authentication.
-
----
-
-# 1. Detect Native Capacitor Runtime
-
-Add a small reusable runtime helper that safely detects whether the application is running inside Capacitor.
-
-Use the official Capacitor runtime APIs rather than user-agent detection.
-
-Example conceptual behavior:
+and:
 
 ```text
-isNativeApp()
+Couldn't create workspace arena folder ...
+Unable to write to info.plist
 ```
 
-returns true only when running inside the native Capacitor shell.
+The project path is:
 
-Normal Safari/Chrome/Vercel usage must continue using the existing web OAuth flow.
+`~/vscode/Buff-me-up`
+
+The agent may use terminal commands to inspect and repair the local development environment.
+
+Do not modify application product functionality as part of this task.
 
 ---
 
-# 2. Native Redirect Scheme
+## 1. Diagnose Disk Space
 
-Configure a custom URL scheme for Buff Me Up.
-
-Use:
-
-`com.laurinvasquez.buffmeup`
-
-with an auth callback such as:
-
-```text
-com.laurinvasquez.buffmeup://auth/callback
-```
-
-or another clean equivalent.
-
-The scheme must be registered in the iOS project.
-
-Follow Capacitor's current iOS deep-link guidance.
-
-Do not invent a web URL for the native callback.
-
----
-
-# 3. Supabase Redirect Configuration
-
-The native redirect must be compatible with Supabase Auth.
-
-The native callback URI should be added to the Supabase Authentication redirect allow list.
-
-Expected example:
-
-```text
-com.laurinvasquez.buffmeup://auth/callback
-```
-
-Document the exact URI the owner must add.
-
-Keep existing web redirects such as:
-
-```text
-http://localhost:3000/auth/callback
-https://buff-me-up.vercel.app/auth/callback
-```
-
-Do not remove or replace them.
-
----
-
-# 4. Google OAuth Behavior
-
-Update the Google sign-in logic so:
-
-## Web
-
-Normal browser use continues to use:
-
-```text
-https://current-origin/auth/callback
-```
-
-## Capacitor iOS
-
-Native runtime uses the registered native redirect URI.
-
-Example:
-
-```text
-com.laurinvasquez.buffmeup://auth/callback
-```
-
-Use Supabase's supported OAuth/deep-link flow.
-
-Do not hard-code localhost.
-
----
-
-# 5. Capacitor App Plugin
-
-Install and use the Capacitor App plugin if not already installed.
-
-The application must listen for native deep-link events.
-
-Handle:
-
-```text
-appUrlOpen
-```
-
-or the current official equivalent.
-
-When the application receives:
-
-```text
-com.laurinvasquez.buffmeup://auth/callback?...
-```
-
-extract the OAuth authorization information safely.
-
-Do not log:
-
-* authorization codes
-* access tokens
-* refresh tokens
-
----
-
-# 6. PKCE Compatibility
-
-The web app currently uses PKCE.
-
-Preserve PKCE security.
-
-Ensure the native flow correctly exchanges the returned authorization code for a Supabase session.
-
-Do not switch the entire application to an insecure authentication strategy merely to simplify native OAuth.
-
-If the current SSR cookie-based PKCE architecture cannot directly complete inside the native shell, implement the smallest clean bridge necessary between the native callback and the deployed Next.js application.
-
-Document the reasoning.
-
----
-
-# 7. Session Establishment
-
-After successful native OAuth:
-
-* Supabase session must exist
-* authenticated application state must be available
-* user should navigate to `/app`
-* `gym_profiles` behavior must remain intact
-
-Closing and reopening Buff Me Up should retain authenticated behavior according to the existing Supabase session strategy.
-
----
-
-# 8. External Browser Handling
-
-Google OAuth may open an external browser/authentication session if required by iOS.
-
-That is acceptable.
-
-The critical behavior is that successful authentication returns the user into Buff Me Up automatically.
-
-Do not leave the user stranded in Safari.
-
----
-
-# 9. Deep-Link Routing
-
-Handle deep links defensively.
-
-Only recognized Buff Me Up routes should be processed.
-
-At minimum:
-
-```text
-/auth/callback
-```
-
-Unknown deep links should not execute arbitrary navigation.
-
----
-
-# 10. iOS Configuration
-
-Update the Capacitor iOS project as necessary.
-
-Possible required changes include:
-
-* URL Types
-* CFBundleURLSchemes
-* Capacitor App plugin configuration
-* Info.plist changes
-
-Use:
-
-```text
-com.laurinvasquez.buffmeup
-```
-
-Do not change the bundle identifier.
-
----
-
-# 11. Existing Web Flow Must Remain Working
-
-Verify that normal web authentication still works:
-
-```text
-Safari/Chrome
-   ↓
-Google OAuth
-   ↓
-https://buff-me-up.vercel.app/auth/callback
-   ↓
-/app
-```
-
-Native-specific logic must not break the deployed SaaS experience.
-
----
-
-# 12. Capacitor Configuration
-
-Review `capacitor.config.ts`.
-
-Current native prototype may use:
-
-```ts
-server: {
-  url: 'https://buff-me-up.vercel.app',
-  cleartext: false,
-}
-```
-
-Do not silently treat this as the final App Store architecture.
-
-Capacitor documentation states that `server.url` is intended for live-reload/development use rather than production.
-
-Keep it only for the current prototype unless a better architecture is implemented as part of this task.
-
-Document this limitation clearly.
-
----
-
-# 13. Xcode Console Warnings
-
-The current app may log messages such as:
-
-```text
-Could not create a sandbox extension
-WebContent process became unresponsive
-JS Eval error
-```
-
-Investigate only if they are causally related to authentication or navigation.
-
-Do not spend excessive time eliminating harmless WebKit/LLDB diagnostic warnings.
-
-The priority is functional OAuth return-to-app behavior.
-
----
-
-# 14. Dependencies
-
-Add only dependencies genuinely required for native deep linking/auth.
-
-Likely candidate:
-
-```text
-@capacitor/app
-```
-
-Avoid unnecessary authentication libraries if Supabase + Capacitor can handle the flow cleanly.
-
----
-
-# 15. Sync Native Project
-
-After changes, run the appropriate Capacitor synchronization command:
+Check available filesystem space using commands such as:
 
 ```bash
+df -h /
+df -h ~
+```
+
+Report:
+
+* total space
+* used space
+* available space
+* filesystem utilization percentage
+
+Determine whether insufficient disk space is causing the Xcode and Capacitor failures.
+
+---
+
+## 2. Inspect Xcode Storage
+
+Measure major Xcode-related storage locations without deleting anything initially.
+
+Inspect:
+
+```bash
+~/Library/Developer/Xcode/DerivedData
+~/Library/Developer/Xcode/Archives
+~/Library/Developer/CoreSimulator
+```
+
+Also inspect other obviously large Xcode development directories if relevant.
+
+Report their approximate sizes.
+
+---
+
+## 3. Safe Cleanup
+
+If disk space is critically low, perform only low-risk development cleanup first.
+
+Safe cleanup may include:
+
+### Xcode DerivedData
+
+Delete generated DerivedData contents:
+
+```bash
+rm -rf ~/Library/Developer/Xcode/DerivedData/*
+```
+
+DerivedData is generated build/index data and may be rebuilt by Xcode.
+
+### Buff Me Up generated Capacitor web/native copy state
+
+If appropriate, remove incomplete generated sync directories such as:
+
+```bash
+~/vscode/Buff-me-up/ios/App/App/public
+~/vscode/Buff-me-up/ios/capacitor-cordova-ios-plugins
+```
+
+Only remove these if they are generated artifacts and the current partial sync left them incomplete.
+
+Do not delete the entire iOS project.
+
+---
+
+## 4. Do Not Delete Without Explicit Approval
+
+Do NOT automatically delete:
+
+* personal files
+* Documents
+* Downloads
+* Photos
+* Desktop files
+* Xcode Archives
+* iOS Simulator devices
+* application source code
+* Git repositories
+* system files
+* user caches outside development tooling
+* anything whose purpose is uncertain
+
+If additional disk space beyond DerivedData cleanup is needed, stop and report the largest candidate directories instead of deleting them.
+
+---
+
+## 5. Check DerivedData Permissions
+
+Inspect:
+
+```bash
+ls -ld ~/Library/Developer/Xcode/DerivedData
+```
+
+Verify the current macOS user owns the directory and has read/write/execute permission.
+
+Test writing:
+
+```bash
+touch ~/Library/Developer/Xcode/DerivedData/buff-me-up-write-test
+```
+
+Delete the test file afterward.
+
+If ownership is incorrect, correct only the Xcode DerivedData directory using the minimum necessary ownership/permission change.
+
+Do not run broad recursive `chmod 777`.
+
+Prefer correct user ownership and user read/write/execute permissions.
+
+---
+
+## 6. Recreate DerivedData Directory If Needed
+
+If the directory is corrupted or missing:
+
+```bash
+mkdir -p ~/Library/Developer/Xcode/DerivedData
+```
+
+Ensure the current user can write to it.
+
+---
+
+## 7. Verify Disk Space Again
+
+After cleanup, run:
+
+```bash
+df -h /
+df -h ~
+```
+
+Report how much disk space was recovered.
+
+Prefer at least approximately 10–15 GB of free space before attempting another full Xcode/iOS build.
+
+If significantly less than that remains, stop and report before continuing.
+
+---
+
+## 8. Validate Capacitor Config
+
+From:
+
+`~/vscode/Buff-me-up`
+
+inspect:
+
+`capacitor.config.ts`
+
+Do not change unrelated configuration.
+
+Confirm the project is currently configured for the expected Buff Me Up iOS prototype.
+
+Do not silently change authentication or application architecture in this environment-recovery task.
+
+---
+
+## 9. Repair Partial Capacitor Sync
+
+If sufficient disk space exists, run:
+
+```bash
+cd ~/vscode/Buff-me-up
 npx cap sync ios
 ```
 
-Ensure the native iOS project contains the updated configuration.
+If sync fails because of artifacts from the earlier incomplete operation, remove only the clearly generated incomplete directories and retry.
+
+Do not recreate the full `ios/` platform unless absolutely necessary.
 
 ---
 
-# 16. Verification
+## 10. Xcode Build Preparation
 
-Run:
+After a successful Capacitor sync:
+
+* confirm the iOS project still exists
+* confirm the expected bundle identifier remains:
+  `com.laurinvasquez.buffmeup`
+* do not alter signing certificates
+* do not change the selected Apple team
+
+If possible from the available environment, verify the project can be opened/build-prepared.
+
+Do not perform App Store distribution.
+
+---
+
+## 11. Verification
+
+At minimum verify:
+
+```bash
+df -h /
+ls -ld ~/Library/Developer/Xcode/DerivedData
+touch ~/Library/Developer/Xcode/DerivedData/buff-me-up-write-test
+rm ~/Library/Developer/Xcode/DerivedData/buff-me-up-write-test
+npx cap sync ios
+```
+
+If appropriate, also run existing project checks:
 
 ```bash
 npm run typecheck
 npm run lint
-npm run build
-git diff --check
 ```
 
-Also verify native configuration compiles.
-
-Manual native test:
-
-1. Launch Buff Me Up on physical iPhone.
-2. Tap Continue with Google.
-3. Complete Google authentication.
-4. Confirm Buff Me Up reopens automatically.
-5. Confirm authenticated dashboard appears.
-6. Close Buff Me Up.
-7. Reopen it.
-8. Confirm authentication/session behavior is correct.
-9. Sign out.
-10. Confirm native login can be performed again.
-11. Confirm web login at the production Vercel URL still works.
+Do not spend time on unrelated application changes.
 
 ---
 
-# Completion Report
+## Completion Report
 
 Return:
 
-1. Files created
-2. Files modified
-3. Dependencies added
-4. Native runtime detection strategy
-5. Native redirect URI
-6. Capacitor deep-link configuration
-7. iOS URL scheme configuration
-8. OAuth flow changes
-9. PKCE/session handling
-10. Supabase dashboard configuration required
-11. Web-auth compatibility
-12. Capacitor config changes
-13. Verification results
-14. Manual Xcode/iPhone steps
-15. Known limitations
-16. Whether `server.url` remains in use
-17. Recommended path toward App Store-ready architecture
+1. Root cause found
+2. Disk space before cleanup
+3. Xcode storage sizes inspected
+4. Files/directories safely removed
+5. Disk space after cleanup
+6. DerivedData ownership/permissions status
+7. Whether write testing succeeded
+8. Whether `npx cap sync ios` succeeded
+9. Any remaining errors
+10. Any cleanup requiring owner approval
+11. Exact next manual step in Xcode
 
-Do not start unrelated product features.
-
-# Additional Requirement — Use Existing Buff Me Up Logo as Native iOS Icon
-
-The project already contains a Buff Me Up logo/icon created for the web application, currently available as an application asset such as:
-
-`app/icon.svg`
-
-Reuse the existing Buff Me Up branding for the native iOS application.
-
-## Requirements
-
-1. Inspect the existing Buff Me Up logo/icon asset.
-2. Use that design as the source for the native iOS app icon.
-3. Generate the appropriate iOS icon assets required by the Xcode asset catalog.
-4. Configure the Capacitor iOS project so Buff Me Up displays the correct icon:
-
-   * on the iPhone Home Screen
-   * in the App Library
-   * in iOS system surfaces where the application icon is used
-5. Do not replace the existing logo with unrelated branding.
-6. Preserve the current Buff Me Up visual identity.
-7. Ensure the icon has appropriate padding/background treatment for iOS and is not visibly clipped.
-8. Do not rely solely on the existing web/PWA SVG; configure the native `AppIcon` asset catalog correctly.
-9. After generating/configuring the assets, run:
-
-```bash
-npx cap sync ios
-```
-
-and verify the iOS project still builds successfully.
-
-## Existing Application Identity
-
-App name:
-
-`Buff Me Up`
-
-Bundle identifier:
-
-`com.laurinvasquez.buffmeup`
-
-The native application name and icon should consistently use this branding.
-
-## Verification
-
-Confirm in the completion report:
-
-* source logo used
-* native icon files/assets created
-* Xcode asset catalog updated
-* Home Screen icon configured
-* build verification result
-* any manual Xcode action still required
+Do not start native OAuth work or product development as part of this task.

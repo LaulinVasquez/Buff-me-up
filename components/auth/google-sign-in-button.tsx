@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { Browser } from "@capacitor/browser";
+import { isNativeApp, NATIVE_AUTH_REDIRECT_URI } from "@/lib/capacitor/runtime";
 import { createClient } from "@/lib/supabase/client";
 
 export function GoogleSignInButton() {
@@ -12,13 +14,24 @@ export function GoogleSignInButton() {
     setIsLoading(true);
     try {
       const supabase = createClient();
-      const { error: signInError } = await supabase.auth.signInWithOAuth({
+      const native = isNativeApp();
+      const { data, error: signInError } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: `${window.location.origin}/auth/callback` },
+        options: {
+          redirectTo: native
+            ? NATIVE_AUTH_REDIRECT_URI
+            : `${window.location.origin}/auth/callback`,
+          skipBrowserRedirect: native,
+        },
       });
       if (signInError) {
         setError("We couldn't start Google sign-in. Please try again.");
         setIsLoading(false);
+        return;
+      }
+      if (native) {
+        if (!data.url) throw new Error("Supabase did not return an OAuth URL");
+        await Browser.open({ url: data.url });
       }
     } catch {
       setError("Sign-in is not configured yet. Please contact the site owner.");

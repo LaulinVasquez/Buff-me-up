@@ -48,8 +48,9 @@ Buff Me Up shares Supabase with FlowDesk. Apply only the provided gym-prefixed m
 1. Enable Google under Authentication > Providers and enter the Google credentials.
 2. Confirm its callback URL exactly matches Google Cloud.
 3. Set the production Site URL under Authentication > URL Configuration.
-4. Allow http://localhost:3000/auth/callback and https://YOUR_DOMAIN/auth/callback.
-5. For Vercel previews, add a suitably scoped preview wildcard callback.
+4. Keep `http://localhost:3000/auth/callback` and `https://buff-me-up.vercel.app/auth/callback` in the redirect allow list.
+5. Add `com.laurinvasquez.buffmeup://auth/callback` to the redirect allow list.
+6. For Vercel previews, add a suitably scoped preview wildcard callback.
 
 Google redirects to Supabase, which returns to the application callback for the PKCE session exchange.
 
@@ -66,6 +67,14 @@ Set both public Supabase variables for Preview and Production. Add each deployme
 - npm start - production server
 
 See docs/ARCHITECTURE.md for project boundaries.
+
+## Capacitor iOS prototype
+
+The iOS target registers `com.laurinvasquez.buffmeup` as its URL scheme. Native Google sign-in opens Capacitor Browser and returns through `com.laurinvasquez.buffmeup://auth/callback`. The App listener accepts only that callback route, exchanges the PKCE code, synchronizes `gym_profiles`, and enters `/app`. Callback codes and tokens are never logged.
+
+Run `npx cap sync ios` after native changes and build the `App` scheme in Xcode. A physical-device OAuth check is still required because provider and Supabase dashboard credentials are not in this repository.
+
+`capacitor.config.ts` retains `server.url` to load the production Vercel site for this prototype. Capacitor intends that setting for live-reload-style workflows, so it is not the final App Store architecture. Before shipping, create a Capacitor-compatible local web bundle (or deliberately design a hosted shell), remove `server.url`, and retest routing, persistence, offline/error states, and App Store behavior.
 
 ## Supabase migrations
 
