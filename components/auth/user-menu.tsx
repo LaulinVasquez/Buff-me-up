@@ -4,9 +4,9 @@ import { signOut } from "@/app/app/actions";
 type UserMenuProps = Readonly<{ avatarUrl: string | null; name: string }>;
 
 export function UserMenu({ avatarUrl, name }: UserMenuProps) {
-  return <div className="flex items-center gap-3">
+  return <div className="flex min-w-0 items-center justify-end gap-3">
     {avatarUrl ? (
-      <Image alt="" className="size-10 rounded-full border border-slate-700 object-cover" height={40} referrerPolicy="no-referrer" src={avatarUrl} unoptimized width={40} />
+      <Image alt="" className="size-10 shrink-0 rounded-full border border-slate-700 object-cover" height={40} referrerPolicy="no-referrer" src={avatarUrl} unoptimized width={40} />
     ) : (
       <span aria-hidden="true" className="flex size-10 items-center justify-center rounded-full bg-lime-400 font-black text-slate-950">{name.charAt(0).toUpperCase()}</span>
     )}

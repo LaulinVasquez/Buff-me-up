@@ -25,7 +25,7 @@ export default async function WorkoutPage({ params, searchParams }: Props) {
   if (workout.status === "cancelled") return <StatusMessage title="Workout cancelled" message="This session remains saved but does not advance your plan." />;
 
   return <main className="pb-40">
-    <header className="sticky top-0 z-10 -mx-5 border-b border-slate-800 bg-slate-950/95 px-5 pb-4 pt-5 backdrop-blur sm:-mx-8 sm:px-8">
+    <header className="sticky top-[env(safe-area-inset-top)] z-10 -mx-5 border-b border-slate-800 bg-slate-950/95 px-5 pb-4 pt-5 backdrop-blur sm:-mx-8 sm:px-8">
       <LocalDate className="text-xs font-bold uppercase tracking-[0.16em] text-lime-400" />
       <div className="mt-2 flex items-end justify-between gap-4"><div><p className="text-xs text-slate-500">Workout in progress</p><h1 className="text-2xl font-black">{workout.name}</h1></div><p className="text-sm font-semibold">{completeCount} / {exercises.length}</p></div>
       <div aria-label={`${percent}% complete`} className="mt-4 h-2 overflow-hidden rounded-full bg-slate-800"><div className="h-full rounded-full bg-lime-400 transition-[width]" style={{ width: `${percent}%` }} /></div>

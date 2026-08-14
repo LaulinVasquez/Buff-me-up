@@ -11,7 +11,12 @@ export const metadata: Metadata = {
   icons: { icon: "/icon.svg" },
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Buff Me Up" },
 };
-export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#070b12" };
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#070b12",
+};
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return <html lang="en"><body><NativeAuthListener />{children}</body></html>;
