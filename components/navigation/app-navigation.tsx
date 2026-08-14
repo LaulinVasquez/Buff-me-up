@@ -12,6 +12,7 @@ const items = [
 
 export function AppNavigation() {
   const pathname = usePathname();
+  if (pathname.startsWith("/app/workout/")) return null;
   return <nav aria-label="Primary" className="fixed inset-x-0 bottom-0 z-20 mx-auto flex min-h-16 max-w-lg items-center justify-around border-t border-slate-800 bg-slate-950/95 px-3 pb-[env(safe-area-inset-bottom)] backdrop-blur">
     {items.map((item) => {
       const active = item.href === "/app" ? pathname === "/app" : pathname.startsWith(item.href);

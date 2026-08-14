@@ -1,6 +1,6 @@
 # Buff Me Up
 
-Buff Me Up is a mobile-first gym tracking SaaS. The current milestone includes authentication, a secure workout data model, recommended plans, and the plan-management data layer. Workout execution is deferred.
+Buff Me Up is a mobile-first gym tracking SaaS with authentication, plan management, and a persistent phone-first workout execution flow.
 
 ## Technology stack
 
@@ -61,3 +61,5 @@ See docs/ARCHITECTURE.md for project boundaries.
 ## Workout foundation
 
 Apply migrations in timestamp order. The Milestone 2 migration creates only `gym_`-prefixed workout objects in the shared Supabase project. Recommended plans remain static application data and are copied into user-owned rows when adopted.
+
+The Milestone 4 migration adds duplicate-active-workout protection and the atomic workout snapshot function. Apply it before using Start Workout.

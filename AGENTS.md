@@ -1,497 +1,623 @@
-# Buff Me Up — Milestone 3: Plan Management, Exercise Details, and Date-Aware UX
+# Buff Me Up — Milestone 4: Workout Execution
 
 ## Objective
 
-Turn the workout-plan foundation into a polished, mobile-first plan-management experience.
+Build the real gym-use experience.
 
-At the end of this milestone, users should be able to:
+At the end of this milestone, an authenticated user should be able to:
 
-* view their active workout plan
-* view today's actual date
-* browse recommended plans before selecting one
-* inspect the exercises contained in a recommended plan
-* view basic exercise examples/instructions
-* create a custom plan
-* edit workout days
-* add, edit, delete, and reorder exercises
-* edit sets, reps, default weight, and notes
-* activate different plans
+* open the app on their phone
+* see today's local date
+* see the workout they should perform
+* start a workout
+* check exercises off
+* record weight used
+* see workout progress
+* finish the workout
+* automatically save the workout date/time
+* return to the dashboard with the workout recorded
 
-Do not build workout execution or workout history yet.
-
----
-
-# 1. Date-Aware Application UI
-
-The application must prominently use the user's current local date where relevant.
-
-On the main authenticated page, display something similar to:
-
-`Friday, August 14`
-
-Use the browser/user local timezone for display.
-
-Do not hard-code dates.
-
-Do not create unnecessary date columns if existing timestamps already represent the underlying event.
-
-Future workout sessions will use `started_at` and `completed_at` as the source of truth.
-
-Create reusable date-formatting utilities where appropriate.
-
-Avoid timezone bugs caused by converting a local calendar day to UTC prematurely.
+This milestone should make Buff Me Up usable in a real gym session.
 
 ---
 
-# 2. Main Dashboard Foundation
+# 1. Today's Workout
 
-Update `/app` to provide a useful pre-workout dashboard.
+Update the authenticated dashboard so the primary content is today's workout.
 
-If there is an active plan, show:
+If the user has an active plan, determine the appropriate workout day.
 
-* current date
-* active plan name
-* number of workout days
-* a compact preview of the next/current workout day
-* button to manage the plan
+For the MVP, use the workout-day sequence rather than tying workouts permanently to weekdays.
+
+Example active plan:
+
+```text
+Push
+Pull
+Legs
+```
+
+If the user's most recent completed workout was:
+
+`Push`
+
+then the next workout should be:
+
+`Pull`
+
+If there are no previous completed workouts for the active plan, start with the first workout day.
+
+After the final workout day, cycle back to the first.
+
+Example:
+
+```text
+Push → Pull → Legs → Push
+```
+
+This behavior should be deterministic and documented.
+
+Do not depend on Monday/Tuesday/etc. scheduling yet.
+
+---
+
+# 2. Today's Date
+
+Display the user's local calendar date prominently.
 
 Example:
 
 ```text
 Friday, August 14
 
-Push / Pull / Legs
-
-Your Plan
-
-Push
-5 exercises
-
-Bench Press
-Incline Dumbbell Press
-Shoulder Press
-+2 more
-
-[ View Plan ]
+Today
+Pull Day
 ```
 
-Do not implement Start Workout yet.
+Continue using browser-local display logic.
 
-That belongs to Milestone 4.
+When a workout begins, store the actual timestamp in the database.
+
+Use:
+
+`started_at`
+
+When completed, store:
+
+`completed_at`
+
+The history system in the next milestone will derive workout dates from these timestamps.
+
+Do not store redundant formatted date strings.
 
 ---
 
-# 3. Recommended Plan Browser
+# 3. Start Workout
 
-Improve `/app/plan` so users can browse recommended plans before adopting them.
+Add a prominent:
 
-Display cards for:
+`Start Workout`
 
-* Push / Pull / Legs
-* Upper / Lower
-* 3-Day Full Body
+action.
 
-Each card should show:
+When selected:
 
-* plan name
-* short description
-* number of workout days
-* approximate focus
-* expandable or navigable preview
+1. Validate there is an active plan.
+2. Determine the next workout day.
+3. Create a `gym_workouts` row.
+4. Set:
+
+   * authenticated `user_id`
+   * plan reference
+   * workout day reference
+   * workout name snapshot
+   * `status = in_progress`
+   * `started_at = current timestamp`
+5. Copy the workout day's exercises into `gym_workout_exercises`.
+
+Each copied exercise should preserve snapshot data including:
+
+* exercise name
+* target sets
+* target reps
+* default/starting weight when useful
+* exercise order
+* source exercise reference
+
+This snapshot ensures future plan edits do not affect the current workout.
+
+---
+
+# 4. Prevent Duplicate Active Workouts
+
+A user should not accidentally create several simultaneous workouts.
+
+Before creating a new workout, check whether the user already has an:
+
+`in_progress`
+
+workout.
+
+If one exists, show:
+
+```text
+Workout in progress
+
+Pull Day
+Started at 5:42 PM
+
+[ Continue Workout ]
+```
+
+Do not silently create another workout.
+
+---
+
+# 5. Workout Screen
+
+Create a dedicated route such as:
+
+`/app/workout/[workoutId]`
+
+This should be designed primarily for phone use.
 
 Example:
 
 ```text
-Push / Pull / Legs
+Friday, August 14
 
-3 training days
+Pull Day
 
-Push
-• Bench Press
-• Incline Dumbbell Press
-• Shoulder Press
-• Lateral Raise
-• Tricep Pushdown
+2 / 5 complete
 
-Pull
-...
+────────────────────
 
-Legs
-...
+Lat Pulldown
+4 × 8–12
 
-[ Use This Plan ]
+Weight
+[ 120 ] lb
+
+[ ✓ Complete ]
+
+────────────────────
+
+Barbell Row
+3 × 6–10
+
+Weight
+[ 135 ] lb
+
+[ ✓ Complete ]
 ```
 
-Users must be able to see the actual exercises before selecting the plan.
+The user should be able to comfortably operate the screen one-handed.
 
 ---
 
-# 4. Exercise Metadata
+# 6. Exercise Completion
 
-Extend the static recommended exercise definitions with lightweight metadata where appropriate.
+Users must be able to mark each exercise:
 
-Suggested fields:
+* complete
+* incomplete again if tapped accidentally
 
-```text
-name
-sets
-targetReps
-muscleGroup
-equipment
-instructions
-```
+Update:
 
-Optional:
+`gym_workout_exercises.completed`
 
-```text
-secondaryMuscles
-```
+Persist changes immediately or through an equally reliable interaction.
 
-Do not introduce an external exercise API yet.
-
-Do not add API keys.
-
-The recommended plan data should remain static TypeScript data for this milestone.
-
----
-
-# 5. Exercise Instruction UI
-
-Allow users to open exercise details.
+The UI should provide obvious visual feedback when an exercise is completed.
 
 Example:
 
 ```text
-Bench Press
-
-Chest
-Barbell
-
-4 sets
-6–10 reps
-
-How to perform
-
-1. Lie on the bench with your feet firmly planted.
-2. Grip the bar slightly wider than shoulder width.
-3. Lower the bar under control toward the chest.
-4. Press upward until the arms are extended.
-
-[ Close ]
+✓ Bench Press
+185 lb
+4 × 6–10
 ```
 
-Use a:
+Avoid tiny checkbox controls.
 
-* modal
-* drawer
-* bottom sheet
-* expandable card
-
-whichever best fits a mobile-first gym application.
-
-Keep instructions concise.
-
-Do not pretend these instructions replace professional coaching.
+Use a large touch-friendly card/action.
 
 ---
 
-# 6. Exercise Visual Foundation
+# 7. Weight Recording
 
-Prepare the exercise data model/UI so a future external visual source can be added cleanly.
+Allow the user to record the actual working weight used for each exercise.
 
-For example, the application model may optionally support:
+Use the existing:
 
-```text
-imageUrl
-videoUrl
-externalExerciseId
-```
+`gym_workout_exercises.weight`
 
-Do not add these columns to Supabase unless they are needed for user-owned exercise data.
+field.
 
-For recommended static exercise definitions, optional fields in TypeScript are sufficient.
+The initial value should preferably use:
 
-Do not call an external API yet.
+`gym_exercises.default_weight`
 
----
-
-# 7. Custom Plan Creation
-
-Allow users to create their own workout plan.
-
-Flow:
-
-```text
-Plan
- ↓
-Create Custom Plan
- ↓
-Plan Name
- ↓
-Create
-```
-
-Examples:
-
-* My 5-Day Split
-* Strength Program
-* Summer Cut
-* Full Body
-
-New custom plans should use:
-
-`source = custom`
-
-Do not automatically activate a newly created plan unless that behavior is clearly communicated.
-
----
-
-# 8. Plan Management
-
-Users must be able to:
-
-* rename plan
-* activate plan
-* delete plan
-
-Deletion requires confirmation.
-
-Do not allow accidental plan deletion from a single tap.
-
-When deleting the active plan, handle the resulting no-active-plan state gracefully.
-
----
-
-# 9. Workout Day Management
-
-Within a plan, allow:
-
-* add workout day
-* rename workout day
-* delete workout day
-* reorder workout days
-
-Examples:
-
-```text
-Push
-Pull
-Legs
-Rest
-Upper
-Lower
-```
-
-Workout days should remain sequence-based rather than permanently tied to Monday/Tuesday/etc.
-
-Do not introduce weekday scheduling yet.
-
----
-
-# 10. Exercise Management
-
-Within each workout day, allow:
-
-* add exercise
-* edit exercise
-* delete exercise
-* reorder exercise
-
-Exercise form fields:
-
-```text
-Exercise name
-Sets
-Target reps
-Default weight
-Notes
-```
-
-If useful, optionally include:
-
-```text
-Muscle group
-Equipment
-```
-
-for custom exercises at the application level.
-
-Do not overcomplicate database migrations for optional metadata unless needed.
-
----
-
-# 11. Weight Input
-
-Default weight should support decimals.
+when one exists.
 
 Example:
 
 ```text
-Bench Press
+Weight used
 
-Sets
-[ 4 ]
-
-Target reps
-[ 6-10 ]
-
-Default weight
-[ 185 ]
-
-Unit
+[ - ] [ 185 ] [ + ]
 lb
 ```
 
-For this MVP, use pounds as the default display unit.
+A simple numeric input is sufficient.
 
-Structure the UI so unit preferences could be introduced later.
+The value may contain decimals.
 
-Do not build unit settings yet.
+Weight cannot be negative.
 
----
+Persist weight changes.
 
-# 12. Recommended Plan Adoption
-
-When a user chooses:
-
-`Use This Plan`
-
-use the existing transactional recommendation-adoption logic.
-
-After adoption:
-
-* new plan becomes active
-* user is taken to their plan
-* days and exercises are visible immediately
-* recommended template itself remains unchanged
-
-Provide appropriate loading and error states.
-
-Prevent duplicate submission from rapid repeated taps.
+Do not implement weight per individual set yet.
 
 ---
 
-# 13. Multiple Plans
+# 8. Previous Workout Weight
 
-Users may have several plans.
-
-Add a simple plan-switching experience.
+If practical within the existing architecture, show the most recent completed weight for the same exercise.
 
 Example:
 
 ```text
-My Plans
+Bench Press
 
-● Push / Pull / Legs
-  Active
+4 × 6–10
 
-○ Strength Program
+Last time: 180 lb
 
-○ Full Body
-
-[ + Create Plan ]
+Today
+[ 185 ] lb
 ```
 
-Users can activate a different plan.
+This is highly valuable for progressive overload.
 
-Only one plan may remain active.
+Determine "same exercise" preferably using the original `exercise_id` when it still exists.
+
+If that reference is unavailable, a conservative name match may be used only if necessary.
+
+Do not build advanced PR calculations yet.
 
 ---
 
-# 14. Mobile-First UX
+# 9. Exercise Details During Workout
 
-This application will primarily be used on a phone in the gym.
+Reuse the Milestone 3 exercise-detail experience where practical.
+
+During a workout, users should be able to access basic information such as:
+
+* muscle group
+* equipment
+* how to perform the exercise
+
+Do not force the user to leave their active workout.
+
+A collapsible section or similar lightweight interaction is acceptable.
+
+If static metadata is not available for a custom exercise, simply omit those details.
+
+---
+
+# 10. Workout Progress
+
+Display clear progress.
+
+Example:
+
+```text
+3 of 5 exercises complete
+60%
+```
+
+A simple progress bar is encouraged.
+
+Calculate progress from:
+
+`gym_workout_exercises.completed`
+
+Do not introduce chart libraries.
+
+---
+
+# 11. Finish Workout
+
+Add a prominent:
+
+`Finish Workout`
+
+button.
+
+On selection:
+
+* show a confirmation if some exercises remain incomplete
+* allow the user to finish anyway
+* set workout status to `completed`
+* set `completed_at`
+* persist all current exercise data
+
+Example:
+
+```text
+2 exercises are still incomplete.
+
+Finish workout anyway?
+
+[ Keep Training ]
+[ Finish Workout ]
+```
+
+If all exercises are completed, finishing should require minimal friction.
+
+---
+
+# 12. Completed Workout Result
+
+After completing a workout, show a brief completion state.
+
+Example:
+
+```text
+Workout Complete 💪
+
+Pull Day
+
+Friday, August 14
+
+5 exercises
+52 minutes
+
+[ Back to Home ]
+```
+
+Duration should be derived from:
+
+`completed_at - started_at`
+
+Do not store a separate duration value unless clearly necessary.
+
+---
+
+# 13. Dashboard After Completion
+
+After completion, the dashboard should update.
+
+Example:
+
+```text
+Friday, August 14
+
+Workout complete
+
+Pull Day ✓
+
+Next workout
+Legs
+```
+
+A completed workout automatically counts as a gym visit.
+
+The user should not need to separately mark:
+
+"I went to the gym."
+
+---
+
+# 14. Workout Cancellation
+
+Allow an active workout to be cancelled.
+
+Use:
+
+`status = cancelled`
+
+Require confirmation.
+
+Example:
+
+```text
+Cancel workout?
+
+Your current exercise progress will remain stored,
+but this workout will not count as completed.
+
+[ Keep Workout ]
+[ Cancel ]
+```
+
+Cancelled workouts must not advance the workout-day sequence.
+
+---
+
+# 15. Next Workout Logic
+
+Create a reusable server-side function such as:
+
+```text
+getNextWorkoutDay()
+```
+
+or equivalent.
+
+It should:
+
+1. Retrieve the active plan.
+2. Retrieve its ordered workout days.
+3. Find the most recent completed workout belonging to that active plan.
+4. Determine the next day in sequence.
+5. Wrap to the beginning when necessary.
+
+Only:
+
+`status = completed`
+
+should advance the sequence.
+
+Cancelled workouts must not.
+
+In-progress workouts should resume instead of selecting another day.
+
+---
+
+# 16. Data Security
+
+All operations must derive the user from the authenticated server session.
+
+Never trust client-provided `user_id`.
+
+A user must not be able to:
+
+* view another user's workout
+* modify another user's workout
+* complete another user's exercises
+* guess another workout ID and access it
+
+Existing RLS remains part of the security boundary.
+
+Validate ownership server-side as well where appropriate.
+
+---
+
+# 17. Server Actions / Data Layer
+
+Expand the existing workout data layer cleanly.
+
+Functions may include equivalents of:
+
+```text
+getCurrentWorkout()
+getNextWorkoutDay()
+startWorkout()
+getWorkout()
+updateWorkoutExercise()
+toggleExerciseComplete()
+finishWorkout()
+cancelWorkout()
+getPreviousExerciseWeight()
+```
+
+Do not create unnecessary abstraction.
+
+Keep authenticated logic server-side.
+
+---
+
+# 18. Loading and Error States
+
+Handle:
+
+* no active plan
+* active plan with no workout days
+* workout day with no exercises
+* workout creation failure
+* exercise update failure
+* workout already completed
+* cancelled workout
+* unauthorized workout ID
+* missing workout ID
+* network/server errors
+
+Messages should remain concise and useful.
+
+---
+
+# 19. Mobile Gym UX
+
+This screen is the most important mobile UI in the application.
 
 Prioritize:
 
-* large tap targets
-* bottom sheets/modals
-* clear typography
-* minimal typing
+* large exercise cards
+* 44px+ tap areas
+* sticky workout header if helpful
+* sticky Finish Workout action where appropriate
+* large numeric weight inputs
+* minimal navigation distraction
+* readable text under gym lighting
 * easy scrolling
-* sticky important actions where appropriate
-* no tiny desktop-only controls
+* clear completed states
 
-Avoid dense tables.
+Avoid:
 
-Prefer cards and lists.
+* dense forms
+* tiny inputs
+* desktop tables
+* excessive modal interactions
 
 ---
 
-# 15. Navigation
+# 20. Navigation During Workout
 
-Complete the basic authenticated navigation:
+When a workout is active, the user should easily return to it.
+
+If they navigate to another app section and return home:
 
 ```text
-Home
-Plan
-History
-Profile
+Workout in progress
+
+[ Continue Workout ]
 ```
 
-History can remain a placeholder.
+should be prominent.
 
-Profile can remain minimal.
+Do not lose workout state due to navigation or refresh.
 
-The currently active route should be visually clear.
-
----
-
-# 16. Loading / Empty / Error States
-
-Create useful states for:
-
-* no active plan
-* no workout days
-* no exercises
-* loading plan
-* failed plan update
-* failed exercise update
-* plan deleted
-* recommendation successfully adopted
-
-Keep messaging concise.
+The database is the source of truth.
 
 ---
 
-# 17. Do Not Implement Yet
+# 21. Refresh / Recovery
+
+The workout must survive:
+
+* browser refresh
+* accidentally closing the tab
+* navigating elsewhere in the app
+
+Because session state is persisted in Supabase, reopening the app should detect the existing `in_progress` workout and allow the user to continue.
+
+Do not rely solely on React local state.
+
+---
+
+# 22. No External Exercise API Yet
+
+Do not integrate ExerciseDB, MuscleWiki, or another external provider in this milestone.
+
+Continue using existing static exercise metadata.
+
+External images/video demonstrations can be evaluated after the core workout experience works reliably.
+
+---
+
+# 23. Do Not Implement Yet
 
 Do not implement:
 
-* Start Workout
-* exercise completion checkboxes
-* workout session execution
-* Finish Workout
+* history calendar UI
 * streak calculations
-* history calendar
-* completed workout history
+* monthly statistics
+* charts
+* personal-record detection
 * individual set tracking
 * rest timers
-* personal records
-* charts
-* external exercise API
-* AI features
+* workout sharing
+* AI workout recommendations
+* social features
 * nutrition
 
-These belong to later milestones.
+Those belong to future milestones.
 
 ---
 
-# 18. External Exercise API Preparation
-
-Do not integrate an API in this milestone.
-
-However, keep the exercise-detail component structured so it can later consume richer exercise data from sources such as:
-
-* ExerciseDB
-* MuscleWiki
-* another approved exercise catalog
-
-The UI should not depend specifically on one provider.
-
----
-
-# 19. Verification
+# 24. Verification
 
 Run:
 
@@ -499,60 +625,63 @@ Run:
 npm run typecheck
 npm run lint
 npm run build
+git diff --check
 ```
 
 Resolve all errors.
 
-Also verify:
+Functionally verify:
 
-* recommended plan can be previewed before adoption
-* adopted plan becomes editable
-* custom plan can be created
-* workout day CRUD works
-* exercise CRUD works
-* plan activation respects one-active-plan constraint
-* plan deletion works safely
-* UI works at common phone widths
+1. User sees the correct next workout day.
+2. Start Workout creates one workout.
+3. Exercise snapshots are created.
+4. Default weights appear.
+5. Exercises can be checked and unchecked.
+6. Weight changes persist.
+7. Refresh preserves progress.
+8. Duplicate active workouts are prevented.
+9. Workout can be completed.
+10. `completed_at` is stored.
+11. Completed workout advances the sequence.
+12. Cancelled workout does not advance it.
+13. User cannot access another user's workout.
+14. Mobile layout works at common phone widths.
 
 ---
 
 # Definition of Done
 
-A user should be able to perform this flow:
+The following flow must work:
 
 ```text
-Sign in
-   ↓
-See today's date
-   ↓
-Plan
-   ↓
-Browse recommendation
-   ↓
-See actual exercises
-   ↓
-Open Bench Press details
-   ↓
-Use This Plan
-   ↓
-Edit plan
-   ↓
-Add/remove/edit exercises
+Open Buff Me Up
+      ↓
+Friday, August 14
+      ↓
+Today's Workout: Push
+      ↓
+Start Workout
+      ↓
+Bench Press
+185 lb
+✓
+      ↓
+Incline Press
+60 lb
+✓
+      ↓
+...
+      ↓
+Finish Workout
+      ↓
+Workout Complete
+      ↓
+Recorded automatically
+      ↓
+Next workout: Pull
 ```
 
-and:
-
-```text
-Create Custom Plan
-   ↓
-Create workout days
-   ↓
-Add exercises
-   ↓
-Configure sets/reps/weight
-   ↓
-Activate plan
-```
+The workout must survive browser refresh and navigation.
 
 ---
 
@@ -562,18 +691,21 @@ Return:
 
 1. Files created
 2. Files modified
-3. UI implemented
-4. Date handling implemented
-5. Exercise metadata added
-6. Exercise details/examples implemented
-7. Plan-management functionality
-8. Workout-day functionality
-9. Exercise CRUD functionality
-10. Navigation changes
-11. Database changes, if any
-12. Verification results
-13. Mobile testing performed
-14. Known limitations
-15. Any deviations from this prompt
+3. Workout start logic
+4. Next-workout selection logic
+5. Exercise snapshot behavior
+6. Weight tracking
+7. Previous-weight functionality
+8. Exercise completion behavior
+9. Progress tracking
+10. Workout finish behavior
+11. Workout cancellation behavior
+12. Date/time handling
+13. Security/ownership handling
+14. Database changes or new migration
+15. Verification results
+16. Mobile testing performed
+17. Known limitations
+18. Any deviations from this prompt
 
-Do not start Milestone 4 automatically.
+Do not begin Milestone 5 automatically.

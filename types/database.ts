@@ -30,6 +30,7 @@ export type Database = {
     Functions: {
       gym_activate_workout_plan: { Args: { target_plan_id: string }; Returns: undefined };
       gym_adopt_recommended_plan: { Args: { template: Json }; Returns: string };
+      gym_start_workout: { Args: { target_day_id: string }; Returns: string };
     };
     Enums: Record<never, never>;
     CompositeTypes: Record<never, never>;

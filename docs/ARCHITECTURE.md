@@ -35,3 +35,9 @@ Future workout routes will live under `app/app/`, reusable domain UI in `compone
 Workout persistence follows two ownership trees: users own plans, which own days and exercises; users also own workout sessions, which own workout-exercise snapshots. Nested RLS policies resolve ownership through these parent relationships.
 
 Static recommendations live in `data/recommended-plans.ts`. The `gym_adopt_recommended_plan` database function copies a complete template atomically, while `gym_activate_workout_plan` atomically switches the active plan. A partial unique index guarantees at most one active plan per user. Server-only operations in `lib/workouts/` always derive the user ID from verified Supabase claims.
+
+## Workout execution
+
+`getNextWorkoutDay` advances through the active plan's ordered days using only the most recent completed workout for that plan; cancelled sessions do not advance the sequence. Any in-progress workout takes priority and is resumed.
+
+`gym_start_workout` atomically creates a session and immutable exercise snapshots. A partial unique index prevents concurrent in-progress sessions. Workout weights, completion flags, and status remain database-backed, so refreshes and navigation do not lose progress.
