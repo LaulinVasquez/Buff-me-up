@@ -2,14 +2,19 @@ import Link from "next/link";
 import { SubmitButton } from "@/components/forms/submit-button";
 import { LocalDate, LocalDateTime } from "@/components/local-date";
 import { getLatestCompletedWorkout, getNextWorkoutDay } from "@/lib/workouts/sessions";
+import { getWorkoutStatsData } from "@/lib/workouts/history";
+import { ConsistencySummary } from "@/components/history/consistency-summary";
 import { startWorkoutAction } from "./workout/actions";
 
 type Props = Readonly<{ searchParams: Promise<{ cancelled?: string; error?: string }> }>;
 
 export default async function ApplicationHome({ searchParams }: Props) {
   const query = await searchParams;
-  const selection = await getNextWorkoutDay().catch(() => ({ plan: null, day: null, currentWorkout: null }));
-  const latest = await getLatestCompletedWorkout().catch(() => null);
+  const [selection, latest, stats] = await Promise.all([
+    getNextWorkoutDay().catch(() => ({ plan: null, day: null, currentWorkout: null })),
+    getLatestCompletedWorkout().catch(() => null),
+    getWorkoutStatsData().catch(() => ({ totalWorkouts: 0, attendanceTimestamps: [] })),
+  ]);
   const exercises = selection.day ? [...selection.day.gym_exercises].sort((a, b) => a.exercise_order - b.exercise_order) : [];
 
   return <main className="min-h-[calc(100dvh-9rem)] py-10 pb-28">
@@ -18,6 +23,7 @@ export default async function ApplicationHome({ searchParams }: Props) {
     <h1 className="mt-1 text-3xl font-black tracking-tight">{selection.currentWorkout?.name ?? selection.day?.name ?? "Ready when you are."}</h1>
     {query.cancelled ? <Notice>Workout cancelled. Your plan sequence was not advanced.</Notice> : null}
     {query.error ? <p className="mt-5 rounded-xl bg-red-400/10 p-4 text-sm text-red-200">We couldn&apos;t start that workout. Please try again.</p> : null}
+    <ConsistencySummary compact timestamps={stats.attendanceTimestamps} />
 
     {selection.currentWorkout ? <section className="mt-8 rounded-3xl border border-lime-400/30 bg-lime-400/10 p-6">
       <p className="text-xs font-bold uppercase tracking-wider text-lime-400">Workout in progress</p>

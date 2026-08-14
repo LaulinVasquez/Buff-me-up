@@ -1,623 +1,531 @@
-# Buff Me Up — Milestone 4: Workout Execution
+# Buff Me Up — Milestone 5: History, Attendance, Streaks, and Stats
 
 ## Objective
 
-Build the real gym-use experience.
+Build the history and consistency layer of Buff Me Up.
 
-At the end of this milestone, an authenticated user should be able to:
+At the end of this milestone, users should be able to:
 
-* open the app on their phone
-* see today's local date
-* see the workout they should perform
-* start a workout
-* check exercises off
-* record weight used
-* see workout progress
-* finish the workout
-* automatically save the workout date/time
-* return to the dashboard with the workout recorded
+* see which dates they completed workouts
+* browse workout history
+* open a past workout
+* see exercises and weights used
+* see workouts completed this month
+* see total completed workouts
+* see current consistency streak
+* see recent activity
+* clearly distinguish completed, cancelled, and in-progress workouts
 
-This milestone should make Buff Me Up usable in a real gym session.
-
----
-
-# 1. Today's Workout
-
-Update the authenticated dashboard so the primary content is today's workout.
-
-If the user has an active plan, determine the appropriate workout day.
-
-For the MVP, use the workout-day sequence rather than tying workouts permanently to weekdays.
-
-Example active plan:
-
-```text
-Push
-Pull
-Legs
-```
-
-If the user's most recent completed workout was:
-
-`Push`
-
-then the next workout should be:
-
-`Pull`
-
-If there are no previous completed workouts for the active plan, start with the first workout day.
-
-After the final workout day, cycle back to the first.
-
-Example:
-
-```text
-Push → Pull → Legs → Push
-```
-
-This behavior should be deterministic and documented.
-
-Do not depend on Monday/Tuesday/etc. scheduling yet.
+Do not build advanced analytics, charts, PR detection, or social functionality yet.
 
 ---
 
-# 2. Today's Date
+# 1. Attendance Definition
 
-Display the user's local calendar date prominently.
+A gym visit counts when:
 
-Example:
+`gym_workouts.status = completed`
+
+A user does not need to separately mark that they went to the gym.
+
+Cancelled or in-progress workouts must not count as attendance.
+
+Use `completed_at` as the source of truth for attendance.
+
+Do not store redundant attendance rows unless there is a compelling architectural reason.
+
+---
+
+# 2. Local Calendar Dates
+
+History must display workout dates according to the user's local timezone.
+
+For example:
 
 ```text
 Friday, August 14
+```
 
-Today
+or:
+
+```text
+Aug 14
+```
+
+Database timestamps remain UTC-compatible timestamps.
+
+Do not store formatted date strings.
+
+Be careful that a workout completed late at night does not appear on the wrong calendar day because of UTC conversion.
+
+Where local-date grouping requires browser timezone information, use a clean client/server strategy and document it.
+
+---
+
+# 3. History Page
+
+Replace the current History placeholder.
+
+Route:
+
+`/app/history`
+
+The page should contain:
+
+* current month calendar or calendar-like grid
+* completed gym days visually marked
+* monthly completed-workout count
+* current streak
+* total completed workouts
+* recent workout history
+
+Example:
+
+```text
+August 2026
+
+M  T  W  T  F  S  S
+               1  2
+3  4  ●  6  ●  8  9
+10 ● 12 13 ● 15 16
+
+4 workouts this month
+🔥 3 workout streak
+```
+
+Do not introduce a large calendar library unless clearly necessary.
+
+A lightweight custom month grid is preferred.
+
+---
+
+# 4. Calendar Navigation
+
+Allow basic month navigation:
+
+```text
+‹ July       August 2026       September ›
+```
+
+Users should be able to inspect previous months.
+
+Future months may be visible but should not show fake activity.
+
+Keep the implementation lightweight.
+
+---
+
+# 5. Workout-Day Markers
+
+Completed workout dates should be visually obvious.
+
+If multiple completed workouts occur on the same calendar day, the calendar may still use one attendance marker for that day.
+
+However, workout counts should still count each completed workout individually unless otherwise documented.
+
+Example:
+
+* 2 workouts on August 14
+* attendance days: 1
+* total workouts: 2
+
+This distinction should be preserved in the underlying calculations.
+
+---
+
+# 6. Current Streak
+
+Implement a simple and clearly documented streak definition.
+
+For this MVP:
+
+A streak is based on **consecutive gym attendance days**, not consecutive workout sessions.
+
+Example:
+
+```text
+Aug 10 — workout
+Aug 11 — workout
+Aug 12 — workout
+```
+
+Current streak:
+
+`3 days`
+
+If Aug 13 has no workout and today is Aug 14, the streak resets.
+
+If today has no completed workout yet but yesterday was part of a streak, the current streak may remain active until the end of today.
+
+Implement this behavior carefully so users do not lose their streak first thing in the morning.
+
+Document the exact rule in code.
+
+---
+
+# 7. Important Streak UX
+
+Do not pressure users or use manipulative messaging.
+
+Display streaks informationally.
+
+Example:
+
+```text
+🔥 4-day streak
+```
+
+Avoid messaging such as:
+
+* "Don't break your streak!"
+* "You failed"
+* "You missed yesterday"
+
+The app should remain supportive and neutral.
+
+---
+
+# 8. Monthly Statistics
+
+Display at minimum:
+
+* completed workouts this month
+* gym attendance days this month
+* total completed workouts
+* current streak
+
+Example:
+
+```text
+This Month
+12 workouts
+
+Gym Days
+10
+
+Current Streak
+4 days
+
+All Time
+48 workouts
+```
+
+Do not add chart libraries.
+
+---
+
+# 9. Recent History
+
+Below the calendar/stats, display recent completed workouts.
+
+Example:
+
+```text
+Recent Workouts
+
+Aug 14
 Pull Day
-```
-
-Continue using browser-local display logic.
-
-When a workout begins, store the actual timestamp in the database.
-
-Use:
-
-`started_at`
-
-When completed, store:
-
-`completed_at`
-
-The history system in the next milestone will derive workout dates from these timestamps.
-
-Do not store redundant formatted date strings.
-
----
-
-# 3. Start Workout
-
-Add a prominent:
-
-`Start Workout`
-
-action.
-
-When selected:
-
-1. Validate there is an active plan.
-2. Determine the next workout day.
-3. Create a `gym_workouts` row.
-4. Set:
-
-   * authenticated `user_id`
-   * plan reference
-   * workout day reference
-   * workout name snapshot
-   * `status = in_progress`
-   * `started_at = current timestamp`
-5. Copy the workout day's exercises into `gym_workout_exercises`.
-
-Each copied exercise should preserve snapshot data including:
-
-* exercise name
-* target sets
-* target reps
-* default/starting weight when useful
-* exercise order
-* source exercise reference
-
-This snapshot ensures future plan edits do not affect the current workout.
-
----
-
-# 4. Prevent Duplicate Active Workouts
-
-A user should not accidentally create several simultaneous workouts.
-
-Before creating a new workout, check whether the user already has an:
-
-`in_progress`
-
-workout.
-
-If one exists, show:
-
-```text
-Workout in progress
-
-Pull Day
-Started at 5:42 PM
-
-[ Continue Workout ]
-```
-
-Do not silently create another workout.
-
----
-
-# 5. Workout Screen
-
-Create a dedicated route such as:
-
-`/app/workout/[workoutId]`
-
-This should be designed primarily for phone use.
-
-Example:
-
-```text
-Friday, August 14
-
-Pull Day
-
-2 / 5 complete
-
-────────────────────
-
-Lat Pulldown
-4 × 8–12
-
-Weight
-[ 120 ] lb
-
-[ ✓ Complete ]
-
-────────────────────
-
-Barbell Row
-3 × 6–10
-
-Weight
-[ 135 ] lb
-
-[ ✓ Complete ]
-```
-
-The user should be able to comfortably operate the screen one-handed.
-
----
-
-# 6. Exercise Completion
-
-Users must be able to mark each exercise:
-
-* complete
-* incomplete again if tapped accidentally
-
-Update:
-
-`gym_workout_exercises.completed`
-
-Persist changes immediately or through an equally reliable interaction.
-
-The UI should provide obvious visual feedback when an exercise is completed.
-
-Example:
-
-```text
-✓ Bench Press
-185 lb
-4 × 6–10
-```
-
-Avoid tiny checkbox controls.
-
-Use a large touch-friendly card/action.
-
----
-
-# 7. Weight Recording
-
-Allow the user to record the actual working weight used for each exercise.
-
-Use the existing:
-
-`gym_workout_exercises.weight`
-
-field.
-
-The initial value should preferably use:
-
-`gym_exercises.default_weight`
-
-when one exists.
-
-Example:
-
-```text
-Weight used
-
-[ - ] [ 185 ] [ + ]
-lb
-```
-
-A simple numeric input is sufficient.
-
-The value may contain decimals.
-
-Weight cannot be negative.
-
-Persist weight changes.
-
-Do not implement weight per individual set yet.
-
----
-
-# 8. Previous Workout Weight
-
-If practical within the existing architecture, show the most recent completed weight for the same exercise.
-
-Example:
-
-```text
-Bench Press
-
-4 × 6–10
-
-Last time: 180 lb
-
-Today
-[ 185 ] lb
-```
-
-This is highly valuable for progressive overload.
-
-Determine "same exercise" preferably using the original `exercise_id` when it still exists.
-
-If that reference is unavailable, a conservative name match may be used only if necessary.
-
-Do not build advanced PR calculations yet.
-
----
-
-# 9. Exercise Details During Workout
-
-Reuse the Milestone 3 exercise-detail experience where practical.
-
-During a workout, users should be able to access basic information such as:
-
-* muscle group
-* equipment
-* how to perform the exercise
-
-Do not force the user to leave their active workout.
-
-A collapsible section or similar lightweight interaction is acceptable.
-
-If static metadata is not available for a custom exercise, simply omit those details.
-
----
-
-# 10. Workout Progress
-
-Display clear progress.
-
-Example:
-
-```text
-3 of 5 exercises complete
-60%
-```
-
-A simple progress bar is encouraged.
-
-Calculate progress from:
-
-`gym_workout_exercises.completed`
-
-Do not introduce chart libraries.
-
----
-
-# 11. Finish Workout
-
-Add a prominent:
-
-`Finish Workout`
-
-button.
-
-On selection:
-
-* show a confirmation if some exercises remain incomplete
-* allow the user to finish anyway
-* set workout status to `completed`
-* set `completed_at`
-* persist all current exercise data
-
-Example:
-
-```text
-2 exercises are still incomplete.
-
-Finish workout anyway?
-
-[ Keep Training ]
-[ Finish Workout ]
-```
-
-If all exercises are completed, finishing should require minimal friction.
-
----
-
-# 12. Completed Workout Result
-
-After completing a workout, show a brief completion state.
-
-Example:
-
-```text
-Workout Complete 💪
-
-Pull Day
-
-Friday, August 14
-
+52 min
 5 exercises
-52 minutes
 
-[ Back to Home ]
+Aug 12
+Push Day
+61 min
+5 exercises
 ```
+
+Sort newest first.
 
 Duration should be derived from:
 
 `completed_at - started_at`
 
-Do not store a separate duration value unless clearly necessary.
+---
+
+# 10. Workout Detail
+
+Allow a user to open a past workout.
+
+Suggested route:
+
+`/app/history/[workoutId]`
+
+Display:
+
+* workout name
+* completed local date
+* start time
+* completion time
+* duration
+* exercise count
+* completed exercise count
+* exercises
+* recorded weights
+* original target sets/reps
+
+Example:
+
+```text
+Pull Day
+
+Friday, August 14
+5:42 PM – 6:34 PM
+52 minutes
+
+Lat Pulldown
+120 lb
+4 × 8–12
+
+Barbell Row
+135 lb
+3 × 6–10
+```
+
+Use the existing workout snapshots.
+
+Do not rebuild history from the current workout plan.
 
 ---
 
-# 13. Dashboard After Completion
+# 11. Cancelled Workouts
 
-After completion, the dashboard should update.
+Cancelled workouts should not appear as normal completed history.
+
+If useful, include a secondary section or filter for:
+
+`Cancelled`
+
+But do not let them contribute to:
+
+* gym attendance
+* streaks
+* monthly completed workouts
+* total completed workouts
+
+For the MVP, hiding cancelled sessions from the main history list is acceptable.
+
+---
+
+# 12. In-Progress Workout
+
+If a workout is currently in progress, History may show a small informational state, but the primary action should remain:
+
+`Continue Workout`
+
+Do not treat it as completed history.
+
+---
+
+# 13. Dashboard Stats
+
+Update `/app` with compact consistency information.
 
 Example:
 
 ```text
 Friday, August 14
 
-Workout complete
+Today's Workout
+Pull Day
 
-Pull Day ✓
+🔥 4-day streak
+10 workouts this month
 
-Next workout
+[ Start Workout ]
+```
+
+If today's workout has already been completed:
+
+```text
+Workout complete ✓
+
+Pull Day
+
+🔥 4-day streak
+10 workouts this month
+
+Next
 Legs
 ```
 
-A completed workout automatically counts as a gym visit.
-
-The user should not need to separately mark:
-
-"I went to the gym."
+Do not overwhelm the dashboard with analytics.
 
 ---
 
-# 14. Workout Cancellation
+# 14. Data Layer
 
-Allow an active workout to be cancelled.
-
-Use:
-
-`status = cancelled`
-
-Require confirmation.
-
-Example:
+Create clean server-side helpers such as equivalents of:
 
 ```text
-Cancel workout?
-
-Your current exercise progress will remain stored,
-but this workout will not count as completed.
-
-[ Keep Workout ]
-[ Cancel ]
+getWorkoutHistory()
+getWorkoutHistoryByMonth()
+getWorkoutDetail()
+getWorkoutStats()
+getCurrentStreak()
+getAttendanceDates()
 ```
 
-Cancelled workouts must not advance the workout-day sequence.
+Do not trust client-submitted user IDs.
+
+Derive ownership from the authenticated Supabase user.
+
+Reuse existing workout/session data.
 
 ---
 
-# 15. Next Workout Logic
+# 15. Query Efficiency
 
-Create a reusable server-side function such as:
+Avoid loading every historical workout into the browser just to render one month.
+
+Use bounded queries where appropriate.
+
+Examples:
+
+* month start
+* month end
+* recent N workouts
+* total count query
+
+Keep the implementation simple but avoid obviously wasteful data fetching.
+
+---
+
+# 16. No New Attendance Table Unless Needed
+
+Prefer deriving attendance from completed workouts.
+
+Do not add:
+
+`gym_attendance`
+
+unless a real requirement appears that cannot be cleanly represented through completed workout sessions.
+
+For this milestone, completed workouts should remain the source of truth.
+
+---
+
+# 17. Database Changes
+
+Avoid database changes if the current schema already supports this milestone.
+
+If indexes are needed for efficient history queries, a small migration is acceptable.
+
+Potential useful indexes may include:
 
 ```text
-getNextWorkoutDay()
+user_id + status + completed_at
+plan_id + status + completed_at
 ```
 
-or equivalent.
+Do not create unnecessary database objects.
 
-It should:
-
-1. Retrieve the active plan.
-2. Retrieve its ordered workout days.
-3. Find the most recent completed workout belonging to that active plan.
-4. Determine the next day in sequence.
-5. Wrap to the beginning when necessary.
-
-Only:
-
-`status = completed`
-
-should advance the sequence.
-
-Cancelled workouts must not.
-
-In-progress workouts should resume instead of selecting another day.
+Any new database object must continue using the `gym_` prefix where applicable and must not affect FlowDesk.
 
 ---
 
-# 16. Data Security
+# 18. Profile Page
 
-All operations must derive the user from the authenticated server session.
+Upgrade `/app/profile` slightly.
 
-Never trust client-provided `user_id`.
+Display:
 
-A user must not be able to:
+* Google avatar
+* name
+* email
+* total workouts
+* gym days
+* member since date if available
+* sign out
 
-* view another user's workout
-* modify another user's workout
-* complete another user's exercises
-* guess another workout ID and access it
+Keep it minimal.
 
-Existing RLS remains part of the security boundary.
-
-Validate ownership server-side as well where appropriate.
-
----
-
-# 17. Server Actions / Data Layer
-
-Expand the existing workout data layer cleanly.
-
-Functions may include equivalents of:
-
-```text
-getCurrentWorkout()
-getNextWorkoutDay()
-startWorkout()
-getWorkout()
-updateWorkoutExercise()
-toggleExerciseComplete()
-finishWorkout()
-cancelWorkout()
-getPreviousExerciseWeight()
-```
-
-Do not create unnecessary abstraction.
-
-Keep authenticated logic server-side.
+Do not build account settings yet.
 
 ---
 
-# 18. Loading and Error States
+# 19. Mobile-First UX
 
-Handle:
-
-* no active plan
-* active plan with no workout days
-* workout day with no exercises
-* workout creation failure
-* exercise update failure
-* workout already completed
-* cancelled workout
-* unauthorized workout ID
-* missing workout ID
-* network/server errors
-
-Messages should remain concise and useful.
-
----
-
-# 19. Mobile Gym UX
-
-This screen is the most important mobile UI in the application.
+History must work well on a phone.
 
 Prioritize:
 
-* large exercise cards
-* 44px+ tap areas
-* sticky workout header if helpful
-* sticky Finish Workout action where appropriate
-* large numeric weight inputs
-* minimal navigation distraction
-* readable text under gym lighting
-* easy scrolling
-* clear completed states
+* readable calendar cells
+* clear date markers
+* touch-friendly month navigation
+* cards instead of tables
+* concise workout summaries
+* comfortable scrolling
+* sticky bottom navigation
 
-Avoid:
-
-* dense forms
-* tiny inputs
-* desktop tables
-* excessive modal interactions
+Test narrow phone widths.
 
 ---
 
-# 20. Navigation During Workout
+# 20. Empty States
 
-When a workout is active, the user should easily return to it.
+Handle:
 
-If they navigate to another app section and return home:
+## No completed workouts
 
 ```text
-Workout in progress
+No workouts yet.
 
-[ Continue Workout ]
+Complete your first workout and it will show up here.
 ```
 
-should be prominent.
+## No workouts in selected month
 
-Do not lose workout state due to navigation or refresh.
+```text
+No workouts this month.
+```
 
-The database is the source of truth.
+## No active streak
 
----
+Display:
 
-# 21. Refresh / Recovery
+```text
+Current streak
+0 days
+```
 
-The workout must survive:
-
-* browser refresh
-* accidentally closing the tab
-* navigating elsewhere in the app
-
-Because session state is persisted in Supabase, reopening the app should detect the existing `in_progress` workout and allow the user to continue.
-
-Do not rely solely on React local state.
+without negative messaging.
 
 ---
 
-# 22. No External Exercise API Yet
+# 21. Security
 
-Do not integrate ExerciseDB, MuscleWiki, or another external provider in this milestone.
+Users must only access their own workout history.
 
-Continue using existing static exercise metadata.
+Ensure:
 
-External images/video demonstrations can be evaluated after the core workout experience works reliably.
+* direct workout-detail URLs are ownership checked
+* server queries filter by authenticated user
+* nested RLS remains effective
+* no client-submitted `user_id`
+* guessed workout IDs return not found
 
 ---
 
-# 23. Do Not Implement Yet
+# 22. Do Not Implement Yet
 
 Do not implement:
 
-* history calendar UI
-* streak calculations
-* monthly statistics
 * charts
-* personal-record detection
-* individual set tracking
+* personal records
+* best lifts
+* per-set tracking
 * rest timers
-* workout sharing
-* AI workout recommendations
-* social features
+* body-weight tracking
+* photos
+* external exercise API
+* AI recommendations
 * nutrition
-
-Those belong to future milestones.
+* social features
+* leaderboards
 
 ---
 
-# 24. Verification
+# 23. Verification
 
 Run:
 
@@ -628,60 +536,48 @@ npm run build
 git diff --check
 ```
 
-Resolve all errors.
-
 Functionally verify:
 
-1. User sees the correct next workout day.
-2. Start Workout creates one workout.
-3. Exercise snapshots are created.
-4. Default weights appear.
-5. Exercises can be checked and unchecked.
-6. Weight changes persist.
-7. Refresh preserves progress.
-8. Duplicate active workouts are prevented.
-9. Workout can be completed.
-10. `completed_at` is stored.
-11. Completed workout advances the sequence.
-12. Cancelled workout does not advance it.
-13. User cannot access another user's workout.
-14. Mobile layout works at common phone widths.
+1. Completed workout appears on correct local date.
+2. Calendar marks completed attendance days.
+3. Month navigation works.
+4. Multiple workouts on one day are handled correctly.
+5. Monthly workout count is correct.
+6. Monthly attendance-day count is correct.
+7. Total workout count is correct.
+8. Current streak is correct.
+9. Today's missing workout does not prematurely break yesterday's active streak.
+10. Cancelled workouts do not count.
+11. In-progress workouts do not count.
+12. Workout detail uses snapshots.
+13. Duration is derived correctly.
+14. Dashboard stats update after workout completion.
+15. Unauthorized history URLs are inaccessible.
+16. Mobile layout works at common phone widths.
 
 ---
 
 # Definition of Done
 
-The following flow must work:
+This user flow must work:
 
 ```text
-Open Buff Me Up
+Complete Workout
       ↓
-Friday, August 14
+Workout timestamp stored
       ↓
-Today's Workout: Push
+Open History
       ↓
-Start Workout
+August 14 marked
       ↓
-Bench Press
-185 lb
-✓
+Pull Day appears
       ↓
-Incline Press
-60 lb
-✓
+Open Pull Day
       ↓
-...
+See exercises and weights
       ↓
-Finish Workout
-      ↓
-Workout Complete
-      ↓
-Recorded automatically
-      ↓
-Next workout: Pull
+Dashboard stats/streak updated
 ```
-
-The workout must survive browser refresh and navigation.
 
 ---
 
@@ -691,21 +587,21 @@ Return:
 
 1. Files created
 2. Files modified
-3. Workout start logic
-4. Next-workout selection logic
-5. Exercise snapshot behavior
-6. Weight tracking
-7. Previous-weight functionality
-8. Exercise completion behavior
-9. Progress tracking
-10. Workout finish behavior
-11. Workout cancellation behavior
-12. Date/time handling
-13. Security/ownership handling
-14. Database changes or new migration
+3. History UI implemented
+4. Calendar implementation
+5. Local-date grouping strategy
+6. Attendance logic
+7. Streak definition and implementation
+8. Monthly statistics
+9. Dashboard statistics
+10. Workout-detail functionality
+11. Profile updates
+12. Data-access functions
+13. Database changes, if any
+14. Security/ownership handling
 15. Verification results
 16. Mobile testing performed
 17. Known limitations
 18. Any deviations from this prompt
 
-Do not begin Milestone 5 automatically.
+Do not begin Milestone 6 automatically.

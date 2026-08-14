@@ -41,3 +41,9 @@ Static recommendations live in `data/recommended-plans.ts`. The `gym_adopt_recom
 `getNextWorkoutDay` advances through the active plan's ordered days using only the most recent completed workout for that plan; cancelled sessions do not advance the sequence. Any in-progress workout takes priority and is resumed.
 
 `gym_start_workout` atomically creates a session and immutable exercise snapshots. A partial unique index prevents concurrent in-progress sessions. Workout weights, completion flags, and status remain database-backed, so refreshes and navigation do not lose progress.
+
+## History and local dates
+
+Attendance is derived from `gym_workouts.status = 'completed'` and `completed_at`; cancelled and in-progress sessions never count. Month queries select only a padded UTC boundary window, then the client groups timestamps using its IANA timezone. The timezone and selected month are retained in the History URL for refresh-safe navigation.
+
+Streaks count consecutive distinct local attendance days ending today or yesterday, so a user does not lose yesterday's active streak at the start of today. Only narrow `completed_at` projections are loaded for all-time attendance calculations; calendar queries and recent workout details remain bounded.
