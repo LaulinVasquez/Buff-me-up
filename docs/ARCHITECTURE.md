@@ -20,15 +20,15 @@ Buff Me Up is one Next.js App Router application. Server Components are the defa
 
 `gym_profiles` and its RLS policies, trigger, and function use the `gym_` prefix to isolate them from FlowDesk in the shared project. Synchronization happens in the Buff Me Up callback rather than through a shared `auth.users` trigger.
 
-## Planned routes
+## Main routes
 
 - `/` — public Google sign-in entry
 - `/auth/callback` — OAuth exchange and profile synchronization
-- `/app` — protected authenticated shell
-- `/app/workouts` — future plans and training days
-- `/app/history` — future completed workouts, attendance, and streaks
-
-Future workout routes will live under `app/app/`, reusable domain UI in `components/`, and data access in `lib/`. No workout implementation exists yet.
+- `/app` — date-aware workout dashboard
+- `/app/plan/[planId]` — plan and exercise management
+- `/app/workout/[workoutId]` — persistent workout execution
+- `/app/history/[workoutId]` — attendance calendar and snapshots
+- `/app/profile` — account and consistency summary
 
 ## Workout-plan foundation
 
@@ -47,3 +47,7 @@ Static recommendations live in `data/recommended-plans.ts`. The `gym_adopt_recom
 Attendance is derived from `gym_workouts.status = 'completed'` and `completed_at`; cancelled and in-progress sessions never count. Month queries select only a padded UTC boundary window, then the client groups timestamps using its IANA timezone. The timezone and selected month are retained in the History URL for refresh-safe navigation.
 
 Streaks count consecutive distinct local attendance days ending today or yesterday, so a user does not lose yesterday's active streak at the start of today. Only narrow `completed_at` projections are loaded for all-time attendance calculations; calendar queries and recent workout details remain bounded.
+
+## Security model
+
+The proxy validates claims and protects every `/app` route. Server operations derive identity from the session and never accept a user ID. Direct-owner tables use `auth.uid()`; nested rows resolve ownership through parents. Buff Me Up shares Supabase Auth with FlowDesk but creates and references only `gym_` application objects.

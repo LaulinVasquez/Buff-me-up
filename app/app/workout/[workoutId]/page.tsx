@@ -5,7 +5,8 @@ import { SubmitButton } from "@/components/forms/submit-button";
 import { LocalDate, LocalDateTime } from "@/components/local-date";
 import { exerciseCatalog } from "@/data/exercise-catalog";
 import { getPreviousExerciseWeight, getWorkout } from "@/lib/workouts/sessions";
-import { cancelWorkoutAction, finishWorkoutAction, saveWeightAction, toggleExerciseAction } from "../actions";
+import { cancelWorkoutAction, finishWorkoutAction, toggleExerciseAction } from "../actions";
+import { WeightControl } from "@/components/workout/weight-control";
 
 type Props = Readonly<{ params: Promise<{ workoutId: string }>; searchParams: Promise<{ error?: string }> }>;
 
@@ -38,10 +39,8 @@ export default async function WorkoutPage({ params, searchParams }: Props) {
         const metadata = exerciseCatalog[exercise.name];
         return <article className={`rounded-3xl border p-5 transition-colors ${exercise.completed ? "border-lime-400/30 bg-lime-400/10" : "border-slate-800 bg-slate-900/80"}`} key={exercise.id}>
           <div className="flex items-start justify-between gap-3"><div><h2 className="text-xl font-bold">{exercise.completed ? "✓ " : ""}{exercise.name}</h2><p className="mt-1 text-sm text-slate-400">{exercise.target_sets ?? "—"} sets × {exercise.target_reps ?? "—"}</p></div><span className="rounded-full bg-slate-950/60 px-2.5 py-1 text-xs text-slate-400">{index + 1}/{exercises.length}</span></div>
-          {previousWeights[index] !== null ? <p className="mt-4 text-sm text-slate-400">Last time: <strong className="text-slate-200">{previousWeights[index]} lb</strong></p> : null}
-          <form action={saveWeightAction} className="mt-4"><input name="workoutId" type="hidden" value={workout.id} /><input name="exerciseId" type="hidden" value={exercise.id} />
-            <label className="text-sm font-semibold text-slate-300">Weight used<div className="mt-2 flex items-center gap-3"><input className="min-h-14 min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-950 px-4 text-center text-xl font-bold outline-none focus:border-lime-400" defaultValue={exercise.weight ?? ""} inputMode="decimal" min="0" name="weight" step="0.25" type="number" /><span className="font-semibold text-slate-400">lb</span><SubmitButton className="min-h-14 rounded-xl bg-slate-800 px-4 font-semibold">Save</SubmitButton></div></label>
-          </form>
+          {previousWeights[index] !== null ? <div className="mt-4 rounded-xl bg-slate-950/60 p-3"><p className="text-xs font-bold uppercase tracking-wider text-slate-500">Last time</p><p className="mt-1 font-bold text-slate-200">{previousWeights[index]} lb</p></div> : null}
+          <WeightControl exerciseId={exercise.id} initialWeight={exercise.weight} workoutId={workout.id} />
           <form action={toggleExerciseAction} className="mt-4"><input name="workoutId" type="hidden" value={workout.id} /><input name="exerciseId" type="hidden" value={exercise.id} /><input name="completed" type="hidden" value={String(exercise.completed)} /><SubmitButton className={`min-h-14 w-full rounded-xl text-base font-bold ${exercise.completed ? "bg-slate-800 text-slate-200" : "bg-lime-400 text-slate-950"}`} pendingLabel="Saving...">{exercise.completed ? "Mark incomplete" : "✓ Complete exercise"}</SubmitButton></form>
           {metadata ? <details className="mt-3"><summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-slate-400">Exercise details</summary><div className="rounded-xl bg-slate-950/60 p-4 text-sm"><p className="font-semibold text-lime-400">{metadata.muscleGroup} · {metadata.equipment}</p><ol className="mt-3 list-decimal space-y-2 pl-5 text-slate-300">{metadata.instructions.map((step) => <li key={step}>{step}</li>)}</ol></div></details> : null}
         </article>;

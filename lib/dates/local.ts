@@ -33,6 +33,12 @@ export function shiftDateKey(key: string, amount: number) {
   return date.toISOString().slice(0, 10);
 }
 
+export function startOfWeekKey(key: string) {
+  const [year, month, day] = key.split("-").map(Number);
+  const weekday = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+  return shiftDateKey(key, -((weekday + 6) % 7));
+}
+
 export function isValidTimeZone(value: string) {
   try {
     new Intl.DateTimeFormat("en-US", { timeZone: value }).format();

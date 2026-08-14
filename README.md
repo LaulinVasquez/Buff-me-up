@@ -2,6 +2,15 @@
 
 Buff Me Up is a mobile-first gym tracking SaaS with authentication, plan management, persistent workout execution, and local-timezone history and consistency statistics.
 
+## Features
+
+- Google sign-in and protected user data
+- Recommended and custom workout plans
+- Ordered workout days and editable exercises
+- Refresh-safe workout execution, weights, and completion tracking
+- Local-timezone history, attendance, streaks, and weekly consistency
+- Installable home-screen manifest for supported phone browsers
+
 ## Technology stack
 
 - Next.js App Router, strict TypeScript, and Tailwind CSS
@@ -12,7 +21,7 @@ Buff Me Up is a mobile-first gym tracking SaaS with authentication, plan managem
 
 1. Install Node.js 20.9 or newer and run npm install.
 2. Copy .env.example to .env.local and add the public Supabase values.
-3. Apply the migrations in supabase/migrations to the shared project.
+3. Apply the migrations below in order to the shared project.
 4. Complete Google OAuth configuration below.
 5. Run npm run dev.
 
@@ -58,10 +67,25 @@ Set both public Supabase variables for Preview and Production. Add each deployme
 
 See docs/ARCHITECTURE.md for project boundaries.
 
-## Workout foundation
+## Supabase migrations
 
-Apply migrations in timestamp order. The Milestone 2 migration creates only `gym_`-prefixed workout objects in the shared Supabase project. Recommended plans remain static application data and are copied into user-owned rows when adopted.
+Apply these files in order without modifying already-applied migrations:
 
-The Milestone 4 migration adds duplicate-active-workout protection and the atomic workout snapshot function. Apply it before using Start Workout.
+1. 20260814000000_create_gym_profiles.sql
+2. 20260815000000_create_gym_workout_foundation.sql
+3. 20260816000000_add_gym_workout_execution.sql
+4. 20260817000000_add_gym_history_index.sql
 
-The Milestone 5 migration adds a history query index. Attendance is derived directly from completed workouts; no separate attendance table is used.
+All application objects use the gym_ prefix. Recommended templates remain static application data; attendance is derived from completed workouts.
+
+## Vercel deployment
+
+1. Import the repository into Vercel.
+2. Configure both public Supabase variables for Preview and Production.
+3. Set Supabase's Site URL to the production origin.
+4. Allow production and intentionally supported preview /auth/callback URLs.
+5. Deploy and run the manual checklist in docs/TESTING.md.
+
+## Current limitations
+
+There is no offline synchronization, per-set tracking, rest timer, personal-record detection, charts, notifications, or external exercise media. An internet connection is required during workouts.
