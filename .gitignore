@@ -39,6 +39,7 @@ next-env.d.ts
 # Tooling
 /.turbo/
 /.eslintcache
+AGENTS.md
 
 # Editors
 /.idea/
