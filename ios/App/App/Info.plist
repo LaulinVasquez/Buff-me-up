@@ -12,10 +12,10 @@
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>com.laurinvasquez.buffmeup.auth</string>
+			<string>com.samirrodriguez.buffmeup.auth</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.laurinvasquez.buffmeup</string>
+				<string>com.samirrodriguez.buffmeup</string>
 			</array>
 		</dict>
 	</array>
@@ -33,6 +33,8 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>
