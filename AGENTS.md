@@ -1,579 +1,348 @@
-# Buff Me Up — Milestone 6: Final Polish, Deployment, and Real-World Readiness
+# Buff Me Up — Capacitor iOS Native Authentication and Deep Linking
 
 ## Objective
 
-Prepare Buff Me Up for real daily use.
+Fix Google OAuth for the Capacitor iOS version of Buff Me Up.
 
-At the end of this milestone, the application should be:
+The native application currently loads the deployed Vercel application successfully inside Capacitor, but Google authentication leaves the app and returns the user to Safari.
 
-* polished
-* responsive
-* reliable
-* installable from a phone browser where supported
-* production-ready for Vercel
-* easy to use during an actual gym session
-* resilient to refreshes and common failures
-
-Do not introduce major new product areas.
-
-Focus on making the existing application feel complete.
-
----
-
-# 1. Full Product Review
-
-Review the complete authenticated flow:
+The desired native flow is:
 
 ```text
-Landing
-   ↓
-Google Login
-   ↓
-Dashboard
-   ↓
-Recommended / Custom Plan
-   ↓
-Start Workout
-   ↓
-Track Exercises
-   ↓
-Finish Workout
-   ↓
-History
-   ↓
-Profile
+Buff Me Up iOS app
+      ↓
+Continue with Google
+      ↓
+Google authentication
+      ↓
+Supabase callback
+      ↓
+Deep link back into Buff Me Up
+      ↓
+Authenticated app session
+      ↓
+/app
 ```
 
-Look for:
-
-* inconsistent spacing
-* duplicate actions
-* confusing copy
-* awkward navigation
-* mobile layout problems
-* unnecessary page jumps
-* dead-end states
-* inconsistent loading states
-* inconsistent buttons
-
-Fix issues where appropriate.
+The existing web authentication flow must continue to work unchanged for normal browser users.
 
 ---
 
-# 2. Mobile-First Visual Polish
+# Current Architecture
 
-The app is primarily used from a phone.
+Buff Me Up uses:
 
-Polish all major routes at narrow mobile widths:
+* Next.js App Router
+* Supabase Auth
+* Google OAuth
+* PKCE
+* `@supabase/ssr`
+* Vercel
+* Capacitor iOS
 
-* `/`
-* `/app`
-* `/app/plan`
-* `/app/plan/[planId]`
-* `/app/workout/[workoutId]`
-* `/app/history`
-* `/app/history/[workoutId]`
-* `/app/profile`
+Current production web URL:
 
-Prioritize:
+`https://buff-me-up.vercel.app`
 
-* strong visual hierarchy
-* comfortable spacing
-* readable text
-* large touch targets
-* sticky actions where useful
-* safe-area handling
-* minimal horizontal overflow
-* usable keyboard behavior for numeric inputs
+Current native bundle ID:
 
-Avoid dense desktop-style interfaces.
+`com.laurinvasquez.buffmeup`
+
+Capacitor is currently loading the deployed Vercel application using the native WebView.
+
+Do not break existing web authentication.
 
 ---
 
-# 3. Dashboard Polish
+# 1. Detect Native Capacitor Runtime
 
-Make the authenticated dashboard feel like the app's real home.
+Add a small reusable runtime helper that safely detects whether the application is running inside Capacitor.
 
-The dashboard should prioritize:
+Use the official Capacitor runtime APIs rather than user-agent detection.
 
-1. today's local date
-2. active/in-progress workout
-3. next workout
-4. current plan
-5. compact consistency statistics
-
-Example:
+Example conceptual behavior:
 
 ```text
-Friday, August 14
-
-Good afternoon
-
-Today's Workout
-Push Day
-
-5 exercises
-About 45–60 min
-
-[ Start Workout ]
-
-4 workouts this month
-🔥 3-day streak
+isNativeApp()
 ```
 
-If a workout is already in progress:
+returns true only when running inside the native Capacitor shell.
 
-```text
-Workout in progress
-
-Push Day
-3 / 5 complete
-
-[ Continue Workout ]
-```
-
-If today's workout has been completed:
-
-```text
-Workout Complete ✓
-
-Push Day
-52 min
-
-Next workout
-Pull Day
-```
-
-Avoid clutter.
+Normal Safari/Chrome/Vercel usage must continue using the existing web OAuth flow.
 
 ---
 
-# 4. Date Awareness
+# 2. Native Redirect Scheme
 
-Review all displayed dates and times.
-
-Ensure:
-
-* current date uses browser-local timezone
-* history uses the supplied IANA timezone
-* workout completion dates are local
-* profile/member-since dates are local where appropriate
-* workout start/end times are local
-
-Do not hard-code timezone assumptions.
-
-Do not store formatted date strings.
-
----
-
-# 5. Weekly Consistency
-
-Keep the existing daily streak.
-
-Additionally, introduce a lightweight weekly consistency indicator.
-
-Do not require the user to configure a weekly target yet.
-
-Display something simple such as:
-
-```text
-This Week
-3 workouts
-```
-
-or:
-
-```text
-3 gym days this week
-```
-
-Calculate it from completed workouts in the user's local week.
-
-Do not replace the existing streak.
-
-This gives users useful consistency information even when their workout program intentionally includes rest days.
-
----
-
-# 6. Empty-State Review
-
-Ensure every major route handles missing data gracefully.
-
-Examples:
-
-## No plan
-
-```text
-You don't have a workout plan yet.
-
-Choose a recommended plan or build your own.
-
-[ Browse Plans ]
-```
-
-## Plan has no exercises
-
-```text
-This workout doesn't have any exercises yet.
-
-[ Add Exercise ]
-```
-
-## No workout history
-
-```text
-No workouts yet.
-
-Complete your first workout and it will appear here.
-```
-
-## No active plan
-
-Provide a direct path to choose or activate one.
-
-Avoid blank pages.
-
----
-
-# 7. Error-State Review
-
-Review server actions and data fetching for understandable errors.
-
-Users should receive concise messages such as:
-
-```text
-We couldn't update your workout.
-Please try again.
-```
-
-Avoid showing:
-
-* SQL errors
-* Supabase errors
-* stack traces
-* internal IDs
-* auth tokens
-* raw exceptions
-
----
-
-# 8. Loading States
-
-Ensure meaningful loading UI exists for routes where navigation could take noticeable time.
-
-Prefer skeletons or lightweight placeholders.
-
-Avoid layout shifts where practical.
-
-Do not add unnecessary animation libraries.
-
----
-
-# 9. Workout UX Polish
-
-Review the active workout experience specifically.
-
-It should be possible to operate with one hand.
-
-Review:
-
-* completion buttons
-* weight inputs
-* exercise spacing
-* progress header
-* finish button
-* cancel action
-* exercise instructions
-* keyboard behavior
-
-Ensure the primary workout action is always easy to reach.
-
-Avoid accidental cancellation.
-
----
-
-# 10. Weight Input Improvements
-
-Review the current weight input.
-
-If clean and low-risk, add small increment/decrement controls.
-
-Example:
-
-```text
-[-5]   185 lb   [+5]
-```
-
-or:
-
-```text
-[-]   185   [+]
-```
-
-Do not add complicated plate calculators yet.
-
-Typing the value manually must remain possible.
-
----
-
-# 11. Previous Weight UX
-
-Improve the progressive-overload hint.
-
-Example:
-
-```text
-Bench Press
-
-Last time
-180 lb
-
-Today
-185 lb
-```
-
-Do not calculate recommendations yet.
-
-Do not tell the user how much weight they should increase.
-
-Simply surface historical information.
-
----
-
-# 12. Plan Screen Polish
-
-Improve plan-management hierarchy.
-
-A user should clearly distinguish:
-
-* active plan
-* inactive plans
-* recommended plans
-* custom plans
-
-Avoid presenting all plans as one undifferentiated list.
-
-Make the active plan obvious.
-
----
-
-# 13. Recommended Exercise Details
-
-Continue using the static exercise catalog.
-
-Do not add an external API in this milestone.
-
-Ensure known recommended exercises have:
-
-* muscle group
-* equipment
-* instructions
-
-If an exercise lacks metadata, handle it gracefully.
-
----
-
-# 14. App Branding
-
-Standardize branding across the application.
+Configure a custom URL scheme for Buff Me Up.
 
 Use:
 
-`Buff Me Up`
+`com.laurinvasquez.buffmeup`
 
-consistently.
+with an auth callback such as:
 
-Review:
+```text
+com.laurinvasquez.buffmeup://auth/callback
+```
 
-* page metadata
-* browser title
-* landing page
-* app shell
-* headings
-* README
+or another clean equivalent.
 
-Add a short product description such as:
+The scheme must be registered in the iOS project.
 
-`A simple workout tracker built for the gym.`
+Follow Capacitor's current iOS deep-link guidance.
 
-Do not over-brand the product.
+Do not invent a web URL for the native callback.
 
 ---
 
-# 15. Metadata
+# 3. Supabase Redirect Configuration
 
-Add appropriate Next.js metadata.
+The native redirect must be compatible with Supabase Auth.
 
-At minimum:
+The native callback URI should be added to the Supabase Authentication redirect allow list.
 
-* title
-* description
+Expected example:
+
+```text
+com.laurinvasquez.buffmeup://auth/callback
+```
+
+Document the exact URI the owner must add.
+
+Keep existing web redirects such as:
+
+```text
+http://localhost:3000/auth/callback
+https://buff-me-up.vercel.app/auth/callback
+```
+
+Do not remove or replace them.
+
+---
+
+# 4. Google OAuth Behavior
+
+Update the Google sign-in logic so:
+
+## Web
+
+Normal browser use continues to use:
+
+```text
+https://current-origin/auth/callback
+```
+
+## Capacitor iOS
+
+Native runtime uses the registered native redirect URI.
 
 Example:
 
 ```text
-Buff Me Up — Workout Tracker
+com.laurinvasquez.buffmeup://auth/callback
 ```
 
-Ensure protected pages don't expose sensitive information through metadata.
+Use Supabase's supported OAuth/deep-link flow.
+
+Do not hard-code localhost.
 
 ---
 
-# 16. PWA / Home Screen Readiness
+# 5. Capacitor App Plugin
 
-Make the application convenient to launch from a phone.
+Install and use the Capacitor App plugin if not already installed.
 
-If the current Next.js architecture supports it cleanly, add basic web-app metadata / manifest support so users can add Buff Me Up to their phone home screen.
+The application must listen for native deep-link events.
 
-Include appropriate:
+Handle:
 
-* application name
-* short name
-* theme metadata
-* standalone display preference
-* icons if appropriate assets exist
-
-Do not spend excessive time generating a complex PWA.
-
-Offline workout synchronization is not required.
-
-Do not add service workers unless necessary.
-
-The primary goal is home-screen launch convenience.
-
----
-
-# 17. Authentication Production Review
-
-Review Google OAuth behavior for:
-
-* localhost
-* production Vercel URL
-* mobile browser
-* sign-out
-* callback failures
-
-Do not hard-code localhost redirects.
-
-Ensure production callbacks resolve to the deployed application.
-
----
-
-# 18. Supabase Shared-Project Safety
-
-Buff Me Up continues to share the FlowDesk Supabase project.
-
-Review all migrations and database operations.
-
-Confirm:
-
-* every application table uses `gym_`
-* every custom function uses `gym_`
-* every relevant index/policy/trigger is Buff Me Up-specific
-* no FlowDesk application table is modified
-* no generic objects overwrite FlowDesk objects
-
-Do not change this architecture.
-
----
-
-# 19. Production Environment
-
-Update documentation for Vercel.
-
-Required variables remain:
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+```text
+appUrlOpen
 ```
 
-Do not add service-role credentials.
+or the current official equivalent.
 
-Document production OAuth callback configuration.
+When the application receives:
 
----
+```text
+com.laurinvasquez.buffmeup://auth/callback?...
+```
 
-# 20. README Finalization
+extract the OAuth authorization information safely.
 
-Update the README with:
+Do not log:
 
-* what Buff Me Up does
-* stack
-* features
-* local setup
-* environment variables
-* Supabase migrations
-* Google OAuth setup
-* development commands
-* Vercel deployment
-* current limitations
-
-Keep it concise and useful.
+* authorization codes
+* access tokens
+* refresh tokens
 
 ---
 
-# 21. Architecture Documentation
+# 6. PKCE Compatibility
 
-Update:
+The web app currently uses PKCE.
 
-`docs/ARCHITECTURE.md`
+Preserve PKCE security.
 
-to reflect the final MVP architecture.
+Ensure the native flow correctly exchanges the returned authorization code for a Supabase session.
 
-Include:
+Do not switch the entire application to an insecure authentication strategy merely to simplify native OAuth.
 
-* authentication
-* shared Supabase strategy
-* plans
-* workout execution
-* history
-* timezone handling
-* RLS model
-* recommended-plan strategy
-* main route structure
+If the current SSR cookie-based PKCE architecture cannot directly complete inside the native shell, implement the smallest clean bridge necessary between the native callback and the deployed Next.js application.
 
-Do not turn this into a giant document.
+Document the reasoning.
 
 ---
 
-# 22. Accessibility Review
+# 7. Session Establishment
 
-Review basic accessibility.
+After successful native OAuth:
 
-Ensure:
+* Supabase session must exist
+* authenticated application state must be available
+* user should navigate to `/app`
+* `gym_profiles` behavior must remain intact
 
-* buttons have clear labels
-* form controls have labels
-* keyboard navigation works
-* focus states remain visible
-* destructive actions are identifiable
-* text contrast is reasonable
-* controls do not rely only on color
-
-Do not introduce a new accessibility library unless necessary.
+Closing and reopening Buff Me Up should retain authenticated behavior according to the existing Supabase session strategy.
 
 ---
 
-# 23. Performance Review
+# 8. External Browser Handling
 
-Review for obvious performance issues.
+Google OAuth may open an external browser/authentication session if required by iOS.
 
-Check:
+That is acceptable.
 
-* unnecessary client components
-* excessive database fetching
-* duplicate queries
-* oversized dependencies
-* unnecessary rerenders
+The critical behavior is that successful authentication returns the user into Buff Me Up automatically.
 
-Do not prematurely optimize.
-
-Fix only clear issues.
+Do not leave the user stranded in Safari.
 
 ---
 
-# 24. Production Build
+# 9. Deep-Link Routing
+
+Handle deep links defensively.
+
+Only recognized Buff Me Up routes should be processed.
+
+At minimum:
+
+```text
+/auth/callback
+```
+
+Unknown deep links should not execute arbitrary navigation.
+
+---
+
+# 10. iOS Configuration
+
+Update the Capacitor iOS project as necessary.
+
+Possible required changes include:
+
+* URL Types
+* CFBundleURLSchemes
+* Capacitor App plugin configuration
+* Info.plist changes
+
+Use:
+
+```text
+com.laurinvasquez.buffmeup
+```
+
+Do not change the bundle identifier.
+
+---
+
+# 11. Existing Web Flow Must Remain Working
+
+Verify that normal web authentication still works:
+
+```text
+Safari/Chrome
+   ↓
+Google OAuth
+   ↓
+https://buff-me-up.vercel.app/auth/callback
+   ↓
+/app
+```
+
+Native-specific logic must not break the deployed SaaS experience.
+
+---
+
+# 12. Capacitor Configuration
+
+Review `capacitor.config.ts`.
+
+Current native prototype may use:
+
+```ts
+server: {
+  url: 'https://buff-me-up.vercel.app',
+  cleartext: false,
+}
+```
+
+Do not silently treat this as the final App Store architecture.
+
+Capacitor documentation states that `server.url` is intended for live-reload/development use rather than production.
+
+Keep it only for the current prototype unless a better architecture is implemented as part of this task.
+
+Document this limitation clearly.
+
+---
+
+# 13. Xcode Console Warnings
+
+The current app may log messages such as:
+
+```text
+Could not create a sandbox extension
+WebContent process became unresponsive
+JS Eval error
+```
+
+Investigate only if they are causally related to authentication or navigation.
+
+Do not spend excessive time eliminating harmless WebKit/LLDB diagnostic warnings.
+
+The priority is functional OAuth return-to-app behavior.
+
+---
+
+# 14. Dependencies
+
+Add only dependencies genuinely required for native deep linking/auth.
+
+Likely candidate:
+
+```text
+@capacitor/app
+```
+
+Avoid unnecessary authentication libraries if Supabase + Capacitor can handle the flow cleanly.
+
+---
+
+# 15. Sync Native Project
+
+After changes, run the appropriate Capacitor synchronization command:
+
+```bash
+npx cap sync ios
+```
+
+Ensure the native iOS project contains the updated configuration.
+
+---
+
+# 16. Verification
 
 Run:
 
@@ -584,116 +353,21 @@ npm run build
 git diff --check
 ```
 
-All must pass.
+Also verify native configuration compiles.
 
----
+Manual native test:
 
-# 25. Migration Review
-
-Confirm all migrations are documented and expected to run in this order:
-
-```text
-20260814000000_create_gym_profiles.sql
-20260815000000_create_gym_workout_foundation.sql
-20260816000000_add_gym_workout_execution.sql
-20260817000000_add_gym_history_index.sql
-```
-
-Include any Milestone 6 migration only if actually necessary.
-
-Do not combine or rewrite already-applied migrations.
-
----
-
-# 26. Real-World Test Checklist
-
-Create a concise manual test checklist for the owner.
-
-It should include:
-
-* Google login
-* logout
-* recommended plan adoption
-* custom plan creation
-* plan activation
-* exercise editing
-* start workout
-* edit weight
-* complete exercise
-* refresh active workout
-* continue workout
-* finish workout
-* workout appears in history
-* history date correct
-* stats update
-* next workout advances
-* cancelled workout does not advance
-* mobile navigation
-* production OAuth redirect
-
----
-
-# 27. Do Not Implement
-
-Do not add:
-
-* AI
-* nutrition
-* social features
-* subscriptions
-* payments
-* leaderboards
-* advanced charts
-* personal records
-* per-set workout tracking
-* rest timers
-* wearable integration
-* notifications
-* external exercise API
-
-The objective is to ship the MVP.
-
----
-
-# Definition of Done
-
-Buff Me Up should now support this complete production flow:
-
-```text
-Open from phone
-      ↓
-Google Login
-      ↓
-See today's workout
-      ↓
-Start
-      ↓
-Track weight + exercises
-      ↓
-Finish
-      ↓
-History updates
-      ↓
-Stats update
-      ↓
-Next workout ready
-```
-
-and:
-
-```text
-Plan
- ↓
-Recommended or Custom
- ↓
-Edit exercises
- ↓
-Activate
- ↓
-Use in gym
-```
-
-The application should be deployable and usable from a phone without development tools.
+1. Launch Buff Me Up on physical iPhone.
+2. Tap Continue with Google.
+3. Complete Google authentication.
+4. Confirm Buff Me Up reopens automatically.
+5. Confirm authenticated dashboard appears.
+6. Close Buff Me Up.
+7. Reopen it.
+8. Confirm authentication/session behavior is correct.
+9. Sign out.
+10. Confirm native login can be performed again.
+11. Confirm web login at the production Vercel URL still works.
 
 ---
 
@@ -703,22 +377,73 @@ Return:
 
 1. Files created
 2. Files modified
-3. UI/UX polish completed
-4. Dashboard improvements
-5. Weekly consistency implementation
-6. Workout UX improvements
-7. Plan UX improvements
-8. Date/time review
-9. PWA/home-screen support
-10. Accessibility improvements
-11. Performance improvements
-12. Authentication production review
-13. Shared Supabase safety review
-14. README/documentation updates
-15. Verification results
-16. Manual production test checklist
-17. Known limitations
-18. Any database changes
-19. Any deviations from this prompt
+3. Dependencies added
+4. Native runtime detection strategy
+5. Native redirect URI
+6. Capacitor deep-link configuration
+7. iOS URL scheme configuration
+8. OAuth flow changes
+9. PKCE/session handling
+10. Supabase dashboard configuration required
+11. Web-auth compatibility
+12. Capacitor config changes
+13. Verification results
+14. Manual Xcode/iPhone steps
+15. Known limitations
+16. Whether `server.url` remains in use
+17. Recommended path toward App Store-ready architecture
 
-Do not begin another milestone automatically.
+Do not start unrelated product features.
+
+# Additional Requirement — Use Existing Buff Me Up Logo as Native iOS Icon
+
+The project already contains a Buff Me Up logo/icon created for the web application, currently available as an application asset such as:
+
+`app/icon.svg`
+
+Reuse the existing Buff Me Up branding for the native iOS application.
+
+## Requirements
+
+1. Inspect the existing Buff Me Up logo/icon asset.
+2. Use that design as the source for the native iOS app icon.
+3. Generate the appropriate iOS icon assets required by the Xcode asset catalog.
+4. Configure the Capacitor iOS project so Buff Me Up displays the correct icon:
+
+   * on the iPhone Home Screen
+   * in the App Library
+   * in iOS system surfaces where the application icon is used
+5. Do not replace the existing logo with unrelated branding.
+6. Preserve the current Buff Me Up visual identity.
+7. Ensure the icon has appropriate padding/background treatment for iOS and is not visibly clipped.
+8. Do not rely solely on the existing web/PWA SVG; configure the native `AppIcon` asset catalog correctly.
+9. After generating/configuring the assets, run:
+
+```bash
+npx cap sync ios
+```
+
+and verify the iOS project still builds successfully.
+
+## Existing Application Identity
+
+App name:
+
+`Buff Me Up`
+
+Bundle identifier:
+
+`com.laurinvasquez.buffmeup`
+
+The native application name and icon should consistently use this branding.
+
+## Verification
+
+Confirm in the completion report:
+
+* source logo used
+* native icon files/assets created
+* Xcode asset catalog updated
+* Home Screen icon configured
+* build verification result
+* any manual Xcode action still required
