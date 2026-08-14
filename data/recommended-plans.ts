@@ -1,6 +1,9 @@
 import type { RecommendedWorkoutPlan } from "@/types/workouts";
+import { getExerciseMetadata } from "./exercise-catalog";
 
-const exercise = (name: string, sets: number, targetReps: string, order: number) => ({ name, sets, targetReps, order });
+const exercise = (name: string, sets: number, targetReps: string, order: number) => ({
+  name, sets, targetReps, order, ...getExerciseMetadata(name),
+});
 
 export const recommendedPlans = [
   {

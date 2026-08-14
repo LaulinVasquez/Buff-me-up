@@ -22,6 +22,8 @@ export type WorkoutExercise = {
 };
 export type RecommendedExercise = {
   name: string; sets: number; targetReps: string; defaultWeight?: number; notes?: string; order: number;
+  muscleGroup: string; equipment: string; instructions: string[]; secondaryMuscles?: string[];
+  imageUrl?: string; videoUrl?: string; externalExerciseId?: string;
 };
 export type RecommendedWorkoutDay = { name: string; order: number; exercises: RecommendedExercise[] };
 export type RecommendedWorkoutPlan = {

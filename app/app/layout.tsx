@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { UserMenu } from "@/components/auth/user-menu";
 import { createClient } from "@/lib/supabase/server";
 import { hasSupabaseConfig } from "@/lib/supabase/config";
-import Link from "next/link";
+import { AppNavigation } from "@/components/navigation/app-navigation";
 
 export default async function ApplicationLayout({ children }: Readonly<{ children: ReactNode }>) {
   if (!hasSupabaseConfig()) redirect("/?error=auth_unavailable");
@@ -27,11 +27,6 @@ export default async function ApplicationLayout({ children }: Readonly<{ childre
       <UserMenu avatarUrl={avatarUrl} name={name} />
     </header>
     {children}
-    <nav aria-label="Primary" className="fixed inset-x-0 bottom-0 z-10 mx-auto flex min-h-16 max-w-lg items-center justify-around border-t border-slate-800 bg-slate-950/95 px-3 pb-[env(safe-area-inset-bottom)] backdrop-blur">
-      <Link className="flex min-h-12 min-w-16 items-center justify-center text-sm font-semibold text-slate-200" href="/app">Home</Link>
-      <Link className="flex min-h-12 min-w-16 items-center justify-center text-sm font-semibold text-lime-400" href="/app/plan">Plan</Link>
-      <span className="text-sm text-slate-600">History</span>
-      <span className="text-sm text-slate-600">Profile</span>
-    </nav>
+    <AppNavigation />
   </div>;
 }

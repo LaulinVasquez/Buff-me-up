@@ -1,109 +1,275 @@
-# Buff Me Up — Milestone 2: Workout Data Model and Plan Foundation
+# Buff Me Up — Milestone 3: Plan Management, Exercise Details, and Date-Aware UX
 
 ## Objective
 
-Build the complete workout-plan data model and the backend/data-access foundation needed for the next milestones.
+Turn the workout-plan foundation into a polished, mobile-first plan-management experience.
 
-At the end of this milestone, the application should have:
+At the end of this milestone, users should be able to:
 
-* secure workout plan tables
-* workout day tables
-* exercise tables
-* workout session tables
-* workout exercise tracking tables
-* recommended workout plan data
-* strongly typed data-access helpers
-* Row Level Security for all Buff Me Up tables
-* a minimal plan-selection/onboarding foundation
+* view their active workout plan
+* view today's actual date
+* browse recommended plans before selecting one
+* inspect the exercises contained in a recommended plan
+* view basic exercise examples/instructions
+* create a custom plan
+* edit workout days
+* add, edit, delete, and reorder exercises
+* edit sets, reps, default weight, and notes
+* activate different plans
 
-Do not build the full workout execution UI yet.
-
-Do not build history, streaks, charts, or advanced analytics yet.
-
----
-
-# IMPORTANT — SHARED SUPABASE PROJECT
-
-Buff Me Up shares an existing Supabase project with another application called FlowDesk.
-
-Do not:
-
-* modify FlowDesk tables
-* rename FlowDesk tables
-* delete FlowDesk tables
-* reference FlowDesk application tables
-* create generic tables that could conflict with FlowDesk
-
-Every Buff Me Up-owned table, trigger, function, policy, or database object must use the `gym_` prefix where practical.
-
-Supabase Auth is intentionally shared.
-
-Existing Buff Me Up authentication uses:
-
-`gym_profiles`
-
-Continue using that table when profile relationships are needed.
+Do not build workout execution or workout history yet.
 
 ---
 
-# 1. Core Data Model
+# 1. Date-Aware Application UI
 
-Create a new timestamped SQL migration under:
+The application must prominently use the user's current local date where relevant.
 
-`supabase/migrations/`
+On the main authenticated page, display something similar to:
 
-The migration should create the following tables.
+`Friday, August 14`
+
+Use the browser/user local timezone for display.
+
+Do not hard-code dates.
+
+Do not create unnecessary date columns if existing timestamps already represent the underlying event.
+
+Future workout sessions will use `started_at` and `completed_at` as the source of truth.
+
+Create reusable date-formatting utilities where appropriate.
+
+Avoid timezone bugs caused by converting a local calendar day to UTC prematurely.
 
 ---
 
-## gym_workout_plans
+# 2. Main Dashboard Foundation
 
-Represents a user's workout program.
+Update `/app` to provide a useful pre-workout dashboard.
+
+If there is an active plan, show:
+
+* current date
+* active plan name
+* number of workout days
+* a compact preview of the next/current workout day
+* button to manage the plan
+
+Example:
+
+```text
+Friday, August 14
+
+Push / Pull / Legs
+
+Your Plan
+
+Push
+5 exercises
+
+Bench Press
+Incline Dumbbell Press
+Shoulder Press
++2 more
+
+[ View Plan ]
+```
+
+Do not implement Start Workout yet.
+
+That belongs to Milestone 4.
+
+---
+
+# 3. Recommended Plan Browser
+
+Improve `/app/plan` so users can browse recommended plans before adopting them.
+
+Display cards for:
+
+* Push / Pull / Legs
+* Upper / Lower
+* 3-Day Full Body
+
+Each card should show:
+
+* plan name
+* short description
+* number of workout days
+* approximate focus
+* expandable or navigable preview
+
+Example:
+
+```text
+Push / Pull / Legs
+
+3 training days
+
+Push
+• Bench Press
+• Incline Dumbbell Press
+• Shoulder Press
+• Lateral Raise
+• Tricep Pushdown
+
+Pull
+...
+
+Legs
+...
+
+[ Use This Plan ]
+```
+
+Users must be able to see the actual exercises before selecting the plan.
+
+---
+
+# 4. Exercise Metadata
+
+Extend the static recommended exercise definitions with lightweight metadata where appropriate.
 
 Suggested fields:
 
 ```text
-id uuid primary key
-user_id uuid not null
-name text not null
-description text nullable
-is_active boolean default false
-source text
-created_at timestamptz
-updated_at timestamptz
+name
+sets
+targetReps
+muscleGroup
+equipment
+instructions
 ```
 
-Requirements:
+Optional:
 
-* `user_id` references `auth.users(id)`
-* use cascading deletion where appropriate
-* `source` should distinguish plans such as:
+```text
+secondaryMuscles
+```
 
-  * custom
-  * recommended
-* users may have multiple plans
-* only one plan should normally be active for a user
+Do not introduce an external exercise API yet.
 
-If enforcing one active plan at the database level is clean and maintainable, implement it using an appropriate partial unique index.
+Do not add API keys.
 
-Otherwise document how application logic will guarantee only one active plan.
+The recommended plan data should remain static TypeScript data for this milestone.
 
 ---
 
-## gym_workout_days
+# 5. Exercise Instruction UI
 
-Represents a training day inside a workout plan.
+Allow users to open exercise details.
 
-Suggested fields:
+Example:
 
 ```text
-id uuid primary key
-plan_id uuid not null
-name text not null
-day_order integer not null
-created_at timestamptz
-updated_at timestamptz
+Bench Press
+
+Chest
+Barbell
+
+4 sets
+6–10 reps
+
+How to perform
+
+1. Lie on the bench with your feet firmly planted.
+2. Grip the bar slightly wider than shoulder width.
+3. Lower the bar under control toward the chest.
+4. Press upward until the arms are extended.
+
+[ Close ]
 ```
+
+Use a:
+
+* modal
+* drawer
+* bottom sheet
+* expandable card
+
+whichever best fits a mobile-first gym application.
+
+Keep instructions concise.
+
+Do not pretend these instructions replace professional coaching.
+
+---
+
+# 6. Exercise Visual Foundation
+
+Prepare the exercise data model/UI so a future external visual source can be added cleanly.
+
+For example, the application model may optionally support:
+
+```text
+imageUrl
+videoUrl
+externalExerciseId
+```
+
+Do not add these columns to Supabase unless they are needed for user-owned exercise data.
+
+For recommended static exercise definitions, optional fields in TypeScript are sufficient.
+
+Do not call an external API yet.
+
+---
+
+# 7. Custom Plan Creation
+
+Allow users to create their own workout plan.
+
+Flow:
+
+```text
+Plan
+ ↓
+Create Custom Plan
+ ↓
+Plan Name
+ ↓
+Create
+```
+
+Examples:
+
+* My 5-Day Split
+* Strength Program
+* Summer Cut
+* Full Body
+
+New custom plans should use:
+
+`source = custom`
+
+Do not automatically activate a newly created plan unless that behavior is clearly communicated.
+
+---
+
+# 8. Plan Management
+
+Users must be able to:
+
+* rename plan
+* activate plan
+* delete plan
+
+Deletion requires confirmation.
+
+Do not allow accidental plan deletion from a single tap.
+
+When deleting the active plan, handle the resulting no-active-plan state gracefully.
+
+---
+
+# 9. Workout Day Management
+
+Within a plan, allow:
+
+* add workout day
+* rename workout day
+* delete workout day
+* reorder workout days
 
 Examples:
 
@@ -111,476 +277,150 @@ Examples:
 Push
 Pull
 Legs
+Rest
 Upper
 Lower
-Full Body A
-Full Body B
 ```
 
-Requirements:
+Workout days should remain sequence-based rather than permanently tied to Monday/Tuesday/etc.
 
-* belongs to `gym_workout_plans`
-* deleting a workout plan should remove its days
-* support explicit ordering
-* prevent obviously invalid ordering values where appropriate
-
-Do not tie workout days directly to specific weekdays yet unless necessary.
-
-The plan order should be flexible enough for users to rotate workouts independently of calendar weekdays later.
+Do not introduce weekday scheduling yet.
 
 ---
 
-## gym_exercises
+# 10. Exercise Management
 
-Represents exercises assigned to a workout day.
+Within each workout day, allow:
 
-Suggested fields:
-
-```text
-id uuid primary key
-workout_day_id uuid not null
-name text not null
-sets integer not null
-target_reps text not null
-default_weight numeric nullable
-exercise_order integer not null
-notes text nullable
-created_at timestamptz
-updated_at timestamptz
-```
-
-`target_reps` should be flexible enough to support values such as:
-
-```text
-8
-10
-8-12
-AMRAP
-30 sec
-```
-
-Do not force reps into an integer if that would make future programming unnecessarily restrictive.
-
-Requirements:
-
-* belongs to `gym_workout_days`
-* deleting a workout day should delete its exercises
-* support ordering
-* sets must be greater than zero
-* default weight, when provided, cannot be negative
-
-The MVP may track one default/working weight per exercise.
-
-Individual per-set weights are a future enhancement.
-
----
-
-# 2. Workout Session Model
-
-Create the foundation needed to record actual gym visits.
-
----
-
-## gym_workouts
-
-Represents an actual workout session.
-
-Suggested fields:
-
-```text
-id uuid primary key
-user_id uuid not null
-workout_day_id uuid nullable
-plan_id uuid nullable
-name text not null
-status text not null
-started_at timestamptz
-completed_at timestamptz nullable
-created_at timestamptz
-updated_at timestamptz
-```
-
-Supported status values should initially be limited to:
-
-```text
-in_progress
-completed
-cancelled
-```
-
-Use a check constraint or another simple maintainable strategy.
-
-The workout should preserve enough context to remain meaningful even if the original workout plan changes later.
-
-If storing a workout name snapshot is useful for this reason, keep it.
-
-Do not over-engineer snapshotting yet.
-
----
-
-## gym_workout_exercises
-
-Represents the exercises performed during a workout session.
-
-Suggested fields:
-
-```text
-id uuid primary key
-workout_id uuid not null
-exercise_id uuid nullable
-name text not null
-target_sets integer nullable
-target_reps text nullable
-weight numeric nullable
-completed boolean default false
-exercise_order integer not null
-created_at timestamptz
-updated_at timestamptz
-```
-
-The `name`, target sets, and target reps should act as lightweight workout-time snapshots.
-
-This prevents old workout history from becoming meaningless if the user's plan changes later.
-
-Requirements:
-
-* belongs to `gym_workouts`
-* deleting a workout session should delete its workout exercise rows
-* weight cannot be negative
-* exercise reference may be nullable so workout history survives future exercise deletion
-* ownership should ultimately be determined through the parent workout
-
----
-
-# 3. Recommended Workout Plans
-
-Create a clean recommended-plan system.
-
-Do NOT store global recommended plans in the shared Supabase database unless there is a strong reason.
-
-For this MVP, prefer static application data under something such as:
-
-`data/recommended-plans.ts`
-
-Create at least these recommended plans:
-
-## Push / Pull / Legs
-
-Push:
-
-* Bench Press — 4 sets — 6-10 reps
-* Incline Dumbbell Press — 3 sets — 8-12 reps
-* Shoulder Press — 3 sets — 8-12 reps
-* Lateral Raise — 3 sets — 12-15 reps
-* Tricep Pushdown — 3 sets — 10-15 reps
-
-Pull:
-
-* Lat Pulldown — 4 sets — 8-12 reps
-* Barbell Row — 3 sets — 6-10 reps
-* Seated Cable Row — 3 sets — 8-12 reps
-* Face Pull — 3 sets — 12-15 reps
-* Bicep Curl — 3 sets — 10-15 reps
-
-Legs:
-
-* Squat — 4 sets — 6-10 reps
-* Romanian Deadlift — 3 sets — 8-12 reps
-* Leg Press — 3 sets — 10-15 reps
-* Leg Curl — 3 sets — 10-15 reps
-* Calf Raise — 4 sets — 10-15 reps
-
----
-
-## Upper / Lower
-
-Upper:
-
-* Bench Press
-* Lat Pulldown
-* Shoulder Press
-* Seated Row
-* Bicep Curl
-* Tricep Pushdown
-
-Lower:
-
-* Squat
-* Romanian Deadlift
-* Leg Press
-* Leg Curl
-* Calf Raise
-
-Assign sensible sets and rep targets.
-
----
-
-## 3-Day Full Body
-
-Create:
-
-* Full Body A
-* Full Body B
-* Full Body C
-
-Use a balanced combination of:
-
-* squat or leg press
-* horizontal press
-* horizontal or vertical pull
-* shoulder work
-* hamstring work
-* arms or core
-
-Keep each workout realistic for a normal gym session.
-
----
-
-# 4. Recommended Plan Adoption
-
-Create the data-layer logic required for a user to select one of the static recommended plans and copy it into their own database records.
-
-Expected behavior:
-
-```text
-Recommended plan
-      ↓
-User selects plan
-      ↓
-Create gym_workout_plans row
-      ↓
-Create corresponding gym_workout_days
-      ↓
-Create corresponding gym_exercises
-      ↓
-Mark plan active
-```
-
-The user's plan must become independent from the static recommended template after creation.
-
-Editing a user's plan must never mutate the static recommended plan definition.
-
-Use a transaction-like or failure-safe approach where practical.
-
-Avoid leaving partially created plans if a multi-step insert fails.
-
----
-
-# 5. Custom Plan Foundation
-
-Create reusable data-access functions or server actions required to:
-
-* create workout plan
-* update workout plan
-* delete workout plan
-* activate workout plan
-* create workout day
-* update workout day
-* delete workout day
-* reorder workout days if practical
-* create exercise
-* update exercise
+* add exercise
+* edit exercise
 * delete exercise
-* reorder exercises if practical
+* reorder exercise
 
-Do not create an elaborate UI yet.
-
-The goal is to prepare safe reusable backend operations for Milestone 3.
-
----
-
-# 6. Active Plan Behavior
-
-A user should be able to have multiple plans, but only one active plan.
-
-When activating a plan:
+Exercise form fields:
 
 ```text
-Current active plan
-      ↓
-Set inactive
-      ↓
-Selected plan
-      ↓
-Set active
+Exercise name
+Sets
+Target reps
+Default weight
+Notes
 ```
 
-This operation should be as safe and atomic as practical.
-
-If the database enforces one active plan using an index, application logic should cooperate with that constraint.
-
----
-
-# 7. Row Level Security
-
-Enable RLS on every new Buff Me Up table.
-
-Tables include:
-
-* gym_workout_plans
-* gym_workout_days
-* gym_exercises
-* gym_workouts
-* gym_workout_exercises
-
-Users must only be able to read or modify their own data.
-
-For direct-user ownership tables:
+If useful, optionally include:
 
 ```text
-gym_workout_plans.user_id
-gym_workouts.user_id
+Muscle group
+Equipment
 ```
 
-ownership can be checked against:
+for custom exercises at the application level.
 
-`auth.uid()`
+Do not overcomplicate database migrations for optional metadata unless needed.
 
-For nested tables such as workout days or exercises, policies should validate ownership through the parent relationship.
+---
 
-Example conceptual relationship:
+# 11. Weight Input
+
+Default weight should support decimals.
+
+Example:
 
 ```text
-gym_exercises
-      ↓
-gym_workout_days
-      ↓
-gym_workout_plans
-      ↓
-user_id
+Bench Press
+
+Sets
+[ 4 ]
+
+Target reps
+[ 6-10 ]
+
+Default weight
+[ 185 ]
+
+Unit
+lb
 ```
 
-Do not add redundant `user_id` columns solely to make RLS easier unless there is a compelling architectural reason.
+For this MVP, use pounds as the default display unit.
 
-Prefer secure relational ownership checks.
+Structure the UI so unit preferences could be introduced later.
 
-Follow current Supabase RLS practices.
-
-Use explicit policies for appropriate operations.
-
-Ensure unauthenticated users cannot access workout data.
+Do not build unit settings yet.
 
 ---
 
-# 8. Shared Database Safety
+# 12. Recommended Plan Adoption
 
-This migration must be safe to apply to the existing FlowDesk Supabase project.
+When a user chooses:
 
-Before considering the milestone complete, inspect the migration and ensure:
+`Use This Plan`
 
-* only `gym_` application objects are created
-* `auth.users` may be referenced
-* `gym_profiles` may be referenced if needed
-* no FlowDesk tables are altered
-* no existing generic functions or triggers are overwritten
-* no unrelated schemas are changed
+use the existing transactional recommendation-adoption logic.
 
-Prefer Buff Me Up-specific function and trigger names.
+After adoption:
+
+* new plan becomes active
+* user is taken to their plan
+* days and exercises are visible immediately
+* recommended template itself remains unchanged
+
+Provide appropriate loading and error states.
+
+Prevent duplicate submission from rapid repeated taps.
 
 ---
 
-# 9. Indexes
+# 13. Multiple Plans
 
-Add sensible indexes where useful.
+Users may have several plans.
 
-Likely examples include:
+Add a simple plan-switching experience.
+
+Example:
 
 ```text
-gym_workout_plans.user_id
-gym_workout_days.plan_id
-gym_exercises.workout_day_id
-gym_workouts.user_id
-gym_workouts.started_at
-gym_workout_exercises.workout_id
+My Plans
+
+● Push / Pull / Legs
+  Active
+
+○ Strength Program
+
+○ Full Body
+
+[ + Create Plan ]
 ```
 
-Also consider uniqueness for ordering inside parents where useful.
+Users can activate a different plan.
 
-Do not add unnecessary indexes.
+Only one plan may remain active.
 
 ---
 
-# 10. TypeScript Types
+# 14. Mobile-First UX
 
-Update:
+This application will primarily be used on a phone in the gym.
 
-`types/database.ts`
+Prioritize:
 
-to include all new tables and relationships.
+* large tap targets
+* bottom sheets/modals
+* clear typography
+* minimal typing
+* easy scrolling
+* sticky important actions where appropriate
+* no tiny desktop-only controls
 
-Create strongly typed application models for:
+Avoid dense tables.
 
-* WorkoutPlan
-* WorkoutDay
-* Exercise
-* Workout
-* WorkoutExercise
-* RecommendedWorkoutPlan
-
-Avoid `any`.
-
-Keep database types separate from higher-level UI models when useful.
+Prefer cards and lists.
 
 ---
 
-# 11. Data Access Structure
+# 15. Navigation
 
-Create a clean organization for workout-related database operations.
-
-Possible structure:
-
-```text
-lib/workouts/
-lib/plans/
-```
-
-or another simple equivalent.
-
-Avoid creating unnecessary abstraction layers.
-
-The code should make it easy for future pages to request:
-
-```text
-getActivePlan()
-getPlans()
-getPlan(id)
-createPlan()
-activatePlan()
-createPlanFromRecommendation()
-getWorkoutDay()
-```
-
-All user-specific operations must derive the authenticated user from the server session.
-
-Do not trust a client-submitted `user_id`.
-
----
-
-# 12. Minimal Plan Screen
-
-You may update `/app` or create `/app/plan` with a minimal foundation demonstrating that the data layer works.
-
-If the user has no plan, show something similar to:
-
-```text
-No workout plan yet.
-
-Choose a recommended plan or create your own.
-```
-
-Display the names of the recommended plans.
-
-The user may be allowed to select a recommended plan if the implementation is clean enough.
-
-However, do NOT spend significant time polishing this UI.
-
-Full plan-management UX belongs to Milestone 3.
-
----
-
-# 13. Navigation Foundation
-
-Prepare the application shell for eventual mobile navigation:
+Complete the basic authenticated navigation:
 
 ```text
 Home
@@ -589,41 +429,71 @@ History
 Profile
 ```
 
-Only create lightweight navigation if useful.
+History can remain a placeholder.
 
-Do not build History functionality yet.
+Profile can remain minimal.
 
-The current priority is the database and workout-plan foundation.
+The currently active route should be visually clear.
 
 ---
 
-# 14. Do Not Implement Yet
+# 16. Loading / Empty / Error States
+
+Create useful states for:
+
+* no active plan
+* no workout days
+* no exercises
+* loading plan
+* failed plan update
+* failed exercise update
+* plan deleted
+* recommendation successfully adopted
+
+Keep messaging concise.
+
+---
+
+# 17. Do Not Implement Yet
 
 Do not implement:
 
-* today's workout logic
-* start workout screen
-* interactive gym checklist
+* Start Workout
+* exercise completion checkboxes
+* workout session execution
+* Finish Workout
+* streak calculations
+* history calendar
+* completed workout history
 * individual set tracking
 * rest timers
-* workout history UI
-* gym calendar
-* streak calculations
-* workout statistics
 * personal records
-* progress charts
-* body weight tracking
+* charts
+* external exercise API
 * AI features
 * nutrition
-* social functionality
 
 These belong to later milestones.
 
 ---
 
-# 15. Verification
+# 18. External Exercise API Preparation
 
-Before completion, run:
+Do not integrate an API in this milestone.
+
+However, keep the exercise-detail component structured so it can later consume richer exercise data from sources such as:
+
+* ExerciseDB
+* MuscleWiki
+* another approved exercise catalog
+
+The UI should not depend specifically on one provider.
+
+---
+
+# 19. Verification
+
+Run:
 
 ```bash
 npm run typecheck
@@ -633,67 +503,77 @@ npm run build
 
 Resolve all errors.
 
-Also inspect the SQL migration for shared-project safety.
+Also verify:
 
-Do not automatically apply the migration to Supabase unless the development environment is already intentionally linked and doing so cannot affect unrelated FlowDesk objects.
-
-The owner may apply the migration manually after review.
+* recommended plan can be previewed before adoption
+* adopted plan becomes editable
+* custom plan can be created
+* workout day CRUD works
+* exercise CRUD works
+* plan activation respects one-active-plan constraint
+* plan deletion works safely
+* UI works at common phone widths
 
 ---
 
 # Definition of Done
 
-Milestone 2 is complete when this foundation exists:
+A user should be able to perform this flow:
 
 ```text
-Authenticated user
-       ↓
-gym_workout_plans
-       ↓
-gym_workout_days
-       ↓
-gym_exercises
-
-Authenticated user
-       ↓
-gym_workouts
-       ↓
-gym_workout_exercises
+Sign in
+   ↓
+See today's date
+   ↓
+Plan
+   ↓
+Browse recommendation
+   ↓
+See actual exercises
+   ↓
+Open Bench Press details
+   ↓
+Use This Plan
+   ↓
+Edit plan
+   ↓
+Add/remove/edit exercises
 ```
 
 and:
 
 ```text
-Recommended template
-       ↓
-Copy into user's plan
-       ↓
-Independent editable workout plan
+Create Custom Plan
+   ↓
+Create workout days
+   ↓
+Add exercises
+   ↓
+Configure sets/reps/weight
+   ↓
+Activate plan
 ```
-
-All user-owned data must be protected by RLS.
 
 ---
 
 # Completion Report
 
-When finished, provide:
+Return:
 
 1. Files created
 2. Files modified
-3. Exact tables created
-4. Relationships and cascade behavior
-5. Constraints and indexes
-6. RLS policies created
-7. Recommended plans implemented
-8. Plan creation/adoption logic
-9. Data-access functions created
-10. Verification results
-11. Migration filename
-12. Manual steps required from the owner
-13. Shared FlowDesk-project safety review
-14. Any architectural decisions or deviations from this prompt
+3. UI implemented
+4. Date handling implemented
+5. Exercise metadata added
+6. Exercise details/examples implemented
+7. Plan-management functionality
+8. Workout-day functionality
+9. Exercise CRUD functionality
+10. Navigation changes
+11. Database changes, if any
+12. Verification results
+13. Mobile testing performed
+14. Known limitations
+15. Any deviations from this prompt
 
-Do not begin Milestone 3 automatically.
-
-Stop after Milestone 2.
+Do not start Milestone 4 automatically.
