@@ -7,8 +7,13 @@ export function isNativeApp() {
   return Capacitor.isNativePlatform();
 }
 
+const NATIVE_AUTH_PROTOCOLS = new Set([
+  "com.samirrodriguez.buffmeup:",
+  "com.laurinvasquez.buffmeup:",
+]);
+
 export function isNativeAuthCallback(url: URL) {
-  return url.protocol === "com.samirrodriguez.buffmeup:"
+  return NATIVE_AUTH_PROTOCOLS.has(url.protocol)
     && url.hostname === "auth"
     && url.pathname === "/callback";
 }

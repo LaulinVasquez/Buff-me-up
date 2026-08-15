@@ -16,6 +16,7 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>com.samirrodriguez.buffmeup</string>
+				<string>com.laurinvasquez.buffmeup</string>
 			</array>
 		</dict>
 	</array>
