@@ -50,8 +50,15 @@ export async function searchCatalog({ query = "", muscle, equipment, limit = 20,
   }
 }
 
-export const getCatalogExercise = unstable_cache(async (id: string) => {
+export const getCatalogExercise = unstable_cache(async (id: string, name?: string) => {
   const local = fallbackExercises.find((exercise) => exercise.id === id);
   if (local) return local;
-  try { return adapt(await request<RemoteExercise>(`/exercises/${encodeURIComponent(id)}`)); } catch { return null; }
+  try {
+    const payload = await request<RemoteExercise | { data: RemoteExercise }>(`/exercises/${encodeURIComponent(id)}`);
+    const adapted = adapt("data" in payload ? payload.data : payload);
+    if (adapted) return adapted;
+  } catch { /* The free API may not expose a single-record endpoint. */ }
+  if (!name) return null;
+  const page = await searchCatalog({ query: name, limit: 20 });
+  return page.exercises.find((exercise) => exercise.id === id) ?? page.exercises.find((exercise) => exercise.name.toLowerCase() === name.toLowerCase()) ?? null;
 }, ["catalog-exercise"], { revalidate: 3600 });

@@ -5,8 +5,8 @@ import { getCatalogExercise } from "@/lib/exercises/provider";
 import { getPlansWithDays } from "@/lib/workouts/plans";
 import { addCatalogExercise } from "../actions";
 
-export default async function ExercisePage({ params, searchParams }: Readonly<{ params: Promise<{ exerciseId: string }>; searchParams: Promise<{ added?: string; error?: string }> }>) {
-  const { exerciseId } = await params; const query = await searchParams; const exercise = await getCatalogExercise(exerciseId); if (!exercise) notFound();
+export default async function ExercisePage({ params, searchParams }: Readonly<{ params: Promise<{ exerciseId: string }>; searchParams: Promise<{ added?: string; error?: string; name?: string }> }>) {
+  const { exerciseId } = await params; const query = await searchParams; const exercise = await getCatalogExercise(exerciseId, query.name); if (!exercise) notFound();
   const plans = await getPlansWithDays().catch(() => []);
   return <main className="pb-28 pt-8"><Link className="text-sm text-slate-400" href="/app/exercises">← Exercises</Link><h1 className="mt-5 text-3xl font-black">{exercise.name}</h1><p className="mt-2 font-semibold text-lime-400">{exercise.primaryMuscle}</p><p className="mt-1 text-sm text-slate-400">Secondary: {exercise.secondaryMuscles.join(", ") || "None listed"}<br />Equipment: {exercise.equipment || "Not listed"}</p>
     {query.added ? <p className="mt-5 rounded-xl bg-lime-400/10 p-4 text-lime-300">Exercise added to your plan.</p> : null}{query.error ? <p className="mt-5 rounded-xl bg-red-400/10 p-4 text-red-200">Could not add this exercise.</p> : null}
