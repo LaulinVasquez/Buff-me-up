@@ -1,7 +1,8 @@
-import type { Database } from "@/types/database";
+import type { Database, Json } from "@/types/database";
 import type { WorkoutPlan } from "@/types/workouts";
 import { getRecommendedPlan } from "@/data/recommended-plans";
 import { assertNoError, getAuthenticatedWorkoutClient } from "./auth";
+import type { GeneratedPlan } from "@/types/catalog";
 
 type PlanInsert = Database["public"]["Tables"]["gym_workout_plans"]["Insert"];
 type PlanUpdate = Pick<PlanInsert, "name" | "description">;
@@ -15,6 +16,20 @@ export async function getPlans(): Promise<WorkoutPlan[]> {
   const { data, error } = await supabase.from("gym_workout_plans").select("*").order("created_at", { ascending: false });
   assertNoError(error, "Unable to load workout plans");
   return data.map(toWorkoutPlan);
+}
+
+export async function getPlansWithDays() {
+  const { supabase } = await getAuthenticatedWorkoutClient();
+  const { data, error } = await supabase.from("gym_workout_plans").select("id, name, gym_workout_days(id, name, day_order)").order("created_at", { ascending: false });
+  assertNoError(error, "Unable to load workout plan days");
+  return data.map((plan) => ({ ...plan, days: [...plan.gym_workout_days].sort((a, b) => a.day_order - b.day_order) }));
+}
+
+export async function getDayExerciseCount(dayId: string) {
+  const { supabase } = await getAuthenticatedWorkoutClient();
+  const { count, error } = await supabase.from("gym_exercises").select("id", { count: "exact", head: true }).eq("workout_day_id", dayId);
+  assertNoError(error, "Unable to inspect workout day");
+  return count ?? 0;
 }
 
 export async function getActivePlan() {
@@ -63,6 +78,13 @@ export async function createPlanFromRecommendation(recommendationId: string) {
   const { supabase } = await getAuthenticatedWorkoutClient();
   const { data, error } = await supabase.rpc("gym_adopt_recommended_plan", { template });
   assertNoError(error, "Unable to adopt recommended plan");
+  return data;
+}
+
+export async function createGeneratedPlan(template: GeneratedPlan, makeActive: boolean) {
+  const { supabase } = await getAuthenticatedWorkoutClient();
+  const { data, error } = await supabase.rpc("gym_save_generated_plan", { template: template as unknown as Json, make_active: makeActive });
+  assertNoError(error, "Unable to save generated plan");
   return data;
 }
 

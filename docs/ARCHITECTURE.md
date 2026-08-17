@@ -53,3 +53,9 @@ Streaks count consecutive distinct local attendance days ending today or yesterd
 ## Security model
 
 The proxy validates claims and protects every `/app` route. Server operations derive identity from the session and never accept a user ID. Direct-owner tables use `auth.uid()`; nested rows resolve ownership through parents. Buff Me Up shares Supabase Auth with FlowDesk but creates and references only `gym_` application objects.
+
+## Exercise catalog and generator
+
+UI components consume the internal `CatalogExercise` model rather than MuscleWiki response objects. A server adapter normalizes muscles, caches catalog calls, and uses a bundled fallback when the provider is unavailable. The API key and authenticated media requests remain server-side. Saved exercise names and prescriptions make workout execution independent of MuscleWiki.
+
+The deterministic generator uses bounded 3–6 day split templates, selected muscles, experience-based session volume, compound-first ordering, and seeded regeneration. Generated plans are previewed and editable before a validated database function saves them. Existing active plans are retained unless the user explicitly opts to activate the new plan.

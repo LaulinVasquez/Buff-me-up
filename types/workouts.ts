@@ -1,4 +1,4 @@
-export type WorkoutPlanSource = "custom" | "recommended";
+export type WorkoutPlanSource = "custom" | "recommended" | "generated";
 export type WorkoutStatus = "in_progress" | "completed" | "cancelled";
 
 export type WorkoutPlan = {

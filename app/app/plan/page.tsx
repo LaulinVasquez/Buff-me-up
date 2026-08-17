@@ -16,6 +16,7 @@ export default async function PlanPage({ searchParams }: Props) {
     <p className="text-sm font-bold uppercase tracking-[0.2em] text-lime-400">Plan</p>
     <h1 className="mt-3 text-3xl font-black tracking-tight">Build your routine.</h1>
     <p className="mt-3 leading-7 text-slate-400">Use a proven template or create a plan that is entirely yours.</p>
+    <Link className="mt-6 flex min-h-14 items-center justify-between rounded-2xl bg-lime-400 px-5 font-bold text-slate-950" href="/app/plan/generate"><span>Generate a smart plan</span><span>→</span></Link>
     {params.deleted ? <Notice tone="success">Plan deleted.</Notice> : null}
     {params.error ? <Notice tone="error">That change could not be saved. Please try again.</Notice> : null}
 
