@@ -56,6 +56,6 @@ The proxy validates claims and protects every `/app` route. Server operations de
 
 ## Exercise catalog and generator
 
-UI components consume the internal `CatalogExercise` model rather than MuscleWiki response objects. A server adapter normalizes muscles, caches catalog calls, and uses a bundled fallback when the provider is unavailable. The API key and authenticated media requests remain server-side. Saved exercise names and prescriptions make workout execution independent of MuscleWiki.
+UI components consume the internal `CatalogExercise` model rather than ExerciseDB response objects. A server adapter normalizes muscles, caches cursor-paginated catalog calls, and uses a bundled fallback when the provider is unavailable. ExerciseDB V1 is called without authentication and its CDN-hosted GIFs are loaded lazily. Saved exercise names and prescriptions make workout execution independent of ExerciseDB.
 
 The deterministic generator uses bounded 3–6 day split templates, selected muscles, experience-based session volume, compound-first ordering, and seeded regeneration. Generated plans are previewed and editable before a validated database function saves them. Existing active plans are retained unless the user explicitly opts to activate the new plan.

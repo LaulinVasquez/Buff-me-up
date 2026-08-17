@@ -14,7 +14,7 @@ export type CatalogExercise = {
   mechanic?: "compound" | "isolation";
 };
 
-export type CatalogPage = { exercises: CatalogExercise[]; total: number; limit: number; offset: number; source: "musclewiki" | "fallback" };
+export type CatalogPage = { exercises: CatalogExercise[]; total: number; limit: number; source: "exercisedb" | "fallback"; nextCursor?: string; previousCursor?: string; fallbackReason?: "provider_error" };
 export type ExperienceLevel = "beginner" | "intermediate" | "advanced";
 export type GeneratedExercise = Pick<CatalogExercise, "id" | "name" | "primaryMuscle" | "equipment"> & { sets: number; reps: string };
 export type GeneratedDay = { name: string; muscles: MuscleGroup[]; exercises: GeneratedExercise[] };

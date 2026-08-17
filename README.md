@@ -10,7 +10,7 @@ Buff Me Up is a mobile-first gym tracking SaaS with authentication, plan managem
 - Refresh-safe workout execution, weights, and completion tracking
 - Local-timezone history, attendance, streaks, and weekly consistency
 - Installable home-screen manifest for supported phone browsers
-- Searchable MuscleWiki exercise library and editable 3–6 day smart plan generator
+- Searchable ExerciseDB library and editable 3–6 day smart plan generator
 
 ## Technology stack
 
@@ -30,8 +30,7 @@ Buff Me Up is a mobile-first gym tracking SaaS with authentication, plan managem
 
 - NEXT_PUBLIC_SUPABASE_URL
 - NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-- MUSCLEWIKI_API_KEY (private; MuscleWiki TESTING tier or higher)
-- MUSCLEWIKI_BASE_URL (optional)
+- EXERCISEDB_BASE_URL (optional; defaults to the free keyless ExerciseDB V1 API)
 
 Never commit real credentials.
 
@@ -59,7 +58,7 @@ Google redirects to Supabase, which returns to the application callback for the 
 
 ### Vercel
 
-Set both public Supabase variables and the server-only `MUSCLEWIKI_API_KEY` for Preview and Production. Never use a `NEXT_PUBLIC_` prefix for this key. Add each deployment callback origin to Supabase. OAuth and provider media require manual testing because credentials are not stored here.
+Set both public Supabase variables for Preview and Production. ExerciseDB V1 requires no account or API key. Add each deployment callback origin to Supabase. OAuth requires manual testing because provider credentials are not stored here.
 
 ## Commands
 
@@ -94,7 +93,7 @@ All application objects use the gym_ prefix. Recommended templates remain static
 ## Vercel deployment
 
 1. Import the repository into Vercel.
-2. Configure the public Supabase variables and private `MUSCLEWIKI_API_KEY` for Preview and Production.
+2. Configure the public Supabase variables for Preview and Production. ExerciseDB needs no environment variable unless overriding its base URL.
 3. Set Supabase's Site URL to the production origin.
 4. Allow production and intentionally supported preview /auth/callback URLs.
 5. Deploy and run the manual checklist in docs/TESTING.md.

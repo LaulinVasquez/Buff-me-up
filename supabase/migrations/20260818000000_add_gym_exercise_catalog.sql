@@ -18,7 +18,7 @@ begin
     for exercise in select value from jsonb_array_elements(day->'exercises') loop
       if nullif(trim(exercise->>'name'), '') is null or (exercise->>'sets')::integer not between 1 and 10 or nullif(trim(exercise->>'reps'), '') is null then raise exception 'Invalid exercise'; end if;
       insert into public.gym_exercises (workout_day_id, name, sets, target_reps, exercise_order, external_exercise_id, exercise_provider, muscle_group, equipment)
-      values (new_day_id, left(exercise->>'name', 160), (exercise->>'sets')::integer, left(exercise->>'reps', 40), exercise_index, nullif(exercise->>'id', ''), case when exercise->>'id' like 'fallback-%' then 'buff-me-up' else 'musclewiki' end, nullif(exercise->>'primaryMuscle', ''), nullif(exercise->>'equipment', ''));
+      values (new_day_id, left(exercise->>'name', 160), (exercise->>'sets')::integer, left(exercise->>'reps', 40), exercise_index, nullif(exercise->>'id', ''), case when exercise->>'id' like 'fallback-%' then 'buff-me-up' else 'exercisedb' end, nullif(exercise->>'primaryMuscle', ''), nullif(exercise->>'equipment', ''));
       exercise_index := exercise_index + 1;
     end loop;
     day_index := day_index + 1;
