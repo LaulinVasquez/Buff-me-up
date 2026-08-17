@@ -12,10 +12,13 @@ export async function updateSession(request: NextRequest) {
       items.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
     },
   }});
-  const { data } = await supabase.auth.getClaims();
+  // Use the same authoritative session check as the protected app layout.
+  // A locally cached JWT can still produce claims after its server session is
+  // no longer valid, which otherwise creates a / -> /app -> / redirect loop.
+  const { data: { user } } = await supabase.auth.getUser();
   const isAppRoute = request.nextUrl.pathname.startsWith("/app");
   const isLandingPage = request.nextUrl.pathname === "/";
-  if (!data?.claims && isAppRoute) return NextResponse.redirect(new URL("/", request.url));
-  if (data?.claims && isLandingPage) return NextResponse.redirect(new URL("/app", request.url));
+  if (!user && isAppRoute) return NextResponse.redirect(new URL("/", request.url));
+  if (user && isLandingPage) return NextResponse.redirect(new URL("/app", request.url));
   return response;
 }

@@ -12,3 +12,18 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 a { color: inherit; text-decoration: none; }
+
+@keyframes buff-logo-fade {
+  0% { opacity: 0; transform: scale(0.96); }
+  45%, 65% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.98); }
+}
+
+.buff-launch-logo {
+  animation: buff-logo-fade 1.8s ease-in-out both;
+  will-change: opacity, transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .buff-launch-logo { animation: none; }
+}
