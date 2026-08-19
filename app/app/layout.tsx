@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { UserMenu } from "@/components/auth/user-menu";
+import { NativeReminderSync } from "@/components/notifications/native-reminder-sync";
 import { createClient } from "@/lib/supabase/server";
 import { hasSupabaseConfig } from "@/lib/supabase/config";
 import { AppNavigation } from "@/components/navigation/app-navigation";
@@ -24,6 +25,7 @@ export default async function ApplicationLayout({ children }: Readonly<{ childre
 
   return <div className="mx-auto min-h-dvh w-full max-w-lg px-[max(1.25rem,env(safe-area-inset-left),env(safe-area-inset-right))] pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[calc(1.5rem+env(safe-area-inset-top))] sm:px-[max(2rem,env(safe-area-inset-left),env(safe-area-inset-right))]">
     <LaunchSplash />
+    <NativeReminderSync />
     <header className="flex min-h-14 items-center justify-between gap-4">
       <p className="shrink-0 text-sm font-bold uppercase tracking-[0.2em] text-lime-400">Buff Me Up</p>
       <UserMenu avatarUrl={avatarUrl} name={name} />
