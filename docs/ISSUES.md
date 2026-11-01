@@ -44,6 +44,8 @@ No repository CI configuration or existing automated test script was present at 
 
 ## BMU-007 — P0: vulnerable locked dependencies
 
-**Status:** reproduced by clean install/audit; separate dependency fix is the next selected task.
+**Status:** implemented separately in draft [PR #3](https://github.com/LaulinVasquez/Buff-me-up/pull/3), commit `828dfdc`; merge/rollout pending.
 
 `npm ci` succeeded but reported 29 affected packages (21 moderate, 6 high, 2 critical). `npm audit --json` returned exit 1. Critical direct packages are `next@16.3.1` and `@capacitor/ios@8.5.0`; the audit reports patched versions are available. The finding alone does not establish which advisory preconditions are reachable in this deployment. Review the relevant advisories, update supported versions/lockfile in a separate focused change, then rerun application checks and the audit. Do not use forced bulk upgrades.
+
+The separate repair updates Next.js/config to 16.4.3, Capacitor core/iOS/CLI and the native Swift package to 8.5.1, plus reviewed compatible transitive fixes. On that branch, `npm audit --omit=dev` reports zero vulnerabilities, and `npm audit --audit-level=high` passes with zero critical/high and 21 moderate development-tool findings. Lint/build/typecheck, local HTTP smoke checks, native sync/resolution, and an unsigned iOS simulator build pass. A full audit still reports the moderate findings; forced fixes propose incompatible tool downgrades. See the [security review](https://github.com/LaulinVasquez/Buff-me-up/blob/agent/security-dependencies/docs/DEPENDENCY_SECURITY_REVIEW.md). These dependency changes are not included in the workout-only branch until the separate PR is merged.

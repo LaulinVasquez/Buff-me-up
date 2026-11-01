@@ -4,6 +4,8 @@ Last audited: **2026-11-01**. Upstream baseline: **`f4828cc`**. Working branch: 
 
 BMU-001 implementation: `a0abae4`, draft [PR #2](https://github.com/LaulinVasquez/Buff-me-up/pull/2). Review and staging migration are pending.
 
+BMU-007 dependency repair: `828dfdc` on separate branch `agent/security-dependencies`, draft [PR #3](https://github.com/LaulinVasquez/Buff-me-up/pull/3). Production dependency audit is clean on that branch; 21 moderate development-tool findings remain. Review, merge, and approved rollout are pending. The workout-only branch retains the original dependency lockfile.
+
 The session follows the locally supplied `BUFF_ME_UP_AGENT_DEVELOPMENT_PLAN.md`. That pre-existing untracked file is preserved. The approved CSE 499 requirements draft was not found in the repository, so its scope has not been changed.
 
 ## Evidence and acceptance status
@@ -42,8 +44,8 @@ Rollout risk: application completion/cancellation now depends on `gym_set_workou
 
 ## Prioritized next steps
 
-1. Address critical dependency audit findings (BMU-007) in a separate focused change; `npm ci` reported 29 affected packages including Next.js and Capacitor iOS.
-2. Establish staging/test accounts, apply the finalization migration there, and demonstrate M1–M7 using `TESTING.md`; then resolve append-order/latest-weight findings (BMU-003/BMU-004).
-3. Test existing generator schedules and exercise-provider behavior before expanding stretch scope (BMU-005); then add CI and mobile demonstration evidence.
+1. Review the two draft PRs; establish staging/test accounts, apply the finalization migration there, and demonstrate M1–M7 using `TESTING.md`. Merge/production rollout remain human decisions.
+2. Resolve append-order/latest-weight findings (BMU-003/BMU-004) with focused regressions.
+3. Test existing generator schedules and exercise-provider behavior before expanding stretch scope (BMU-005); then add CI/mobile evidence and track the residual moderate tooling advisories.
 
 See `AGENT_SESSION_LOG.md` for command outcomes and Git/PR references, and `ISSUES.md` for acceptance details and blockers.
