@@ -9,6 +9,7 @@ Buff Me Up is a mobile-first gym tracking SaaS with authentication, plan managem
 - Ordered workout days and editable exercises
 - Refresh-safe workout execution, weights, and completion tracking
 - Local-timezone history, attendance, streaks, and weekly consistency
+- Interactive day/month/year history graphs for completed workouts and time logged
 - Installable home-screen manifest for supported phone browsers
 - Searchable ExerciseDB library and editable 3–6 day smart plan generator
 
@@ -67,6 +68,7 @@ Set both public Supabase variables for Preview and Production. ExerciseDB V1 req
 - npm run lint - ESLint
 - npm run build - production build
 - npm run test:db - isolated PostgreSQL regression tests (requires local PostgreSQL binaries)
+- npm run test:history - history aggregation, timezone/DST, date navigation, and duration tests
 - npm start - production server
 
 See docs/ARCHITECTURE.md for project boundaries.

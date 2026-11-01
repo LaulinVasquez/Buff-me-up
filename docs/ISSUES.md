@@ -1,5 +1,13 @@
 # Development issues
 
+## BMU-008 — History layout and day/month/year progress
+
+**Status:** implemented on `agent/history-progress`; automated and synthetic-component checks pass; PR handoff/staging verification pending.
+
+Acceptance: clear mobile layout, day/month/year views, workouts/time graphs, accurate local-date totals, selectable buckets and drill-downs, retained session details/calendar/resume links, usable empty/loading states, and accessible chart data. Existing completed-workout records supply all values; no sample records or chart dependency are shipped.
+
+Implementation: narrow paginated period queries, pure timezone-aware aggregation, graph/metric controls, updated session cards and calendar, and 12 aggregation/date regression tests. Labeled synthetic component checks cover interactions, keyboard selection, annual/monthly/daily counts, 320px width and empty-state behavior. Existing issue/open-PR searches found no matching History work. The test preview was isolated from authentication/database code and removed after review. Live signed-in staging verification is still needed.
+
 Audited 2026-11-01 against upstream `f4828cc`. GitHub searches returned no existing issues or open PRs for this repository. Creating an issue returned HTTP 403, `Resource not accessible by integration`, so this file tracks findings until GitHub issue write access is available.
 
 ## BMU-001 — P0: finalization retries and stale exercise saves

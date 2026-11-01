@@ -1,10 +1,18 @@
 # Development status
 
-Last audited: **2026-11-01**. Upstream baseline: **`f4828cc`**. Working branch: **`agent/core-workout-audit`**.
+Last updated: **2026-11-01**. History feature baseline: **`5f503c0`**. Working branch: **`agent/history-progress`**. The original audit baseline was `f4828cc`.
 
-BMU-001 implementation: `a0abae4`, draft [PR #2](https://github.com/LaulinVasquez/Buff-me-up/pull/2). Review and staging migration are pending.
+BMU-001 implementation: `a0abae4`, [PR #2](https://github.com/LaulinVasquez/Buff-me-up/pull/2), now merged upstream. Deployed migration/test-account acceptance is still unverified.
 
-BMU-007 dependency repair: `828dfdc` on separate branch `agent/security-dependencies`, draft [PR #3](https://github.com/LaulinVasquez/Buff-me-up/pull/3). Production dependency audit is clean on that branch; 21 moderate development-tool findings remain. Review, merge, and approved rollout are pending. The workout-only branch retains the original dependency lockfile.
+BMU-007 dependency repair: `828dfdc`, [PR #3](https://github.com/LaulinVasquez/Buff-me-up/pull/3), now merged upstream. The history branch includes those patched lockfiles; 21 moderate development-tool findings remain from the earlier audit. Production/native rollout is not inferred from a Git merge.
+
+## History refresh (BMU-008)
+
+Requested by the developer: a more appealing History tab with day/month/year progress graphs. Implemented a graph-led mobile layout with workout/minute metric controls, active-day/time summaries, streak/all-time context, selectable bars, year → month → day drill-downs, an expandable attendance calendar, and period-specific workout cards. Empty/loading states and keyboard-accessible chart data are included. A base link-style layering correction restores the intended active-tab/link contrast.
+
+Progress uses existing completed sessions; no database schema or external chart dependency is added. Query results are paginated as narrow session summaries and filtered to exact local dates. Time logged is elapsed session time grouped by completion time. The same pure aggregation functions drive graph totals and the workout list.
+
+Initial evidence: 12 aggregation/navigation tests pass, including timezone boundaries, both DST transitions, leap years, rest days, excluded statuses, and matching totals. Browser checks of the actual component with labeled synthetic data verified metric switching, annual totals, drill-downs, calendar navigation, additional-session loading, arrow-key selection/single chart tab stop, empty states, and a 320px component width without horizontal overflow. Browser warning/error log was empty. Authenticated staging/PostgREST verification remains pending; no real user data was accessed. Final command/Git results are recorded in the session log.
 
 The session follows the locally supplied `BUFF_ME_UP_AGENT_DEVELOPMENT_PLAN.md`. That pre-existing untracked file is preserved. The approved CSE 499 requirements draft was not found in the repository, so its scope has not been changed.
 
