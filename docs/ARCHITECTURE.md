@@ -16,7 +16,7 @@ Buff Me Up is one Next.js App Router application. Server Components are the defa
 
 ## Supabase strategy
 
-`@supabase/ssr` supplies separate browser and server factories. The proxy refreshes cookies with verified claims, protects `/app/*`, and redirects authenticated users away from `/`. The PKCE callback exchanges the code and idempotently upserts `gym_profiles`. Only the public URL and publishable key are exposed.
+`@supabase/ssr` supplies separate browser and server factories. The proxy checks the user with Supabase Auth, refreshes cookies, protects `/app/*`, and redirects authenticated users away from `/`. The PKCE callback exchanges the code and idempotently upserts `gym_profiles`. Only the public URL and publishable key are exposed.
 
 `gym_profiles` and its RLS policies, trigger, and function use the `gym_` prefix to isolate them from FlowDesk in the shared project. Synchronization happens in the Buff Me Up callback rather than through a shared `auth.users` trigger.
 
@@ -42,7 +42,9 @@ Static recommendations live in `data/recommended-plans.ts`. The `gym_adopt_recom
 
 `getNextWorkoutDay` advances through the active plan's ordered days using only the most recent completed workout for that plan; cancelled sessions do not advance the sequence. Any in-progress workout takes priority and is resumed.
 
-`gym_start_workout` atomically creates a session and immutable exercise snapshots. A partial unique index prevents concurrent in-progress sessions. Workout weights, completion flags, and status remain database-backed, so refreshes and navigation do not lose progress.
+`gym_start_workout` atomically creates a session and exercise snapshots. A partial unique index prevents concurrent in-progress sessions. Workout weights, completion flags, and status remain database-backed, so refreshes and navigation do not lose progress.
+
+`gym_set_workout_status` locks the owned workout row before completing or cancelling it. Repeating the same final state returns its existing ID; a conflicting final state fails. The database assigns the completion time and prevents later changes to final status/timestamps. Snapshot writes lock that same parent row and require an in-progress workout, so a stale tab cannot change finished exercise data. Deleting an exercise template can still clear its optional foreign key, and deleting a workout still cascades to its snapshots. These functions use invoker permissions and retain RLS.
 
 ## History and local dates
 
@@ -52,7 +54,7 @@ Streaks count consecutive distinct local attendance days ending today or yesterd
 
 ## Security model
 
-The proxy validates claims and protects every `/app` route. Server operations derive identity from the session and never accept a user ID. Direct-owner tables use `auth.uid()`; nested rows resolve ownership through parents. Buff Me Up shares Supabase Auth with FlowDesk but creates and references only `gym_` application objects.
+The proxy verifies the user and protects every `/app` route. Server operations derive identity from the session and never accept a user ID. Direct-owner tables use `auth.uid()`; nested rows resolve ownership through parents. Buff Me Up shares Supabase Auth with FlowDesk but creates and references only `gym_` application objects.
 
 ## Exercise catalog and generator
 

@@ -31,6 +31,7 @@ export type Database = {
       gym_activate_workout_plan: { Args: { target_plan_id: string }; Returns: undefined };
       gym_adopt_recommended_plan: { Args: { template: Json }; Returns: string };
       gym_start_workout: { Args: { target_day_id: string }; Returns: string };
+      gym_set_workout_status: { Args: { target_workout_id: string; target_status: "completed" | "cancelled" }; Returns: string };
       gym_save_generated_plan: { Args: { template: Json; make_active: boolean }; Returns: string };
     };
     Enums: Record<never, never>;

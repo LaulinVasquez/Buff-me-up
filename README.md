@@ -22,7 +22,7 @@ Buff Me Up is a mobile-first gym tracking SaaS with authentication, plan managem
 
 1. Install Node.js 20.9 or newer and run npm install.
 2. Copy .env.example to .env.local and add the public Supabase values.
-3. Apply the migrations below in order to the shared project.
+3. Apply the migrations below in order to a development/staging Supabase project. Changes to the shared production project require explicit approval.
 4. Complete Google OAuth configuration below.
 5. Run npm run dev.
 
@@ -66,6 +66,7 @@ Set both public Supabase variables for Preview and Production. ExerciseDB V1 req
 - npm run typecheck - strict TypeScript checking
 - npm run lint - ESLint
 - npm run build - production build
+- npm run test:db - isolated PostgreSQL regression tests (requires local PostgreSQL binaries)
 - npm start - production server
 
 See docs/ARCHITECTURE.md for project boundaries.
@@ -87,6 +88,9 @@ Apply these files in order without modifying already-applied migrations:
 3. 20260816000000_add_gym_workout_execution.sql
 4. 20260817000000_add_gym_history_index.sql
 5. 20260818000000_add_gym_exercise_catalog.sql
+6. 20261101000000_guard_gym_workout_finalization.sql
+
+Apply migration 6 to development/staging before running this version's completion/cancellation flows: they now use `gym_set_workout_status`. It adds functions and triggers without rewriting existing rows. Test the same migration in staging before an approved production rollout.
 
 All application objects use the gym_ prefix. Recommended templates remain static application data; attendance is derived from completed workouts.
 

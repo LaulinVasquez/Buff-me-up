@@ -88,17 +88,12 @@ export async function cancelWorkout(id: string) {
 }
 
 async function setWorkoutStatus(id: string, status: "completed" | "cancelled") {
-  const { supabase, userId } = await getAuthenticatedWorkoutClient();
-  const { data, error } = await supabase
-    .from("gym_workouts")
-    .update({ status, completed_at: status === "completed" ? new Date().toISOString() : null })
-    .eq("id", id)
-    .eq("user_id", userId)
-    .eq("status", "in_progress")
-    .select()
-    .maybeSingle();
+  const { supabase } = await getAuthenticatedWorkoutClient();
+  const { data, error } = await supabase.rpc("gym_set_workout_status", {
+    target_workout_id: id,
+    target_status: status,
+  });
   assertNoError(error, `Unable to mark workout ${status}`);
-  if (!data) throw new Error("Active workout not found");
   return data;
 }
 
