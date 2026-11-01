@@ -1,0 +1,94 @@
+import { execFileSync, spawn } from "node:child_process";
+import { mkdtempSync, readdirSync, rmSync } from "node:fs";
+import { tmpdir, userInfo } from "node:os";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+// Always create a disposable cluster. Never read application database credentials.
+const root = dirname(dirname(fileURLToPath(import.meta.url)));
+const directory = mkdtempSync(join(tmpdir(), "bmu-db-"));
+let started = false;
+let bin;
+
+try {
+  bin = execFileSync("pg_config", ["--bindir"], { encoding: "utf8" }).trim();
+  const databaseEnv = {
+    ...Object.fromEntries(Object.entries(process.env).filter(([key]) => !key.startsWith("PG"))),
+    PGHOST: directory,
+    PGPORT: "55432",
+    PGDATABASE: "postgres",
+    PGUSER: userInfo().username,
+    PGPASSWORD: "",
+  };
+  const sql = (source) => execFileSync(join(bin, "psql"), ["-X", "-v", "ON_ERROR_STOP=1", "-q"], {
+    env: databaseEnv, input: source, encoding: "utf8", stdio: ["pipe", "pipe", "pipe"],
+  });
+  execFileSync(join(bin, "initdb"), ["-D", join(directory, "data"), "-A", "trust", "--no-locale", "-E", "UTF8"], { stdio: "pipe" });
+  execFileSync(join(bin, "pg_ctl"), ["-D", join(directory, "data"), "-l", join(directory, "postgres.log"), "-o", `-F -k ${directory} -p 55432 -h ''`, "-w", "start"], { stdio: "pipe" });
+  started = true;
+
+  const runFile = (file) => execFileSync(join(bin, "psql"), ["-X", "-v", "ON_ERROR_STOP=1", "-q", "-f", join(root, file)], {
+    env: databaseEnv, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"],
+  });
+  runFile("tests/database/bootstrap.sql");
+  for (const file of readdirSync(join(root, "supabase/migrations")).filter((file) => file.endsWith(".sql")).sort()) {
+    runFile(`supabase/migrations/${file}`);
+  }
+  runFile("tests/database/workouts.sql");
+  console.log("PASS: migrations, start/resume, finalization, snapshots, and two-user RLS");
+
+  // Hold finalization open while a stale tab tries to save a weight.
+  const firstUser = "00000000-0000-0000-0000-000000000001";
+  const asUser = `set role authenticated; set request.jwt.claim.sub = '${firstUser}';`;
+  const day = "20000000-0000-0000-0000-000000000001";
+  const workoutId = sql(`${asUser} select public.gym_start_workout('${day}');`).trim().split("\n").find((line) => /^\s*[0-9a-f]{8}-/.test(line))?.trim();
+  if (!workoutId) throw new Error("Could not create concurrency fixture");
+
+  const runAsync = (source) => new Promise((resolve) => {
+    const child = spawn(join(bin, "psql"), ["-X", "-v", "ON_ERROR_STOP=1", "-q"], { env: databaseEnv });
+    let output = "";
+    child.stdout.on("data", (chunk) => { output += chunk; });
+    child.stderr.on("data", (chunk) => { output += chunk; });
+    child.on("error", (error) => resolve({ code: -1, output: error.message }));
+    child.on("close", (code) => resolve({ code, output }));
+    child.stdin.end(source);
+  });
+  const finalize = runAsync(`${asUser} begin; select public.gym_set_workout_status('${workoutId}', 'completed'); select pg_sleep(1); commit;`);
+  // Wait for the finalizer's transaction to hold a row lock, rather than racing a fixed delay.
+  let finalizerReady = false;
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    if (sql("select exists (select 1 from pg_stat_activity where wait_event = 'PgSleep');").includes(" t\n")) {
+      finalizerReady = true;
+      break;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+  if (!finalizerReady) {
+    await finalize;
+    throw new Error("Finalizer did not reach the concurrency barrier");
+  }
+  const staleSave = runAsync(`${asUser} update public.gym_workout_exercises set weight = 999 where workout_id = '${workoutId}';`);
+  const [finished, stale] = await Promise.all([finalize, staleSave]);
+  if (finished.code !== 0 || stale.code === 0 || !stale.output.includes("Workout is no longer in progress")) {
+    throw new Error(`Concurrent finalization failed: ${JSON.stringify({ finished, stale })}`);
+  }
+  const retries = await Promise.all(Array.from({ length: 4 }, () => runAsync(`${asUser} select public.gym_set_workout_status('${workoutId}', 'completed');`)));
+  if (retries.some((result) => result.code !== 0)) throw new Error("Concurrent completion retries failed");
+  sql(`${asUser} select test.assert((select weight = 25 from public.gym_workout_exercises where workout_id = '${workoutId}'), 'Stale save changed a completed snapshot');`);
+  console.log("PASS: concurrent completion retries and stale weight save");
+
+  const starts = await Promise.all(Array.from({ length: 4 }, () => runAsync(`${asUser} select public.gym_start_workout('${day}');`)));
+  const ids = starts.map((result) => result.output.match(/[0-9a-f]{8}-[0-9a-f-]{27}/)?.[0]);
+  if (starts.some((result) => result.code !== 0) || !ids[0] || new Set(ids).size !== 1) {
+    throw new Error(`Concurrent starts did not resume the same workout: ${JSON.stringify(starts)}`);
+  }
+  sql(`${asUser} select test.assert((select count(*) = 1 from public.gym_workouts where status = 'in_progress'), 'Concurrent starts duplicated workouts');
+    select test.assert((select count(*) = 1 from public.gym_workout_exercises where workout_id = '${ids[0]}'), 'Concurrent starts duplicated snapshots');`);
+  console.log("PASS: concurrent starts resume one session with one snapshot");
+} catch (error) {
+  console.error(error.stderr?.toString() || error.message);
+  process.exitCode = 1;
+} finally {
+  if (started) execFileSync(join(bin, "pg_ctl"), ["-D", join(directory, "data"), "-m", "immediate", "-w", "stop"], { stdio: "pipe" });
+  rmSync(directory, { recursive: true, force: true });
+}
