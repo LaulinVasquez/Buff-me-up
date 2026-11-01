@@ -2,6 +2,8 @@
 
 Last audited: **2026-11-01**. Upstream baseline: **`f4828cc`**. Working branch: **`agent/core-workout-audit`**.
 
+BMU-001 implementation: `a0abae4`, draft [PR #2](https://github.com/LaulinVasquez/Buff-me-up/pull/2). Review and staging migration are pending.
+
 The session follows the locally supplied `BUFF_ME_UP_AGENT_DEVELOPMENT_PLAN.md`. That pre-existing untracked file is preserved. The approved CSE 499 requirements draft was not found in the repository, so its scope has not been changed.
 
 ## Evidence and acceptance status
