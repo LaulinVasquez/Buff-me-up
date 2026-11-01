@@ -2,7 +2,7 @@
 
 ## BMU-008 — History layout and day/month/year progress
 
-**Status:** implemented on `agent/history-progress`; automated and synthetic-component checks pass; PR handoff/staging verification pending.
+**Status:** implemented in `96639e3` on `agent/history-progress`; draft [PR #4](https://github.com/LaulinVasquez/Buff-me-up/pull/4). Automated and synthetic-component checks pass; review/staging verification pending.
 
 Acceptance: clear mobile layout, day/month/year views, workouts/time graphs, accurate local-date totals, selectable buckets and drill-downs, retained session details/calendar/resume links, usable empty/loading states, and accessible chart data. Existing completed-workout records supply all values; no sample records or chart dependency are shipped.
 
