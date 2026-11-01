@@ -1,5 +1,33 @@
 # Agent session log
 
+## 2026-11-01 — History layout and progress (BMU-008)
+
+**Branch:** `agent/history-progress`, based on `origin/main` at `5f503c0`. Earlier PRs #2/#3 were merged upstream before this task. The supplied untracked development guide remains untouched.
+
+**Git handoff:** implementation commit `96639e3`, pushed to `origin/agent/history-progress`. Draft [PR #4](https://github.com/LaulinVasquez/Buff-me-up/pull/4) is open for review. No merge or production deployment was performed. PR creation used the repository's existing Git API authentication, as in the preceding session; no credential was printed or saved in a file.
+
+### Scope and implementation plan
+
+Refresh History with a mobile graph-led layout and Day/Month/Year views. Use completed-workout counts and elapsed session time, since those are the records the app actually stores. Add bounded/paginated owner-filtered summary queries, one pure aggregation module, accessible chart interactions, and matching period-specific session lists. Preserve calendar, resume/detail links and legacy month URLs. Test timezone/DST/date boundaries and inspect populated/empty component layouts without using real user data.
+
+### Completed and evidence
+
+- Updated History route/bootstrap/loading UI, graph/calendar/session components, pure period/date/aggregation helpers, and the history summary service. Added `test:history` using existing TypeScript/Node tooling; no dependency or migration was added.
+- Restored utility-class link colors by placing the base anchor rule in Tailwind's base layer; verified the selected lime tab has dark text and History navigation has the intended highlight.
+- A temporary local Next.js preview imported the actual History component with clearly labeled synthetic sessions. It never imported the app's auth/data services and was removed after testing.
+- Browser checks passed: Workouts/Minutes switching, 12-month annual graph/total, year → month and calendar → day drill-downs (24 local-hour buckets), 6 → 12 visible sessions via Show more, arrow-key bar selection with one chart tab stop, and empty periods. A 320px-wide component had equal client/scroll widths in both metrics and empty state; this is a component-width check, not a physical-device test. Browser warning/error log was empty.
+- Captured a component screenshot with synthetic data for design review. It is not evidence of a real user's history or of deployed acceptance. The temporary preview server was stopped.
+- `npm run test:history` — PASS, 12 tests; `npm run test:db` — PASS, all existing migration/RLS/concurrency regressions.
+- `npm run lint` — PASS after adjusting the calendar memo to depend directly on its input date. The earlier lint run caught React Compiler's memo-preservation rule; it was fixed in source without disabling the rule.
+- `npm run build` — PASS on the final source with Next.js 16.4.3; `npm run typecheck` — PASS after generated route types were refreshed. `git diff --check` — PASS.
+- No new History issue/open PR matched the repository search. Fetched again before commit; upstream remained at `5f503c0`.
+
+### Risks, next steps, and learning note
+
+No staging/test-account session was available, so signed-in PostgREST pagination, real history-detail navigation, and device verification remain unverified. The service retains authenticated ownership filters and RLS. No production database, deployment, or signing action was performed.
+
+Next: review the History PR; verify the staging checklist (including >500 sessions and two users); then address the existing ordering/latest-weight backlog. Grouping records by local calendar dates instead of UTC prevents workouts near midnight and DST changes from appearing in the wrong day/month/year. Graphs and totals share one aggregation function so they stay consistent.
+
 ## 2026-11-01 — audit and workout finalization
 
 **Branch:** `agent/core-workout-audit`, based on upstream `f4828cc`.

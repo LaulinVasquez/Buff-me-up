@@ -1,5 +1,23 @@
 # Verification
 
+## History graphs
+
+Run `npm run test:history`. The runner compiles the pure history tests into a disposable directory with the existing TypeScript dependency, runs Node's test runner, then removes the output. No additional package or database is needed. Tests cover day/month/year buckets, rest days, leap years, local year/month boundaries, both DST transitions, distinct active days, totals/duration, excluded statuses, query-window padding, invalid dates and clamped navigation.
+
+In staging with a test account:
+
+- [ ] Open History and verify the default month follows the browser timezone.
+- [ ] Switch Day/Month/Year; verify 24 local-hour/day/month bars, matching totals and the filtered session list.
+- [ ] Switch Workouts/Minutes and compare against completed sessions. Time logged is start-to-finish elapsed time, grouped by completion time.
+- [ ] Select a bar by pointer, then use Tab and Left/Right/Home/End to inspect values. Expand the chart data table.
+- [ ] Drill from a year bar to its month and a month bar/calendar day to its day; verify refresh and browser Back preserve view/date/timezone.
+- [ ] Navigate periods, including Jan 31 → February and a leap year. Open an old `month=YYYY-MM&tz=...` link.
+- [ ] Verify empty periods, resume an active session, open a completed-session detail, and load additional sessions.
+- [ ] Verify narrow mobile layout, readable selected-tab colors, loading/error states, and no horizontal overflow.
+- [ ] Verify year queries with more than 500 completed sessions include every page and isolate a second test user's data.
+
+The development component preview used synthetic fixtures only. It verifies rendering/interactions, not a deployed Supabase/PostgREST configuration, and is not a shipped demo route.
+
 ## Automated database regression tests
 
 Install dependencies with `npm ci`, then run `npm run test:db`. PostgreSQL's `pg_config`, `initdb`, `pg_ctl`, and `psql` must be installed locally and `pg_config` must be on PATH. The runner uses its reported binary directory. Run as a normal user; PostgreSQL refuses to initialize a cluster as root.

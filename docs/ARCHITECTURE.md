@@ -48,7 +48,11 @@ Static recommendations live in `data/recommended-plans.ts`. The `gym_adopt_recom
 
 ## History and local dates
 
-Attendance is derived from `gym_workouts.status = 'completed'` and `completed_at`; cancelled and in-progress sessions never count. Month queries select only a padded UTC boundary window, then the client groups timestamps using its IANA timezone. The timezone and selected month are retained in the History URL for refresh-safe navigation.
+Attendance is derived from `gym_workouts.status = 'completed'` and `completed_at`; cancelled and in-progress sessions never count. History supports day, month, and year views. A bounded, paginated query selects session summaries (`id`, name, status, start/completion timestamps) within a padded UTC window; it keeps ownership filters and RLS and avoids downloading every exercise snapshot for a year. Full exercise snapshots are loaded on the existing workout-detail route.
+
+`lib/history/progress.ts` filters that window to exact local dates and builds 24 local-hour, daily, or monthly buckets. Both repeated fall-DST hours share a clock-hour bucket; spring's skipped hour remains empty. Workouts and time logged use the same completed-session set, and active days count distinct local dates. Time logged is elapsed start-to-finish time, attributed to the completion date/hour; it is not measured active exercise time.
+
+The URL retains `view`, `date`, and `tz` for refresh, back navigation, period controls, and chart/calendar drill-downs. Existing `month=YYYY-MM&tz=...` links remain supported. Invalid dates/timezones use the browser's current-date bootstrap instead of issuing a malformed database query. Graph bars support pointer and arrow-key selection with a single tab stop; an expandable data table exposes every value without relying on color.
 
 Streaks count consecutive distinct local attendance days ending today or yesterday, so a user does not lose yesterday's active streak at the start of today. Only narrow `completed_at` projections are loaded for all-time attendance calculations; calendar queries and recent workout details remain bounded.
 

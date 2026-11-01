@@ -1,18 +1,25 @@
 import { assertNoError, getAuthenticatedWorkoutClient } from "./auth";
+import { historyQueryWindow, type HistoryPeriod, type HistorySession } from "@/lib/history/progress";
 
 const HISTORY_SELECT = "*, gym_workout_exercises(*)";
 
-export async function getWorkoutHistoryByMonth(month: string) {
-  const { year, monthIndex } = parseMonth(month);
-  const start = new Date(Date.UTC(year, monthIndex, 1) - 2 * 86400000).toISOString();
-  const end = new Date(Date.UTC(year, monthIndex + 1, 1) + 2 * 86400000).toISOString();
+export async function getHistoryPeriodSessions(period: HistoryPeriod, date: string): Promise<HistorySession[]> {
+  const { start, end } = historyQueryWindow(period, date);
   const { supabase, userId } = await getAuthenticatedWorkoutClient();
-  const { data, error } = await supabase.from("gym_workouts").select(HISTORY_SELECT)
-    .eq("user_id", userId).eq("status", "completed")
-    .gte("completed_at", start).lt("completed_at", end)
-    .order("completed_at", { ascending: false });
-  assertNoError(error, "Unable to load monthly history");
-  return data;
+  const sessions = new Map<string, HistorySession>();
+  const batchSize = 500;
+  for (let offset = 0; ; offset += batchSize) {
+    const { data, error } = await supabase.from("gym_workouts")
+      .select("id, name, status, started_at, completed_at")
+      .eq("user_id", userId).eq("status", "completed")
+      .gte("completed_at", start).lt("completed_at", end)
+      .order("completed_at", { ascending: false }).order("id", { ascending: false })
+      .range(offset, offset + batchSize - 1);
+    assertNoError(error, "Unable to load workout progress");
+    for (const session of data) sessions.set(session.id, session);
+    if (data.length < batchSize) break;
+  }
+  return [...sessions.values()];
 }
 
 export async function getWorkoutHistory(limit = 10) {
@@ -56,13 +63,6 @@ export async function getCurrentWorkoutSummary() {
     .eq("user_id", userId).eq("status", "in_progress").order("started_at", { ascending: false }).limit(1).maybeSingle();
   assertNoError(error, "Unable to load current workout");
   return data;
-}
-
-function parseMonth(month: string) {
-  if (!/^\d{4}-\d{2}$/.test(month)) throw new Error("Invalid month");
-  const [year, number] = month.split("-").map(Number);
-  if (number < 1 || number > 12) throw new Error("Invalid month");
-  return { year, monthIndex: number - 1 };
 }
 
 export type HistoryWorkout = Awaited<ReturnType<typeof getWorkoutHistory>>[number];
