@@ -258,3 +258,5 @@ Git: `c495325` on `agent/personal-gyms`, draft [PR #12](https://github.com/Lauli
 Added authenticated, no-store owner-scoped JSON export across eight explicit gym tables with keyset pages of 500/start-time cutoff. No tokens/provider secrets/FlowDesk objects or new migration. Any query failure aborts; HTML sign-in responses and unexpected format are rejected. UI prepares download and selectable-text fallback. Eleven training tests pass. Synthetic actual-component browser verifies visible JSON payload, HTML rejection/clearing and five expanded widths without overflow. Browser download event timed out; no disk download/native success is claimed. Temporary preview removed before final checks. Next: automated CI and generator validation, consolidated report.
 
 Final lint/build/sequential typecheck, eleven training tests and diff check pass after preview cleanup.
+
+Git: `4e27624` on `agent/data-export-quality`, draft [PR #13](https://github.com/LaulinVasquez/Buff-me-up/pull/13), base `agent/personal-gyms` (PR #12).
