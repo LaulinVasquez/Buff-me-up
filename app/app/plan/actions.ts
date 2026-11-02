@@ -1,5 +1,6 @@
 "use server";
 
+import { nextOrder } from "@/lib/workouts/ordering";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { activatePlan, createExercise, createPlan, createPlanFromRecommendation, createWorkoutDay, deleteExercise, deletePlan, deleteWorkoutDay, getPlan, reorderExercises, reorderWorkoutDays, updateExercise, updatePlan, updateWorkoutDay } from "@/lib/workouts/plans";
@@ -61,7 +62,7 @@ export async function addWorkoutDay(form: FormData) {
   const planId = text(form, "planId");
   try {
     const plan = await getPlan(planId);
-    await createWorkoutDay(planId, { name: text(form, "name"), day_order: plan.gym_workout_days.length });
+    await createWorkoutDay(planId, { name: text(form, "name"), day_order: nextOrder(plan.gym_workout_days.map(day => day.day_order)) });
   } catch { redirect(path(planId, "day_create")); }
   revalidatePath(path(planId));
 }
@@ -96,7 +97,7 @@ export async function addExercise(form: FormData) {
   try {
     const plan = await getPlan(planId);
     const day = plan.gym_workout_days.find((item) => item.id === dayId);
-    await createExercise(dayId, { name: text(form, "name"), sets: positiveInteger(form, "sets"), target_reps: text(form, "targetReps"), default_weight: weight(form), notes: optionalText(form, "notes"), exercise_order: day?.gym_exercises.length ?? 0 });
+    await createExercise(dayId, { name: text(form, "name"), sets: positiveInteger(form, "sets"), target_reps: text(form, "targetReps"), default_weight: weight(form), notes: optionalText(form, "notes"), exercise_order: nextOrder(day?.gym_exercises.map(item => item.exercise_order) ?? []) });
   } catch { redirect(path(planId, "exercise_create")); }
   revalidatePath(path(planId));
 }

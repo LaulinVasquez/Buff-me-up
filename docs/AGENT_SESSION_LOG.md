@@ -212,3 +212,13 @@ After returning, also ran `npm run test:db`, `npm run build`, `npm run typecheck
 3. Verify generator/provider behavior and add CI/mobile evidence; track supported fixes for residual tooling advisories.
 
 Learning note: Capacitor ships both npm and native Swift dependencies. Updating npm alone does not update an already-resolved native binary; sync, resolve, and rebuild are required. The unsigned simulator build checks compilation without signing or distributing an app.
+
+## 2026-11-02 — Autonomous roadmap: training correctness
+
+Authorized continuing the earlier product opportunities and pushing reviewable PRs. Fetched `origin/main` at `c092c6a`; PR #7 is merged, no open issue/PR matches found. Preserved the pre-existing untracked guide. Recorded scope/order in PRODUCT_ROADMAP.md.
+
+BMU-003: append after the highest remaining day/exercise position instead of count; covers catalog additions. BMU-004: order top-level snapshot rows by the related workout's completion time before limiting, using Supabase's documented to-one relation syntax (https://supabase.com/docs/reference/javascript/order). Add deterministic ties and request-contract regression using the actual SDK with a synthetic fetch response. No database migration. Concurrent append/reorder remains unaddressed; this corrects sequential delete/append.
+
+Passed: `npm run test:training` (2), `npm run lint`, `npm run build`, sequential `npm run typecheck`, `npm run test:db`, `npm run test:history` (12), `npm run test:swaps` (7), `npm run test:appearance` (4), `git diff --check`. No signed-in/live PostgREST or device testing. Next: actual per-set records and rest timer.
+
+Git: `58e7ade` on `agent/training-foundation-fixes`; draft [PR #8](https://github.com/LaulinVasquez/Buff-me-up/pull/8) targets main.
