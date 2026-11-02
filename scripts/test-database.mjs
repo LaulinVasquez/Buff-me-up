@@ -37,6 +37,9 @@ try {
   runFile("tests/database/workouts.sql");
   console.log("PASS: migrations, start/resume, finalization, snapshots, and two-user RLS");
 
+  runFile("tests/database/substitutions.sql");
+  console.log("PASS: session substitutions, preserved originals/plans, stale writes, validation and RLS");
+
   // Hold finalization open while a stale tab tries to save a weight.
   const firstUser = "00000000-0000-0000-0000-000000000001";
   const asUser = `set role authenticated; set request.jwt.claim.sub = '${firstUser}';`;
@@ -85,6 +88,53 @@ try {
   sql(`${asUser} select test.assert((select count(*) = 1 from public.gym_workouts where status = 'in_progress'), 'Concurrent starts duplicated workouts');
     select test.assert((select count(*) = 1 from public.gym_workout_exercises where workout_id = '${ids[0]}'), 'Concurrent starts duplicated snapshots');`);
   console.log("PASS: concurrent starts resume one session with one snapshot");
+
+  // All new progress/swap operations lock the same parent before touching a snapshot.
+  const snapshotState = () => {
+    const output = sql(`${asUser} select json_build_object('id', id, 'updatedAt', updated_at, 'version', substitution_version) from public.gym_workout_exercises where workout_id = '${ids[0]}';`);
+    return JSON.parse(output.split("\n").find(line => line.trim().startsWith("{")));
+  };
+  const waitForBarrier = async () => {
+    for (let attempt = 0; attempt < 100; attempt += 1) {
+      if (sql("select exists (select 1 from pg_stat_activity where wait_event = 'PgSleep');").includes(" t\n")) return;
+      await new Promise(resolve => setTimeout(resolve, 10));
+    }
+    throw new Error("Substitution transaction did not reach its concurrency barrier");
+  };
+  const hammer = JSON.stringify({ id: "fallback-hammer", name: "Hammer Curl", primaryMuscle: "Biceps", equipment: "Dumbbells", instructions: [] });
+  const preacher = JSON.stringify({ id: "fallback-preacher", name: "Preacher Curl", primaryMuscle: "Biceps", equipment: "Machine", instructions: [] });
+  const callSwap = (state, replacement) => `select public.gym_swap_workout_exercise('${ids[0]}','${state.id}',${state.version},'${state.updatedAt}','Biceps','${replacement}');`;
+  const original = snapshotState();
+  const swap = runAsync(`${asUser} begin; ${callSwap(original, hammer)} select pg_sleep(1); commit;`);
+  await waitForBarrier();
+  const oldWeight = runAsync(`${asUser} select public.gym_update_workout_progress('${ids[0]}','${original.id}',0,'{"weight":999}');`);
+  const competingSwap = runAsync(`${asUser} ${callSwap(original, preacher)}`);
+  const [swapped, rejectedWeight, rejectedSwap] = await Promise.all([swap, oldWeight, competingSwap]);
+  if (swapped.code !== 0 || rejectedWeight.code === 0 || rejectedSwap.code === 0
+    || !rejectedWeight.output.includes("Exercise changed") || !rejectedSwap.output.includes("Exercise changed")) {
+    throw new Error(`Concurrent swap protection failed: ${JSON.stringify({ swapped, rejectedWeight, rejectedSwap })}`);
+  }
+  sql(`${asUser} select test.assert((select substitution_version = 1 and weight is null and jsonb_array_length(substitution_history) = 1 from public.gym_workout_exercises where id = '${original.id}'), 'Concurrent swap changed progress twice');`);
+
+  const beforeSave = snapshotState();
+  const save = runAsync(`${asUser} begin; select public.gym_update_workout_progress('${ids[0]}','${original.id}',1,'{"weight":42}'); select pg_sleep(1); commit;`);
+  await waitForBarrier();
+  const staleReview = runAsync(`${asUser} ${callSwap(beforeSave, preacher)}`);
+  const [saved, staleReviewResult] = await Promise.all([save, staleReview]);
+  if (saved.code !== 0 || staleReviewResult.code === 0 || !staleReviewResult.output.includes("Exercise changed")) {
+    throw new Error(`Concurrent progress save was lost: ${JSON.stringify({ saved, staleReviewResult })}`);
+  }
+  const beforeFinish = snapshotState();
+  const finalizing = runAsync(`${asUser} begin; select public.gym_set_workout_status('${ids[0]}','completed'); select pg_sleep(1); commit;`);
+  await waitForBarrier();
+  const lateSwap = runAsync(`${asUser} ${callSwap(beforeFinish, preacher)}`);
+  const [finalized, lateSwapResult] = await Promise.all([finalizing, lateSwap]);
+  if (finalized.code !== 0 || lateSwapResult.code === 0 || !lateSwapResult.output.includes("Workout is no longer in progress")) {
+    throw new Error(`Finalization allowed a late swap: ${JSON.stringify({ finalized, lateSwapResult })}`);
+  }
+  sql(`${asUser} select test.assert((select name = 'Hammer Curl' and weight = 42 and substitution_version = 1 from public.gym_workout_exercises where id = '${original.id}'), 'Saved replacement progress was not preserved');`);
+  console.log("PASS: swap vs stale progress/second swap, progress vs stale review, and finalization vs swap");
+
 } catch (error) {
   console.error(error.stderr?.toString() || error.message);
   process.exitCode = 1;

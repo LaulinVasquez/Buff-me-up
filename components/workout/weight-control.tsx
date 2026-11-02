@@ -4,7 +4,7 @@ import { useState } from "react";
 import { SubmitButton } from "@/components/forms/submit-button";
 import { saveWeightAction } from "@/app/app/workout/actions";
 
-export function WeightControl({ workoutId, exerciseId, initialWeight }: Readonly<{ workoutId: string; exerciseId: string; initialWeight: number | null }>) {
+export function WeightControl({ workoutId, exerciseId, initialWeight, version }: Readonly<{ workoutId: string; exerciseId: string; initialWeight: number | null; version: number }>) {
   const [weight, setWeight] = useState(initialWeight?.toString() ?? "");
   const adjust = (amount: number) => {
     const current = Number(weight || 0);
@@ -14,6 +14,7 @@ export function WeightControl({ workoutId, exerciseId, initialWeight }: Readonly
   return <form action={saveWeightAction} className="mt-4">
     <input name="workoutId" type="hidden" value={workoutId} />
     <input name="exerciseId" type="hidden" value={exerciseId} />
+    <input name="version" type="hidden" value={version} />
     <label className="text-sm font-semibold text-slate-300">Today&apos;s weight</label>
     <div className="mt-2 grid grid-cols-[3.5rem_minmax(0,1fr)_3.5rem] gap-2">
       <button aria-label="Decrease weight by 5 pounds" className="min-h-14 rounded-xl border border-slate-700 bg-slate-900 text-lg font-black" onClick={() => adjust(-5)} type="button">−5</button>

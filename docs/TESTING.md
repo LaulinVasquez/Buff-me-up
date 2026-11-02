@@ -18,6 +18,12 @@ In staging with a test account:
 
 The development component preview used synthetic fixtures only. It verifies rendering/interactions, not a deployed Supabase/PostgREST configuration, and is not a shipped demo route.
 
+## Gym is packed mode
+
+Run `npm run test:swaps` for pure matching tests and `npm run test:db` for transactional acceptance in the disposable local cluster. Tests include template aliases, equipment/movement filters, completed/incomplete duplicate exclusion, unclassified custom moves, saved replacement metadata, malformed data and non-mutation of input lists. SQL verifies original weights/history/targets/order, unchanged plans and completed exercises, repeat swaps, future sessions, resume/finalization, validation, anonymous/two-user isolation, stale version/update-time rejection and legacy writes. Concurrent tests cover swap vs save/another swap, a save invalidating the reviewed timestamp, and finalization vs swap.
+
+Before a release, apply `20261102000000_add_workout_substitutions.sql` in staging and run the full checklist in `GYM_PACKED_MODE.md` with dedicated test accounts. The application now requires the versioned progress RPC even for workouts that have never been swapped. Do not deploy the application before its migration.
+
 ## Automated database regression tests
 
 Install dependencies with `npm ci`, then run `npm run test:db`. PostgreSQL's `pg_config`, `initdb`, `pg_ctl`, and `psql` must be installed locally and `pg_config` must be on PATH. The runner uses its reported binary directory. Run as a normal user; PostgreSQL refuses to initialize a cluster as root.

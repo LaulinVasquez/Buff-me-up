@@ -1,3 +1,5 @@
+import type { Json } from "./database";
+
 export type WorkoutPlanSource = "custom" | "recommended" | "generated";
 export type WorkoutStatus = "in_progress" | "completed" | "cancelled";
 
@@ -17,6 +19,7 @@ export type Workout = {
   status: WorkoutStatus; startedAt: string; completedAt: string | null; createdAt: string; updatedAt: string;
 };
 export type WorkoutExercise = {
+  substitutionVersion: number; substitutionDetails: Json; substitutionHistory: Json;
   id: string; workoutId: string; exerciseId: string | null; name: string; targetSets: number | null;
   targetReps: string | null; weight: number | null; completed: boolean; order: number; createdAt: string; updatedAt: string;
 };

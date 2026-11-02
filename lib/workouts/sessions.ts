@@ -57,7 +57,7 @@ export async function getWorkout(id: string) {
   const { supabase, userId } = await getAuthenticatedWorkoutClient();
   const { data, error } = await supabase
     .from("gym_workouts")
-    .select("*, gym_workout_exercises(*)")
+    .select("*, gym_workout_exercises(*, gym_exercises(muscle_group, equipment))")
     .eq("id", id)
     .eq("user_id", userId)
     .maybeSingle();
@@ -65,17 +65,12 @@ export async function getWorkout(id: string) {
   return data;
 }
 
-export async function updateWorkoutExercise(workoutId: string, exerciseId: string, input: { weight?: number | null; completed?: boolean }) {
+export async function updateWorkoutExercise(workoutId: string, exerciseId: string, version: number, input: { weight?: number | null; completed?: boolean }) {
   const { supabase } = await getAuthenticatedWorkoutClient();
-  const { data, error } = await supabase
-    .from("gym_workout_exercises")
-    .update(input)
-    .eq("id", exerciseId)
-    .eq("workout_id", workoutId)
-    .select()
-    .maybeSingle();
-  assertNoError(error, "Unable to update exercise");
-  if (!data) throw new Error("Exercise not found");
+  const { data, error } = await supabase.rpc("gym_update_workout_progress", {
+    target_workout_id: workoutId, target_exercise_id: exerciseId, expected_version: version, changes: input,
+  });
+  assertNoError(error, "Unable to update exercise; refresh the workout and try again");
   return data;
 }
 

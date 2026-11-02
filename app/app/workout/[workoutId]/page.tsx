@@ -7,6 +7,10 @@ import { exerciseCatalog } from "@/data/exercise-catalog";
 import { getPreviousExerciseWeight, getWorkout } from "@/lib/workouts/sessions";
 import { cancelWorkoutAction, finishWorkoutAction, toggleExerciseAction } from "../actions";
 import { WorkoutLayout } from "@/components/workout/workout-layout";
+import { ExerciseSwap } from "@/components/workout/exercise-swap";
+import { SubstitutionHistory } from "@/components/workout/substitution-history";
+import { getSwapSource, readSubstitutionDetails } from "@/lib/workouts/substitutions";
+import { swapExerciseAction } from "../substitution-actions";
 import { WeightControl } from "@/components/workout/weight-control";
 
 type Props = Readonly<{ params: Promise<{ workoutId: string }>; searchParams: Promise<{ error?: string }> }>;
@@ -40,13 +44,18 @@ export default async function WorkoutPage({ params, searchParams }: Props) {
       <form action={cancelWorkoutAction} className="mt-2"><input name="workoutId" type="hidden" value={workout.id} /><ConfirmSubmitButton className="min-h-11 w-full text-sm font-semibold text-red-300" message="Cancel this workout? Progress stays saved, but it will not count as completed.">Cancel workout</ConfirmSubmitButton></form>
     </>}>
       {exercises.map((exercise, index) => {
-        const metadata = exerciseCatalog[exercise.name];
-        return <article className={`min-w-0 rounded-3xl border p-5 transition-colors ${exercise.completed ? "border-lime-400/30 bg-lime-400/10" : "border-slate-800 bg-slate-900/80"}`} key={exercise.id}>
+        const replacement = readSubstitutionDetails(exercise.substitution_details);
+        const metadata = replacement ? { muscleGroup: replacement.primaryMuscle, equipment: replacement.equipment, instructions: replacement.instructions } : exerciseCatalog[exercise.name];
+        const source = getSwapSource(exercise);
+        return <article className={`min-w-0 rounded-3xl border p-5 transition-colors ${exercise.completed ? "border-lime-400/30 bg-lime-400/10" : "border-slate-800 bg-slate-900/80"}`} key={`${exercise.id}-${exercise.substitution_version}`}>
           <div className="flex items-start justify-between gap-3"><div><h2 className="text-xl font-bold">{exercise.completed ? "✓ " : ""}{exercise.name}</h2><p className="mt-1 text-sm text-slate-400">{exercise.target_sets ?? "—"} sets × {exercise.target_reps ?? "—"}</p></div><span className="shrink-0 rounded-full bg-slate-950/60 px-2.5 py-1 text-xs text-slate-400">{index + 1}/{exercises.length}</span></div>
           {previousWeights[index] !== null ? <div className="mt-4 rounded-xl bg-slate-950/60 p-3"><p className="text-xs font-bold uppercase tracking-wider text-slate-500">Last time</p><p className="mt-1 font-bold text-slate-200">{previousWeights[index]} lb</p></div> : null}
-          <WeightControl exerciseId={exercise.id} initialWeight={exercise.weight} workoutId={workout.id} />
-          <form action={toggleExerciseAction} className="mt-4"><input name="workoutId" type="hidden" value={workout.id} /><input name="exerciseId" type="hidden" value={exercise.id} /><input name="completed" type="hidden" value={String(exercise.completed)} /><SubmitButton className={`min-h-14 w-full rounded-xl text-base font-bold ${exercise.completed ? "bg-slate-800 text-slate-200" : "bg-lime-400 text-slate-950"}`} pendingLabel="Saving...">{exercise.completed ? "Mark incomplete" : "✓ Complete exercise"}</SubmitButton></form>
+          {source.equipment ? <p className="mt-3 text-xs text-slate-400">{source.equipment}</p> : null}
+          <SubstitutionHistory history={exercise.substitution_history} />
+          <WeightControl exerciseId={exercise.id} initialWeight={exercise.weight} version={exercise.substitution_version} workoutId={workout.id} />
+          <form action={toggleExerciseAction} className="mt-4"><input name="workoutId" type="hidden" value={workout.id} /><input name="exerciseId" type="hidden" value={exercise.id} /><input name="version" type="hidden" value={exercise.substitution_version} /><input name="completed" type="hidden" value={String(exercise.completed)} /><SubmitButton className={`min-h-14 w-full rounded-xl text-base font-bold ${exercise.completed ? "bg-slate-800 text-slate-200" : "bg-lime-400 text-slate-950"}`} pendingLabel="Saving...">{exercise.completed ? "Mark incomplete" : "✓ Complete exercise"}</SubmitButton></form>
           {metadata ? <details className="mt-3"><summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-slate-400">Exercise details</summary><div className="rounded-xl bg-slate-950/60 p-4 text-sm"><p className="font-semibold text-lime-400">{metadata.muscleGroup} · {metadata.equipment}</p><ol className="mt-3 list-decimal space-y-2 pl-5 text-slate-300">{metadata.instructions.map((step) => <li key={step}>{step}</li>)}</ol></div></details> : null}
+          <ExerciseSwap key={`${exercise.id}-${exercise.updated_at}`} action={swapExerciseAction} exercise={exercise} exercises={exercises} workoutId={workout.id} />
         </article>;
       })}
     </WorkoutLayout>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LocalDateTime } from "@/components/local-date";
+import { SubstitutionHistory } from "@/components/workout/substitution-history";
 import { getWorkoutDetail } from "@/lib/workouts/history";
 
 type Props = Readonly<{ params: Promise<{ workoutId: string }> }>;
@@ -24,6 +25,7 @@ export default async function WorkoutHistoryDetail({ params }: Props) {
     <section className="mt-9 grid items-start gap-4 md:grid-cols-2"><h2 className="text-xl font-bold md:col-span-2">Exercise snapshots</h2>
       {exercises.map((exercise) => <article className="min-w-0 rounded-2xl border border-slate-800 bg-slate-900/70 p-5" key={exercise.id}>
         <div className="flex items-start justify-between gap-3"><div><h3 className="font-bold">{exercise.completed ? "✓ " : ""}{exercise.name}</h3><p className="mt-1 text-sm text-slate-500">{exercise.target_sets ?? "—"} sets × {exercise.target_reps ?? "—"}</p></div><strong className="shrink-0 text-lime-400">{exercise.weight !== null ? `${exercise.weight} lb` : "No weight"}</strong></div>
+        <SubstitutionHistory history={exercise.substitution_history} />
       </article>)}
     </section>
   </main>;

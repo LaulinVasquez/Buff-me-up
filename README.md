@@ -8,6 +8,7 @@ Buff Me Up is a mobile-first gym tracking SaaS with authentication, plan managem
 - Recommended and custom workout plans
 - Ordered workout days and editable exercises
 - Refresh-safe workout execution, weights, and completion tracking
+- “Gym is packed” session-only exercise swaps with equipment filters, review and saved swap history
 - Local-timezone history, attendance, streaks, and weekly consistency
 - Interactive day/month/year history graphs for completed workouts and time logged
 - Installable home-screen manifest for supported phone browsers
@@ -68,6 +69,7 @@ Set both public Supabase variables for Preview and Production. ExerciseDB V1 req
 - npm run lint - ESLint
 - npm run build - production build
 - npm run test:db - isolated PostgreSQL regression tests (requires local PostgreSQL binaries)
+- npm run test:swaps - exercise matching, equipment filtering, duplicate exclusion and metadata tests
 - npm run test:history - history aggregation, timezone/DST, date navigation, and duration tests
 - npm start - production server
 
@@ -91,10 +93,13 @@ Apply these files in order without modifying already-applied migrations:
 4. 20260817000000_add_gym_history_index.sql
 5. 20260818000000_add_gym_exercise_catalog.sql
 6. 20261101000000_guard_gym_workout_finalization.sql
+7. 20261102000000_add_workout_substitutions.sql
 
 Apply migration 6 to development/staging before running this version's completion/cancellation flows: they now use `gym_set_workout_status`. It adds functions and triggers without rewriting existing rows. Test the same migration in staging before an approved production rollout.
 
 All application objects use the gym_ prefix. Recommended templates remain static application data; attendance is derived from completed workouts.
+
+Apply migration 7 to development/staging **before deploying this application version**. Progress saves now use `gym_update_workout_progress`, and swaps use `gym_swap_workout_exercise`. Existing sessions receive empty swap history/version zero; no plan or workout records are backfilled or renamed. Verify staging ownership, stale-tab and resume/history behavior in `docs/GYM_PACKED_MODE.md` before any approved production rollout.
 
 ## Vercel deployment
 
@@ -106,4 +111,4 @@ All application objects use the gym_ prefix. Recommended templates remain static
 
 ## Current limitations
 
-There is no offline synchronization, per-set tracking, rest timer, personal-record detection, charts, notifications, or external exercise media. An internet connection is required during workouts.
+There is no offline synchronization, per-set tracking, rest timer, personal-record detection or notifications. An internet connection is required during workouts. Gym is packed mode currently offers the bundled catalog only; it does not fetch a larger set of remote alternatives or automatically rewrite the entire remaining session.
