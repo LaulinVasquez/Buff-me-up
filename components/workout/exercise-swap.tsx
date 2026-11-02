@@ -32,7 +32,7 @@ export function ExerciseSwap({ workoutId, exercise, exercises, action }: Props) 
 
   return <div className="mt-4 border-t border-slate-700/60 pt-3">
     <button aria-controls={id} aria-expanded={open} className="flex min-h-12 w-full items-center justify-between gap-3 rounded-xl px-2 text-left text-sm font-bold text-sky-300 hover:bg-slate-800/60 focus-visible:outline-2 focus-visible:outline-accent-400 disabled:opacity-50" disabled={pending} onClick={() => open ? close() : setOpen(true)} ref={trigger} type="button"><span>Equipment busy? Swap exercise</span><span aria-hidden="true">{open ? "−" : "↔"}</span></button>
-    {open ? <form action={submit} className="mt-3 min-w-0 rounded-2xl border border-sky-300/20 bg-slate-950/60 p-4" id={id}>
+    {open ? <form data-leaves-workout="true" action={submit} className="mt-3 min-w-0 rounded-2xl border border-sky-300/20 bg-slate-950/60 p-4" id={id}>
       <input name="workoutId" type="hidden" value={workoutId} /><input name="exerciseId" type="hidden" value={exercise.id} />
       <input name="version" type="hidden" value={exercise.substitution_version} /><input name="updatedAt" type="hidden" value={exercise.updated_at} />
       <input name="muscle" type="hidden" value={muscle} />

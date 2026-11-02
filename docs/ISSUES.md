@@ -1,3 +1,7 @@
+## BMU-012 — Actual set logging / rest timer
+
+**Status:** implemented on `agent/set-logging`, pending PR and staging acceptance. Save actual reps/weight/completion with optimistic revision checks, preserve finished sets and originals during swaps, show saved sets in History, and provide a manual rest timer. No historical reps are inferred. See SET_LOGGING.md for migration 9, evidence and limits.
+
 # Development issues
 
 ## BMU-011 — Account accent-color preferences

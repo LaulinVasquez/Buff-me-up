@@ -1,3 +1,7 @@
+## Set logging and rest timer (BMU-012)
+
+Implemented on `agent/set-logging`, stacked on foundation PR #8. Individual reps/weight/completion, explicit saves, dirty/error feedback, History details, swap archives and a page-local rest timer. Additive migration 9 required before deployment. Local SQL validation/RLS/concurrency tests and five responsive synthetic fixture widths pass; authenticated staging/device acceptance remains pending. See SET_LOGGING.md.
+
 ## Autonomous roadmap — 2026-11-02
 
 Laurin authorized continuing the proposed product opportunities through reviewable branches/PRs. Appearance PR #7 is now merged (`c092c6a`). See `PRODUCT_ROADMAP.md` for ordered scope. First repair append ordering after deletion and the top-level previous-weight query, with regression checks; then implement set logging before progress analysis. Live staging/device checks remain pending. No live writes or deployments are authorized by this workflow.
