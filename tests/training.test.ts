@@ -28,6 +28,8 @@ test("previous weight orders parent snapshots by completion before limiting", as
   assert.equal(captured?.searchParams.get("gym_workouts.order"), null);
   assert.equal(captured?.searchParams.get("limit"), "1");
   assert.equal(captured?.searchParams.get("gym_workouts.status"), "eq.completed");
+  assert.equal(captured?.searchParams.get("deferred"), "eq.false");
+  assert.equal(captured?.searchParams.get("or"), "(completed.eq.true,log_revision.gt.0)");
   assert.equal(captured?.searchParams.get("weight"), "not.is.null");
   assert.equal(captured?.searchParams.get("exercise_id"), "eq.exercise-template");
 });
@@ -45,4 +47,23 @@ test("actual set records validate reps/weight/completion without inventing histo
   assert.equal(setVolume(sets),490);
   assert.deepEqual(readSets(sets).map(item=>item.set),[1,2,3,4]);
   assert.equal(initialSets([],1000).length,100);
+});
+
+import { adaptationPreview, type AdaptableExercise } from "../lib/workouts/adaptations";
+const adaptable = (id:string, sets=3):AdaptableExercise => ({id,name:id,exercise_order:Number(id),target_sets:sets,completed:false,logged_sets:[],deferred:false,updated_at:"2026-11-02T12:00:00Z"});
+test("short sessions retain logged work, ordered untouched exercises and original records",()=>{
+ const exercises=[adaptable("1"),adaptable("2"),adaptable("3"),adaptable("4"),adaptable("5")];
+ exercises[0].completed=true;exercises[1].logged_sets=[{set:1,reps:8,weight:25,completed:true}];
+ const before=JSON.stringify(exercises);const short=adaptationPreview(exercises,"short",15);
+ assert.deepEqual(short.keepIds,["1","2","3"]);assert.deepEqual(short.deferred.map(e=>e.id),["4","5"]);
+ assert.equal(short.protectedCount,2);assert.equal(short.estimatedMinutes,10);assert.equal(JSON.stringify(exercises),before);
+ assert.equal(adaptationPreview(exercises,"full").deferred.length,0);
+});
+test("comeback keeps half of untouched work and never drops completed or saved sets",()=>{
+ const exercises=[adaptable("1"),adaptable("2"),adaptable("3"),adaptable("4"),adaptable("5")];
+ exercises[0].logged_sets=[{set:1,reps:null,weight:25,completed:false}];
+ assert.deepEqual(adaptationPreview(exercises,"comeback").keepIds,["1","2","3"]);
+ const huge=adaptationPreview([adaptable("1",100)],"short",15);
+ assert.equal(huge.keep.length,1);assert.equal(huge.estimatedMinutes,204);
+ assert.equal(adaptationPreview([],"short").estimatedMinutes,0);
 });

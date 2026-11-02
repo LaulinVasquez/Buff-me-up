@@ -1,3 +1,7 @@
+## BMU-013/014 — Short and comeback sessions
+
+**Status:** implemented on `agent/session-adaptations`; PR/staging review pending. Explicit keep/set-aside review, 15/20/30-minute estimates, half-untouched comeback, safe restore, plan/log preservation and stale-review protection. Additive migration 10. See SESSION_ADAPTATIONS.md for scope and acceptance limits.
+
 ## BMU-012 — Actual set logging / rest timer
 
 **Status:** implemented on `agent/set-logging`, pending PR and staging acceptance. Save actual reps/weight/completion with optimistic revision checks, preserve finished sets and originals during swaps, show saved sets in History, and provide a manual rest timer. No historical reps are inferred. See SET_LOGGING.md for migration 9, evidence and limits.
