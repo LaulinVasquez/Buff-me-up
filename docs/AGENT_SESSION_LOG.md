@@ -244,3 +244,19 @@ Added Profile goal (1–7 distinct attendance days), Home/History weekly review 
 Final lint/build/sequential typecheck, eight training tests, 12 History tests and diff check pass after preview cleanup.
 
 Git: `3d881b4` on `agent/weekly-progress`, draft [PR #11](https://github.com/LaulinVasquez/Buff-me-up/pull/11), base `agent/session-adaptations` (PR #10).
+
+## 2026-11-02 — Personal gym setup
+
+Added Profile gym setup, explicit equipment/selection, per-gym exercise settings/notes and preferred alternative. Gym is packed defaults to saved equipment and highlights eligible preference; acceptance is always explicit. Migration 12 preserves account isolation with owner/nested RLS and atomic selection/reviewed saves. Nine training tests, SQL bounds/persistence/stale saves/isolation pass. Synthetic actual-component browser verifies add, save notes/preference, switch, reload, preferred swap display and five expanded phone-to-desktop widths without overflow or warnings/errors. No real data or location permissions. Next: data export and automated checks, then consolidated review report.
+
+Final SQL/concurrency suite (including competing gym notes), lint/build/sequential typecheck, nine training tests, seven swap tests and diff check pass after preview cleanup.
+
+Git: `c495325` on `agent/personal-gyms`, draft [PR #12](https://github.com/LaulinVasquez/Buff-me-up/pull/12), base `agent/weekly-progress` (PR #11).
+
+## 2026-11-02 — Portable account data export
+
+Added authenticated, no-store owner-scoped JSON export across eight explicit gym tables with keyset pages of 500/start-time cutoff. No tokens/provider secrets/FlowDesk objects or new migration. Any query failure aborts; HTML sign-in responses and unexpected format are rejected. UI prepares download and selectable-text fallback. Eleven training tests pass. Synthetic actual-component browser verifies visible JSON payload, HTML rejection/clearing and five expanded widths without overflow. Browser download event timed out; no disk download/native success is claimed. Temporary preview removed before final checks. Next: automated CI and generator validation, consolidated report.
+
+Final lint/build/sequential typecheck, eleven training tests and diff check pass after preview cleanup.
+
+Git: `4e27624` on `agent/data-export-quality`, draft [PR #13](https://github.com/LaulinVasquez/Buff-me-up/pull/13), base `agent/personal-gyms` (PR #12).

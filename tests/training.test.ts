@@ -93,3 +93,24 @@ test("progress does not compare unrelated, deleted, unweighted, deferred or inco
  assert.deepEqual(explainProgress(excluded,reviewNow),[]);
  assert.equal(explainProgress([current,current],reviewNow).length,1);
 });
+
+import { gymExerciseKey,validEquipment } from "../lib/gyms/preferences";
+test("gym notes normalize known names and equipment stays a bounded explicit list",()=>{
+ assert.equal(gymExerciseKey("  Bench   Press "),gymExerciseKey("Barbell Bench Press"));
+ assert.equal(gymExerciseKey(""),null);assert.equal(gymExerciseKey("x".repeat(161)),null);
+ assert.equal(validEquipment(["Dumbbells","Cable"]),true);assert.equal(validEquipment([]),true);
+ assert.equal(validEquipment(["Dumbbells","Dumbbells"]),false);assert.equal(validEquipment(["Unknown machine"]),false);assert.equal(validEquipment([null]),false);
+});
+
+import { exportAccount,EXPORT_TABLES } from "../lib/export/account";
+test("export uses an explicit gym-only allowlist and keyset pages without silent truncation",async()=>{
+ const seen:URL[]=[];const first=Array.from({length:500},(_,i)=>({id:String(i+1).padStart(4,"0"),created_at:"2026-01-01T00:00:00Z"}));
+ const client=createClient<Database>("http://127.0.0.1:55999","synthetic-test-key",{auth:{persistSession:false,autoRefreshToken:false},global:{fetch:async(input)=>{const url=new URL(String(input));seen.push(url);const table=url.pathname.split("/").at(-1);const rows=table==="gym_workouts"?(url.searchParams.has("id")?[{id:"0501",created_at:"2026-01-01T00:00:00Z"}]:first):[];return new Response(JSON.stringify(rows),{headers:{"Content-Type":"application/json"}});}}});
+ const result=await exportAccount(client,"synthetic-owner",reviewNow);
+ assert.deepEqual(Object.keys(result.tables),[...EXPORT_TABLES]);assert.equal(result.tables.gym_workouts.length,501);assert.equal(result.weightUnit,"lb");assert.equal(result.accountId,"synthetic-owner");
+ assert.equal(seen.length,9);assert.equal(seen.filter(url=>url.pathname.endsWith("gym_workouts"))[1].searchParams.get("id"),"gt.0500");assert(seen.every(url=>url.searchParams.get("created_at")===`lte.${reviewNow.toISOString()}`));assert(seen.every(url=>url.searchParams.get("limit")==="500"));assert(!JSON.stringify(result).includes("synthetic-test-key"));
+});
+test("an export failure aborts the download instead of returning a partial success",async()=>{
+ const client=createClient<Database>("http://127.0.0.1:55999","synthetic-test-key",{auth:{persistSession:false,autoRefreshToken:false},global:{fetch:async()=>new Response(JSON.stringify({message:"Unavailable"}),{status:500,headers:{"Content-Type":"application/json"}})}});
+ await assert.rejects(exportAccount(client,"owner",reviewNow),/could not be completed/);
+});
