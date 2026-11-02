@@ -2,7 +2,7 @@
 
 ## BMU-010 — Gym is packed session-only exercise swaps
 
-**Status:** implemented on `agent/gym-packed-mode`, based on merged responsive baseline `e45f53f`; lint/build/typecheck, seven matching tests, 12 History tests, SQL/concurrency and 20 responsive fixture-state checks pass. Staging rollout and signed-in/device acceptance remain pending.
+**Status:** implemented in `7a1ba02`, draft [PR #6](https://github.com/LaulinVasquez/Buff-me-up/pull/6), on `agent/gym-packed-mode`, based on merged responsive baseline `e45f53f`; lint/build/typecheck, seven matching tests, 12 History tests, SQL/concurrency and 20 responsive fixture-state checks pass. Staging rollout and signed-in/device acceptance remain pending.
 
 Scope explicitly selected by the developer: an unfinished exercise can be replaced for the current workout using available equipment, with review/confirmation and saved original data. The bundled catalog supplies same-primary-muscle/type alternatives; existing session exercises are excluded and unclassified custom moves require a muscle choice. Targets/order stay intact; replacement weight resets, original data is retained, and the plan/completed work remains unchanged.
 

@@ -8,6 +8,8 @@ BMU-007 dependency repair: `828dfdc`, [PR #3](https://github.com/LaulinVasquez/B
 
 ## Gym is packed mode (BMU-010)
 
+Implementation `7a1ba02`, draft [PR #6](https://github.com/LaulinVasquez/Buff-me-up/pull/6).
+
 Scope confirmed by the developer: replace one unfinished exercise in the current workout using available equipment. Implemented a reviewable picker backed by the bundled catalog, same-primary-muscle/type matching and duplicate exclusion, with manual muscle selection for unclassified custom moves. Saved plans, completed exercises, original snapshot/weight history and order are preserved; replacement weight is explicitly cleared while targets/instructions remain visible.
 
 Added an additive migration for replacement metadata/history/version, owner-scoped swap/progress RPCs and stale-client guards. Lint, production build, sequential typecheck, seven matching tests, 12 History tests and local SQL persistence/RLS/finalization/concurrency checks pass. The sample-data picker preview passes 20 responsive-state checks; Git/PR results are in the session log. Apply migration 7 in staging before deploying the updated application. Signed-in PostgREST/iPhone acceptance remains pending. No production migration or deployment was performed. Baseline: merged responsive PR #5, `e45f53f`; branch `agent/gym-packed-mode`.
