@@ -1,70 +1,24 @@
-## Account data export (BMU-017)
-
-Implemented on `agent/data-export-quality`, stacked on PR #12. Profile downloads all eight owned gym tables as versioned JSON with keyset pagination, no-store/auth checks, failure feedback and readable-text fallback. Eleven training tests and five synthetic fixture widths pass. Actual disk download and authenticated/native export remain manual acceptance. No new migration. See DATA_EXPORT.md.
-
-## Personal gym setup (BMU-016)
-
-Implemented on `agent/personal-gyms`, stacked on PR #11. Named equipment setups, per-gym exercise settings/notes/preferred alternatives, explicit selection and equipment-aware swap defaults. Owner-isolated tables and stale-save/selection RPCs in migration 12. Nine training tests, local SQL/isolation and five expanded fixture widths pass; staging/device acceptance pending. See PERSONAL_GYMS.md.
-
-## Flexible weekly goals and progress feedback (BMU-015)
-
-Implemented on `agent/weekly-progress`, stacked on PR #10. Account-saved 1–7 attendance-day goals, current local week/last week, schedule-focused next step and actual weighted-set explanations on Home/History. Comparisons are explicitly limited to up to 100 completed sessions/90 days; no inferred historical reps or all-time claims. Migration 11 and staging acceptance required. See WEEKLY_PROGRESS.md.
-
-## Session adaptations (BMU-013/014)
-
-Implemented on `agent/session-adaptations`, stacked on PR #9. Reviewed short sessions, optional comeback and full restore preserve logged work and saved routines. Migration 10 retains deferred snapshots and rejects stale scope changes. Pure/local SQL and five responsive fixture checks pass; live/device acceptance pending. See SESSION_ADAPTATIONS.md.
-
-## Set logging and rest timer (BMU-012)
-
-Implemented on `agent/set-logging`, stacked on foundation PR #8. Individual reps/weight/completion, explicit saves, dirty/error feedback, History details, swap archives and a page-local rest timer. Additive migration 9 required before deployment. Local SQL validation/RLS/concurrency tests and five responsive synthetic fixture widths pass; authenticated staging/device acceptance remains pending. See SET_LOGGING.md.
-
-## Autonomous roadmap — 2026-11-02
-
-Laurin authorized continuing the proposed product opportunities through reviewable branches/PRs. Appearance PR #7 is now merged (`c092c6a`). See `PRODUCT_ROADMAP.md` for ordered scope. First repair append ordering after deletion and the top-level previous-weight query, with regression checks; then implement set logging before progress analysis. Live staging/device checks remain pending. No live writes or deployments are authorized by this workflow.
-
 # Development status
 
-Last updated: **2026-11-02**. Appearance baseline: **`aa44d5f`** (merged PR #6). Working branch: **`agent/appearance-themes`**. The original audit baseline was `f4828cc`.
+Updated **2026-11-02**. Autonomous batch baseline: `c092c6a` (appearance PR #7 merged). Current branch: `agent/generator-quality-ci`. Laurin authorized continuing the proposed opportunities and pushing branches/PRs for later review. No merge, deployment, production-data access or remote migration was performed. The pre-existing untracked development guide remains preserved.
 
-BMU-001 implementation: `a0abae4`, [PR #2](https://github.com/LaulinVasquez/Buff-me-up/pull/2), now merged upstream. Deployed migration/test-account acceptance is still unverified.
+## Review queue
 
-BMU-007 dependency repair: `828dfdc`, [PR #3](https://github.com/LaulinVasquez/Buff-me-up/pull/3), now merged upstream. The history branch includes those patched lockfiles; 21 moderate development-tool findings remain from the earlier audit. Production/native rollout is not inferred from a Git merge.
+| PR / branch | Implemented behavior | Evidence / release dependency |
+| --- | --- | --- |
+| [#8](https://github.com/LaulinVasquez/Buff-me-up/pull/8) · agent/training-foundation-fixes | Correct sequential append after deletion and latest previous-weight ordering | Pure/request contract tests; live PostgREST pending. No new migration. Concurrent append/reorder atomicity remains outside fix. |
+| [#9](https://github.com/LaulinVasquez/Buff-me-up/pull/9) · agent/set-logging | Actual reps/weight/completion per set, conflict-safe saves, archived originals, History detail, rest timer | SET_LOGGING.md; migration 9. |
+| [#10](https://github.com/LaulinVasquez/Buff-me-up/pull/10) · agent/session-adaptations | Reviewed short/comeback sessions and restore, retained logged work/plan | SESSION_ADAPTATIONS.md; migration 10. |
+| [#11](https://github.com/LaulinVasquez/Buff-me-up/pull/11) · agent/weekly-progress | Flexible distinct-day goal, readable comparable set feedback | WEEKLY_PROGRESS.md; migration 11; up to 100 sessions/90-day review. |
+| [#12](https://github.com/LaulinVasquez/Buff-me-up/pull/12) · agent/personal-gyms | Named equipment setups, per-gym settings/notes and valid preferred alternatives | PERSONAL_GYMS.md; migration 12. |
+| [#13](https://github.com/LaulinVasquez/Buff-me-up/pull/13) · agent/data-export-quality | Owner-scoped portable JSON with readable text fallback | DATA_EXPORT.md; no new migration, schema through 12 required. Actual disk/native download pending. |
+| Final quality PR pending · agent/generator-quality-ci | Strict generator validation, complete bounded fallback schedules and automated quality workflow | GENERATOR_QUALITY.md; migration 13; final/remote outcomes in session log. |
 
-## Appearance themes (BMU-011)
+PRs are stacked in this order; each targets the preceding feature branch to keep its review diff focused. Review/merge in order and retarget as parent changes are merged; do not deploy a newer app before its required migrations are verified in staging. See AUTONOMOUS_UPDATES_2026-11-02.md for the complete review and rollout checklist.
 
-Implementation `02fb241`, draft [PR #7](https://github.com/LaulinVasquez/Buff-me-up/pull/7).
+## Existing merged improvements
 
-Implemented Profile → Appearance with five accent presets, live preview and a labeled sample chart, explicit Save/Cancel, reset-to-default preview and account-backed persistence. Existing primary colors use shared tokens; semantic success/warning/error colors and Google/brand assets stay distinct. The authenticated layout server-renders saved preferences and keys the provider by account. Dark backgrounds stay unchanged; light mode/custom input are outside this change.
-
-Added a checked `gym_profiles.accent_theme` column under existing owner RLS and a validated server action. Palette contrast/validation, local owner-isolated SQL and sample-data save/preview/cancel/error/reset/navigation checks pass, along with 25 theme/width measurements; final quality/Git results are recorded in the session log. Apply migration 8 in staging before verifying saved preferences. Signed-in PostgREST, cross-device and native-device acceptance remain pending. No production migration or deployment. Based on merged Gym is packed PR #6 (`aa44d5f`), including that feature’s accent controls. The appearance PR targets `main`.
-
-## Gym is packed mode (BMU-010)
-
-Implementation `7a1ba02`, merged [PR #6](https://github.com/LaulinVasquez/Buff-me-up/pull/6).
-
-Scope confirmed by the developer: replace one unfinished exercise in the current workout using available equipment. Implemented a reviewable picker backed by the bundled catalog, same-primary-muscle/type matching and duplicate exclusion, with manual muscle selection for unclassified custom moves. Saved plans, completed exercises, original snapshot/weight history and order are preserved; replacement weight is explicitly cleared while targets/instructions remain visible.
-
-Added an additive migration for replacement metadata/history/version, owner-scoped swap/progress RPCs and stale-client guards. Lint, production build, sequential typecheck, seven matching tests, 12 History tests and local SQL persistence/RLS/finalization/concurrency checks pass. The sample-data picker preview passes 20 responsive-state checks; Git/PR results are in the session log. Apply migration 7 in staging before deploying the updated application. Signed-in PostgREST/iPhone acceptance remains pending. No production migration or deployment was performed. Baseline: merged responsive PR #5, `e45f53f`; branch `agent/gym-packed-mode`.
-
-## Responsive layout (BMU-009)
-
-Requested by the developer: retain the phone-first experience and make larger devices useful. Plan: expand the shared content shell on tablets, switch bottom navigation to a sidebar at 1024px, and introduce readable grids for dashboard, History, plans, exercises, profile and workout screens. Keep phone safe areas and workout controls reachable. Presentation changes only; no schema, authentication or workout-state changes.
-
-Acceptance: no horizontal page overflow at 320/390/768/1024/1440px, a single visible primary navigation, accurate active links, working History controls and generator interactions, and usable workout actions at phone and desktop sizes. Validate actual components using labeled synthetic fixtures in an isolated preview, plus lint/build/typecheck and existing History regressions. Signed-in staging and physical-device checks remain separate.
-
-Implementation `9fdf744` is merged via [PR #5](https://github.com/LaulinVasquez/Buff-me-up/pull/5). All 55 initial screen/width measurements (11 screens × 320/390/768/1024/1440px) passed after fixing a History-card grid overflow. Expanded plan forms also fit at 320/768/1024px. History metric controls, keyboard selection and year → month → day navigation, plus generator build/start-over interactions, were verified in fixtures. Final lint, build, sequential typecheck and all 12 History tests pass. See `RESPONSIVE_LAYOUT.md` for breakpoints and staging checks. Git/PR references are recorded in the session log.
-
-## History refresh (BMU-008)
-
-Requested by the developer: a more appealing History tab with day/month/year progress graphs. Implemented a graph-led mobile layout with workout/minute metric controls, active-day/time summaries, streak/all-time context, selectable bars, year → month → day drill-downs, an expandable attendance calendar, and period-specific workout cards. Empty/loading states and keyboard-accessible chart data are included. A base link-style layering correction restores the intended active-tab/link contrast.
-
-Implementation `96639e3`, [PR #4](https://github.com/LaulinVasquez/Buff-me-up/pull/4), now merged upstream. Lint, build, sequential typecheck, all 12 History tests and the database regression suite pass. Signed-in/device verification remains pending.
-
-Progress uses existing completed sessions; no database schema or external chart dependency is added. Query results are paginated as narrow session summaries and filtered to exact local dates. Time logged is elapsed session time grouped by completion time. The same pure aggregation functions drive graph totals and the workout list.
-
-Initial evidence: 12 aggregation/navigation tests pass, including timezone boundaries, both DST transitions, leap years, rest days, excluded statuses, and matching totals. Browser checks of the actual component with labeled synthetic data verified metric switching, annual totals, drill-downs, calendar navigation, additional-session loading, arrow-key selection/single chart tab stop, empty states, and a 320px component width without horizontal overflow. Browser warning/error log was empty. Authenticated staging/PostgREST verification remains pending; no real user data was accessed. Final command/Git results are recorded in the session log.
-
-The session follows the locally supplied `BUFF_ME_UP_AGENT_DEVELOPMENT_PLAN.md`. That pre-existing untracked file is preserved. The approved CSE 499 requirements draft was not found in the repository, so its scope has not been changed.
+PR #2 finalization/idempotency and finished-record guards; #3 patched web/native dependencies; #4 History day/month/year graphs and date-aware aggregation; #5 phone-first/tablet/desktop shell; #6 Gym is packed session substitutions; #7 account accent themes. Git merges do not establish live migration/device acceptance. Their detailed reports and original audit evidence remain in AGENT_SESSION_LOG.md and feature documents. The earlier audit retained 21 moderate development-tool dependency advisories; this batch introduces no dependency upgrades.
 
 ## Evidence and acceptance status
 
@@ -80,30 +34,17 @@ The session follows the locally supplied `BUFF_ME_UP_AGENT_DEVELOPMENT_PLAN.md`.
 | M6 history/detail | Partially implemented | Completed-only history queries, calendar/detail pages, saved snapshots exist. Database completion/snapshot tests pass; browser calendar/detail checks remain. |
 | M7 consistency | Partially implemented | `lib/dates/local.ts`, attendance queries and consistency components exist. Timezone/DST and browser summary acceptance remain. |
 | S1 ExerciseDB | Partially implemented | Server provider, normalized model, fallback catalog, API/search/detail/add-to-day exist. Live contract/limits/terms, pagination and saved-plan demonstration unverified. |
-| S2 generator | Partially implemented | Seeded generator, preview editing, 3–6 day UI and atomic save RPC exist. Schedule/sparse-catalog tests and four-populated-day save/reload demonstration remain. |
+| S2 generator | Implemented locally; staging acceptance pending | 12 day/experience cases, coverage/deduplication/edit validation, local atomic four-day save/rollback and synthetic UI checks pass. Signed-in save/reload remains pending. |
 | S3 mobile | Partially implemented; device verification blocked | Capacitor iOS target, deep-link handling, safe-area layouts and manifest exist. No physical-device/PWA installation verification this session. Hosted `server.url` remains a prototype limitation. |
 | S4 guidance | Partially implemented | Local workout instructions and provider detail media/instructions/fallback UI exist. Saved provider exercises' workout-view guidance and licensing/attribution require verification. |
 | User isolation | Implemented in local migration tests; deployed verification blocked | All six tables have owner/nested RLS. Tests use two synthetic users and real database roles; deployed JWT/PostgREST/two-account checks remain. |
-| Automated quality checks | Partially implemented | Lint/typecheck/build scripts existed; no test script or CI configuration existed at baseline. Added `test:db` with isolated PostgreSQL regression coverage. CI/browser coverage remains missing. |
+| Automated quality checks | Implemented locally; remote CI evidence recorded separately | npm test/check, 38 pure tests, SQL/RLS/concurrency suite and GitHub workflow. Synthetic UI checks are not authenticated end-to-end coverage. |
 
-## First selected task and implementation plan
+## Remaining work and explicit limits
 
-**BMU-001 (P0)**: preserve completed workouts and make completion retries safe. Files: workout service/types, one additive migration, disposable database test runner/fixtures, and verification documentation. Lock each owned workout during finalization; have snapshot writes acquire the same lock; preserve final timestamps and allow retrying the same terminal state. Test both serial and concurrent requests, two-user isolation, and deletion compatibility.
+1. Designated staging Supabase project and two test accounts: apply/verify migrations 9–13 (plus any missing earlier ones), OAuth, real plan/log save/reload, two-tab conflicts, History/goals/gyms/export and owner isolation. Existing environment variables are not permission for production test writes.
+2. Physical iPhone/PWA/Capacitor acceptance, native dialogs, reliable download to Files and background timer behavior. No signing/publishing/invites performed.
+3. Private training partners and a durable offline queue remain separate, unimplemented features. Partners require deliberate revocable sharing and two-account acceptance; offline requires device persistence, retry/conflict/expiry/account-isolation tests. No offline-sync guarantee is shipped.
+4. Provider API contract/rate limits/media terms and guidance attribution remain unverified. All-time personal records, light/custom themes and atomic concurrent append/reorder are not part of this batch.
 
-Rollout risk: application completion/cancellation now depends on `gym_set_workout_status`. Apply and verify migration `20261101000000_guard_gym_workout_finalization.sql` in staging before deploying this version. The migration adds functions/triggers and does not backfill, rewrite, or delete stored rows. Existing migrations are unchanged.
-
-## Repository and external checks
-
-- Fetched upstream safely; local `main` was seven commits behind. Created the agent branch from `origin/main` without moving local `main` or overwriting the untracked guide.
-- Read README, package scripts, routes/actions, services, all migrations/RLS, history/date logic, provider/generator, Capacitor and deployment configuration.
-- GitHub issue/open-PR searches returned none. Issue creation returned 403; findings are tracked in `ISSUES.md`.
-- No `.github` workflow directory was present. GitHub returned no PR-triggered workflow runs for the baseline commit; this does not prove absence of external deployment checks.
-- No authenticated test-account or staging service was established. Production data, OAuth provider settings, signing, publishing, and deployments were not changed.
-
-## Prioritized next steps
-
-1. Review the responsive-layout PR; establish staging/test accounts, verify the merged finalization migration there, and demonstrate M1–M7 plus the responsive checklist. PRs #2/#3/#4 are merged upstream; production rollout is not inferred from a Git merge.
-2. Resolve append-order/latest-weight findings (BMU-003/BMU-004) with focused regressions.
-3. Test existing generator schedules and exercise-provider behavior before expanding stretch scope (BMU-005); then add CI/mobile evidence and track the residual moderate tooling advisories.
-
-See `AGENT_SESSION_LOG.md` for command outcomes and Git/PR references, and `ISSUES.md` for acceptance details and blockers.
+The approved CSE 499 requirements draft was not found; it was not changed. Local synthetic fixtures and disposable SQL establish implementation evidence, not a completed deployed M1–M7 demonstration.

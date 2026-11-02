@@ -1,3 +1,7 @@
+## BMU-018 — Generator validation / continuous quality
+
+**Status:** implemented on `agent/generator-quality-ci`; final PR/remote checks pending. Reject empty/duplicate/fractional edited plans, guarantee deterministic populated 3–6 day fallback schedules with selected-muscle coverage, protect atomic saves and add secret-free CI. Migration 13 required for direct database validation. See GENERATOR_QUALITY.md.
+
 ## BMU-017 — Portable account export
 
 **Status:** implemented on `agent/data-export-quality`; review/staging pending. Explicit owner-scoped table allowlist, keyset pages, all-or-error download preparation, sign-in HTML rejection and readable JSON fallback. No token/provider/FlowDesk export. Actual saved file and native download acceptance remain pending. See DATA_EXPORT.md.
@@ -84,13 +88,13 @@ Browser acceptance for M1–M7, including Google sign-in/out, plan/exercise edit
 
 ## BMU-005 — P1: exercise provider and generator verification
 
-**Status:** partially implemented; not live-verified.
+**Status:** generator schedule/edit validation implemented on `agent/generator-quality-ci`; local pure/SQL and component checks pass. Provider contract/licensing and signed-in staging remain unverified.
 
 ExerciseDB browsing, fallback data, details, and a 3–6 day generator already exist upstream. Verify the provider's current contract, pagination/filtering, limits, and media terms/attribution before marking S1/S4 complete. Add deterministic generator tests for 3/4/5/6 days, sparse catalogs, duplicate avoidance, empty-day rejection, and edited-plan validation. Then demonstrate four populated days and saving/reloading in staging.
 
 ## BMU-006 — P2: mobile, CI, and demonstration evidence
 
-**Status:** pending.
+**Status:** quality workflow/aggregate scripts implemented on `agent/generator-quality-ci`; remote result recorded in the session log. Physical-device/native and authenticated smoke acceptance remain pending.
 
 No repository CI configuration or existing automated test script was present at baseline. This session adds `test:db`; CI integration and browser smoke coverage remain. Physical iPhone OAuth/deep links, installation, PWA layout, network failures, real screenshots, and TestFlight checks require device/staging evidence. The approved requirements draft was not available in this repository; confirm scope before changing commitments. Publishing/signing/invites require human approval per the development plan.
 

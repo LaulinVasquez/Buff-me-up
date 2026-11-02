@@ -14,3 +14,7 @@ Authorized by Laurin on 2026-11-02: continue the previously proposed opportuniti
 | 7 | Private partners | Deliberate sharing controls, revocable access and two-account acceptance required before release; never a public feed by default. |
 
 Already implemented and merged: responsive History, phone/desktop layouts, Gym is packed mode, account color themes. Existing authentication, provider/generator and device acceptance gaps stay visible in ISSUES.md; local fixtures do not establish live acceptance. Features after the first PR may be stacked with explicit dependencies until reviewed.
+
+## End-of-batch scope
+
+Five of the six original product opportunities have implementations: Gym is packed (already merged), short sessions, explained progress/weekly goals, comeback sessions and personal gym setups. New set logging, rest timer, portable export and generator/CI reliability support them. Private partners are not implemented in this batch: shared/revocable visibility and two-account staging acceptance remain a separate feature. Durable offline queues, all-time records, light/custom themes and physical-device acceptance are also explicitly unimplemented/unverified; failed-save draft retention is not offline synchronization. No production changes were performed.

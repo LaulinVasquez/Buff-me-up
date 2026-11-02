@@ -260,3 +260,9 @@ Added authenticated, no-store owner-scoped JSON export across eight explicit gym
 Final lint/build/sequential typecheck, eleven training tests and diff check pass after preview cleanup.
 
 Git: `4e27624` on `agent/data-export-quality`, draft [PR #13](https://github.com/LaulinVasquez/Buff-me-up/pull/13), base `agent/personal-gyms` (PR #12).
+
+## 2026-11-02 — Generator validation and continuous quality
+
+Tests found empty generated days could save and fractional day counts could choose the wrong split. Added strict unknown-input plan validation in UI/server, generation bounds/selected-muscle coverage, catalog deduplication, bounded rotating focus and error feedback. Migration 13 replaces generated save validation with atomic empty/duplicate/malformed rejection. Four generator tests cover 12 day/experience combinations and sparse/edited cases; local SQL verifies four populated days, rollback and isolation. Browser fixture checks fractional/empty-day blocking, regeneration, empty catalog, four generated days at five widths without overflow/warnings/errors. Never submitted the production save action. A temporary iframe outer-scroll obstruction was resolved by using an iframe shorter than the outer viewport; product layout was unaffected. Added npm test/check and pinned, secret-free GitHub quality workflow. Final aggregate/remote results follow.
+
+Final `npm run check` passes after all product/preview changes: lint, production build, sequential typecheck, 38 pure tests and full local SQL/RLS/concurrency suite. `git diff --check` passes. Consolidated report: AUTONOMOUS_UPDATES_2026-11-02.md. No dependency upgrade or remote schema/data/deploy change.

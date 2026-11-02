@@ -101,6 +101,7 @@ Apply these files in order without modifying already-applied migrations:
 10. 20261102030000_add_session_adaptations.sql
 11. 20261102040000_add_weekly_training_goal.sql
 12. 20261102050000_add_personal_gyms.sql
+13. 20261102060000_guard_generated_plan_validation.sql
 
 Apply migration 6 to development/staging before running this version's completion/cancellation flows: they now use `gym_set_workout_status`. It adds functions and triggers without rewriting existing rows. Test the same migration in staging before an approved production rollout.
 
@@ -111,6 +112,8 @@ Apply migration 10 before session adaptation controls. It retains deferred snaps
 Apply migration 11 before account weekly goals. Weekly review uses distinct local attendance days and actual saved sets. See `docs/WEEKLY_PROGRESS.md`.
 
 Apply migration 12 before personal gym setup and exercise notes. It creates owner-isolated gym/notes tables and validated save/selection functions. See `docs/PERSONAL_GYMS.md`.
+
+Apply migration 13 for strict generated-plan validation and atomic empty/duplicate-day rejection. Run `npm run check` for lint, build, sequential typecheck, pure tests and isolated database checks (PostgreSQL tools required). GitHub workflow runs the same checks without application credentials. See `docs/GENERATOR_QUALITY.md` and `docs/AUTONOMOUS_UPDATES_2026-11-02.md`.
 
 All application objects use the gym_ prefix. Recommended templates remain static application data; attendance is derived from completed workouts.
 
