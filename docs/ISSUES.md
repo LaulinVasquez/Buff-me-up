@@ -1,8 +1,16 @@
 # Development issues
 
+## BMU-009 — Phone-first responsive layout for larger devices
+
+**Status:** implemented in `9fdf744` on `agent/responsive-layout`, draft [PR #5](https://github.com/LaulinVasquez/Buff-me-up/pull/5), based on merged upstream `95b4b92`; local layout/build checks pass. Signed-in staging and physical-device acceptance pending.
+
+Shared shell now expands beyond the former 512px cap, with bottom navigation below 1024px and a 240px sidebar at desktop widths. Dashboard, History, library, plans/generator, profile and detail pages use responsive grids. Workout actions stay fixed at the bottom on phones/tablets and become a sticky side panel on desktop. The sign-in page gains a desktop two-column layout.
+
+Acceptance evidence: 55 fixture screen/width combinations have no horizontal page overflow at 320/390/768/1024/1440px, including all primary screens and details. Expanded plan forms fit at 320/768/1024px; generated 3-day phone and 4-day desktop plans fit; History controls/drill-down and chart keyboard selection work. The initial 320px History session-card overflow was repaired with explicit shrinkable grid tracks/items. Lint, build, sequential typecheck and 12 History tests pass. No migrations, dependencies, auth checks, services or server actions changed. See `RESPONSIVE_LAYOUT.md` and the session log for limits and review references.
+
 ## BMU-008 — History layout and day/month/year progress
 
-**Status:** implemented in `96639e3` on `agent/history-progress`; draft [PR #4](https://github.com/LaulinVasquez/Buff-me-up/pull/4). Automated and synthetic-component checks pass; review/staging verification pending.
+**Status:** implemented in `96639e3`, merged [PR #4](https://github.com/LaulinVasquez/Buff-me-up/pull/4). Automated and synthetic-component checks pass; staging verification pending.
 
 Acceptance: clear mobile layout, day/month/year views, workouts/time graphs, accurate local-date totals, selectable buckets and drill-downs, retained session details/calendar/resume links, usable empty/loading states, and accessible chart data. Existing completed-workout records supply all values; no sample records or chart dependency are shipped.
 
@@ -52,7 +60,7 @@ No repository CI configuration or existing automated test script was present at 
 
 ## BMU-007 — P0: vulnerable locked dependencies
 
-**Status:** implemented separately in draft [PR #3](https://github.com/LaulinVasquez/Buff-me-up/pull/3), commit `828dfdc`; merge/rollout pending.
+**Status:** implemented in merged [PR #3](https://github.com/LaulinVasquez/Buff-me-up/pull/3), commit `828dfdc`; production/native rollout remains unverified.
 
 `npm ci` succeeded but reported 29 affected packages (21 moderate, 6 high, 2 critical). `npm audit --json` returned exit 1. Critical direct packages are `next@16.3.1` and `@capacitor/ios@8.5.0`; the audit reports patched versions are available. The finding alone does not establish which advisory preconditions are reachable in this deployment. Review the relevant advisories, update supported versions/lockfile in a separate focused change, then rerun application checks and the audit. Do not use forced bulk upgrades.
 

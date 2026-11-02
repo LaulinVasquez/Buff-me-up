@@ -35,7 +35,7 @@ export function HistoryView(props: Props) {
   const isCurrentPeriod = today >= start && today < end;
   const chartId = useId();
 
-  return <main className="pb-28 pt-8">
+  return <main className="pb-28 pt-8 lg:pb-8">
     <header>
       <div className="flex items-center justify-between gap-3">
         <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-lime-400">Your training journal</p>
@@ -51,7 +51,8 @@ export function HistoryView(props: Props) {
       <span className="text-xs font-bold text-lime-400">Resume <span aria-hidden="true">↗</span></span>
     </Link> : null}
 
-    <section aria-label="Workout progress" className={`${card} relative mt-7 overflow-hidden p-4 sm:p-5`}>
+    <div className="mt-7 grid items-start gap-3 xl:grid-cols-[minmax(0,1.8fr)_minmax(0,1fr)] xl:gap-6">
+    <section aria-label="Workout progress" className={`${card} relative min-w-0 overflow-hidden p-4 sm:p-5`}>
       <div aria-hidden="true" className="pointer-events-none absolute -right-12 -top-24 size-64 rounded-full bg-lime-400/[0.04] blur-3xl" />
       <nav aria-label="Progress time range" className="relative grid grid-cols-3 gap-1 rounded-2xl bg-slate-950/80 p-1">
         {(["day", "month", "year"] as const).map((period) => <Link aria-current={props.period === period ? "page" : undefined} className={`flex min-h-11 items-center justify-center rounded-xl text-sm font-bold capitalize transition-colors ${focus} ${props.period === period ? "bg-lime-400 text-slate-950 shadow-[0_3px_16px_-6px_#a3e635]" : "text-slate-400 hover:bg-slate-800/70 hover:text-white"}`} href={historyHref(period, props.date, props.timeZone)} key={period} scroll={false}>{period}</Link>)}
@@ -75,7 +76,8 @@ export function HistoryView(props: Props) {
       {today && !isCurrentPeriod ? <Link className={`mt-3 flex min-h-10 items-center justify-center text-xs font-semibold text-slate-400 hover:text-lime-400 ${focus}`} href={historyHref(props.period, today, props.timeZone)} scroll={false}>Back to {periodText}</Link> : null}
     </section>
 
-    <section aria-label="Period summary" className="mt-3 grid grid-cols-2 gap-3">
+    <div className="min-w-0">
+    <section aria-label="Period summary" className="grid grid-cols-2 gap-3 xl:grid-cols-1">
       <div className={`${card} p-4`}><div className="flex items-center gap-2 text-sky-300"><Icon name="calendar" className="size-4" /><p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Active days</p></div><p className="mt-3 text-2xl font-black tracking-tight">{progress.activeDays}<span className="ml-1.5 text-xs font-normal text-slate-500">{progress.activeDays === 1 ? "day" : "days"}</span></p></div>
       <div className={`${card} p-4`}><div className="flex items-center gap-2 text-lime-300"><Icon name={metric === "workouts" ? "clock" : "workout"} className="size-4" /><p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{metric === "workouts" ? "Time logged" : "Workouts"}</p></div><p className="mt-3 text-2xl font-black tracking-tight">{metric === "workouts" ? formatTrainingTime(progress.minutes) : progress.workouts}</p></div>
     </section>
@@ -83,10 +85,12 @@ export function HistoryView(props: Props) {
 
     {props.period !== "year" ? <AttendanceCalendar date={props.date} timeZone={props.timeZone} timestamps={props.attendanceTimestamps} today={today} /> : null}
 
+    </div></div>
+
     <section className="mt-8">
       <div className="flex items-center justify-between gap-3"><h2 className="text-lg font-bold tracking-tight">The work you put in</h2><span className="text-[11px] text-slate-500">{progress.workouts} {progress.workouts === 1 ? "session" : "sessions"}</span></div>
       <p className="mt-1 text-xs text-slate-500">Your completed workouts for {periodLabel(props.period, props.date)}.</p>
-      <div className="mt-4 space-y-2.5">{progress.sessions.slice(0, visibleCount).map((session) => <SessionRow key={session.id} session={session} timeZone={props.timeZone} />)}</div>
+      <div className="mt-4 grid grid-cols-1 gap-2.5 md:grid-cols-2">{progress.sessions.slice(0, visibleCount).map((session) => <SessionRow key={session.id} session={session} timeZone={props.timeZone} />)}</div>
       {!progress.workouts ? <div className={`${card} mt-4 px-6 py-8 text-center`}><span className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-slate-800 text-slate-400"><Icon name="workout" /></span><h3 className="mt-4 font-bold">Room for your next workout.</h3><p className="mt-2 text-xs leading-6 text-slate-500">No completed sessions in this period.<br />Every workout is another step forward.</p><Link className={`mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl bg-lime-400 px-5 text-xs font-bold text-slate-950 ${focus}`} href="/app">Go to my workouts<Icon name="arrow" className="size-3.5" /></Link></div> : null}
       {visibleCount < progress.sessions.length ? <button className={`mt-4 min-h-12 w-full rounded-2xl border border-slate-800 text-xs font-semibold text-slate-300 hover:bg-slate-900 ${focus}`} onClick={() => setVisibleCount((count) => count + 6)} type="button">Show more workouts <span className="ml-1 text-slate-500">({progress.sessions.length - visibleCount} more)</span></button> : null}
     </section>
@@ -100,8 +104,8 @@ function ActivityChart({ buckets, id, metric, onSelect, period, selectedIndex }:
   const labels = new Set(period === "year" ? buckets.map((_, index) => index) : [0, ...buckets.map((_, index) => index).filter((index) => index > 0 && index % (period === "day" ? 6 : 7) === 0), buckets.length - 1]);
   return <div className="mt-6" id={id}>
     <div className="relative pl-7">
-      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-40">{[max, max / 2, 0].map((value, index) => <div className="absolute inset-x-0 flex items-center gap-2" key={index} style={{ top: `${index * 50}%` }}><span className="w-5 shrink-0 -translate-y-1/2 text-right text-[9px] tabular-nums text-slate-600">{value}</span><span className="w-full -translate-y-1/2 border-t border-dashed border-slate-800" /></div>)}</div>
-      <div aria-label={`${metric === "workouts" ? "Completed workouts" : "Minutes logged"} by ${period === "day" ? "local hour" : period === "month" ? "day" : "month"}. Select a bar for details. Use left and right arrow keys to explore.`} className={`relative grid h-40 items-end ${period === "year" ? "gap-1.5" : "gap-[3px]"}`} role="group" style={{ gridTemplateColumns: `repeat(${buckets.length}, minmax(0, 1fr))` }}>
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-40 sm:h-52 xl:h-64">{[max, max / 2, 0].map((value, index) => <div className="absolute inset-x-0 flex items-center gap-2" key={index} style={{ top: `${index * 50}%` }}><span className="w-5 shrink-0 -translate-y-1/2 text-right text-[9px] tabular-nums text-slate-600">{value}</span><span className="w-full -translate-y-1/2 border-t border-dashed border-slate-800" /></div>)}</div>
+      <div aria-label={`${metric === "workouts" ? "Completed workouts" : "Minutes logged"} by ${period === "day" ? "local hour" : period === "month" ? "day" : "month"}. Select a bar for details. Use left and right arrow keys to explore.`} className={`relative grid h-40 items-end sm:h-52 xl:h-64 ${period === "year" ? "gap-1.5" : "gap-[3px]"}`} role="group" style={{ gridTemplateColumns: `repeat(${buckets.length}, minmax(0, 1fr))` }}>
         {buckets.map((bucket, index) => <button aria-label={`${bucket.fullLabel}: ${bucket.workouts} ${bucket.workouts === 1 ? "workout" : "workouts"}, ${formatTrainingTime(bucket.minutes)} logged`} aria-pressed={index === selectedIndex} className={`group relative flex h-full min-w-0 items-end rounded-sm outline-offset-2 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-lime-200 ${focus}`} key={bucket.key} onClick={() => onSelect(index)} onKeyDown={(event) => {
           const next = event.key === "ArrowRight" ? Math.min(buckets.length - 1, index + 1) : event.key === "ArrowLeft" ? Math.max(0, index - 1) : event.key === "Home" ? 0 : event.key === "End" ? buckets.length - 1 : null;
           if (next === null) return;
@@ -144,7 +148,7 @@ function SessionRow({ session, timeZone }: { session: HistorySession; timeZone: 
   const day = new Intl.DateTimeFormat("en-US", { day: "2-digit", timeZone }).format(completed);
   const month = new Intl.DateTimeFormat("en-US", { month: "short", timeZone }).format(completed);
   const time = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", timeZone }).format(completed);
-  return <Link className={`${card} flex min-h-24 items-center gap-3 p-3.5 transition-colors hover:border-slate-600 hover:bg-slate-900 ${focus}`} href={`/app/history/${session.id}`}>
+  return <Link className={`${card} flex min-h-24 min-w-0 items-center gap-3 p-3.5 transition-colors hover:border-slate-600 hover:bg-slate-900 ${focus}`} href={`/app/history/${session.id}`}>
     <span className="flex w-12 shrink-0 flex-col items-center rounded-xl bg-slate-950/80 py-2"><span className="text-[9px] font-bold uppercase tracking-wider text-slate-500">{month}</span><span className="mt-0.5 text-xl font-bold tabular-nums leading-none text-slate-200">{day}</span></span>
     <span className="min-w-0 flex-1"><strong className="block truncate text-sm">{session.name}</strong><span className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] text-slate-500"><span>{time}</span><span aria-hidden="true">·</span><span>{formatTrainingTime(sessionMinutes(session))} logged</span></span></span>
     <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-lime-400/10 text-lime-400"><Icon name="check" className="size-3.5" /></span><Icon name="chevron" className="size-3 shrink-0 text-slate-600" />

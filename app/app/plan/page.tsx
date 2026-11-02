@@ -12,14 +12,15 @@ export default async function PlanPage({ searchParams }: Props) {
   const activePlan = plans.find((plan) => plan.isActive);
   const inactivePlans = plans.filter((plan) => !plan.isActive);
 
-  return <main className="pb-28 pt-10">
+  return <main className="pb-28 pt-10 lg:pb-8">
     <p className="text-sm font-bold uppercase tracking-[0.2em] text-lime-400">Plan</p>
     <h1 className="mt-3 text-3xl font-black tracking-tight">Build your routine.</h1>
     <p className="mt-3 leading-7 text-slate-400">Use a proven template or create a plan that is entirely yours.</p>
-    <Link className="mt-6 flex min-h-14 items-center justify-between rounded-2xl bg-lime-400 px-5 font-bold text-slate-950" href="/app/plan/generate"><span>Generate a smart plan</span><span>→</span></Link>
+    <Link className="mt-6 flex max-w-xl min-h-14 items-center justify-between rounded-2xl bg-lime-400 px-5 font-bold text-slate-950" href="/app/plan/generate"><span>Generate a smart plan</span><span>→</span></Link>
     {params.deleted ? <Notice tone="success">Plan deleted.</Notice> : null}
     {params.error ? <Notice tone="error">That change could not be saved. Please try again.</Notice> : null}
 
+    <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-6"><div className="min-w-0">
     <section className="mt-10">
       <h2 className="text-xl font-bold">Active plan</h2>
       <div className="mt-4 space-y-3">
@@ -29,6 +30,7 @@ export default async function PlanPage({ searchParams }: Props) {
 
     {inactivePlans.length ? <section className="mt-8"><h2 className="text-lg font-bold">Other plans</h2><p className="mt-1 text-sm text-slate-500">Custom and adopted plans that are not currently active.</p><div className="mt-4 space-y-3">{inactivePlans.map((plan) => <PlanLink key={plan.id} plan={plan} />)}</div></section> : null}
 
+    </div>
     <details className="mt-10 rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
       <summary className="min-h-10 cursor-pointer font-bold">+ Create custom plan</summary>
       <form action={createCustomPlan} className="mt-5 space-y-4">
@@ -36,11 +38,11 @@ export default async function PlanPage({ searchParams }: Props) {
         <Field label="Description" name="description" placeholder="Optional goal or focus" />
         <SubmitButton className="min-h-12 w-full rounded-xl bg-lime-400 font-bold text-slate-950 disabled:opacity-60">Create plan</SubmitButton>
       </form>
-    </details>
+    </details></div>
 
     <section className="mt-12 space-y-5">
       <div><h2 className="text-xl font-bold">Recommended plans</h2><p className="mt-1 text-sm text-slate-400">Preview every workout and exercise before choosing.</p></div>
-      {recommendedPlans.map((plan) => <article className="rounded-3xl border border-slate-800 bg-slate-900/70 p-5" key={plan.id}>
+      <div className="grid items-start gap-5 md:grid-cols-2 2xl:grid-cols-3">{recommendedPlans.map((plan) => <article className="min-w-0 rounded-3xl border border-slate-800 bg-slate-900/70 p-5" key={plan.id}>
         <div className="flex items-start justify-between gap-4">
           <div><h3 className="text-lg font-bold">{plan.name}</h3><p className="mt-1 text-sm leading-6 text-slate-400">{plan.description}</p></div>
           <span className="shrink-0 rounded-full bg-slate-800 px-2.5 py-1 text-xs">{plan.days.length} days</span>
@@ -65,7 +67,7 @@ export default async function PlanPage({ searchParams }: Props) {
           <input name="recommendationId" type="hidden" value={plan.id} />
           <SubmitButton className="min-h-12 w-full rounded-xl bg-lime-400 px-5 font-bold text-slate-950 hover:bg-lime-300 disabled:opacity-60" pendingLabel="Creating plan...">Use this plan</SubmitButton>
         </form>
-      </article>)}
+      </article>)}</div>
     </section>
   </main>;
 }
