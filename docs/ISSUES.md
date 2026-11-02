@@ -1,3 +1,7 @@
+## BMU-015 — Weekly goal / progress explained
+
+**Status:** implemented on `agent/weekly-progress`; review/staging pending. Distinct local days, account goal, readable best-set rep changes and limited-window load records. Eight training tests, goal SQL isolation and five fixture widths pass. Migration 11 required; no automatic progression prescription. See WEEKLY_PROGRESS.md.
+
 ## BMU-013/014 — Short and comeback sessions
 
 **Status:** implemented on `agent/session-adaptations`; PR/staging review pending. Explicit keep/set-aside review, 15/20/30-minute estimates, half-untouched comeback, safe restore, plan/log preservation and stale-review protection. Additive migration 10. See SESSION_ADAPTATIONS.md for scope and acceptance limits.

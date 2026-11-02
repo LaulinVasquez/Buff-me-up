@@ -1,0 +1,16 @@
+set role authenticated;
+set request.jwt.claim.sub='00000000-0000-0000-0000-000000000001';
+select test.assert((select weekly_goal=3 from public.gym_profiles where id=auth.uid()),'Existing goal defaults to three days');
+update public.gym_profiles set weekly_goal=1 where id=auth.uid();
+update public.gym_profiles set weekly_goal=7 where id=auth.uid();
+select test.assert((select weekly_goal=7 from public.gym_profiles where id=auth.uid()),'Changed goal persists');
+select test.assert_raises($$update public.gym_profiles set weekly_goal=0 where id=auth.uid()$$,'violates check');
+select test.assert_raises($$update public.gym_profiles set weekly_goal=8 where id=auth.uid()$$,'violates check');
+select test.assert_raises($$update public.gym_profiles set weekly_goal=null where id=auth.uid()$$,'null value');
+set request.jwt.claim.sub='00000000-0000-0000-0000-000000000002';
+update public.gym_profiles set weekly_goal=2 where id='00000000-0000-0000-0000-000000000001';
+select test.assert((select count(*)=0 from public.gym_profiles where id='00000000-0000-0000-0000-000000000001'),'Other goals are private');
+set request.jwt.claim.sub='00000000-0000-0000-0000-000000000001';
+select test.assert((select weekly_goal=7 from public.gym_profiles where id=auth.uid()),'Other user cannot change goal');
+update public.gym_profiles set weekly_goal=3 where id=auth.uid();
+reset role;

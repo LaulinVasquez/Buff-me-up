@@ -1,3 +1,5 @@
+import { GoalSettings } from "@/components/progress/goal-settings";
+import { saveGoalAction } from "./goal-actions";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import { signOut } from "@/app/app/actions";
@@ -30,6 +32,7 @@ export default async function ProfilePage() {
     <section className="space-y-3 md:col-start-2 md:row-span-2"><div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4"><p className="text-xs font-bold uppercase text-slate-500">Total workouts</p><p className="mt-2 text-xl font-black">{stats.totalWorkouts}</p></div><ConsistencySummary timestamps={stats.attendanceTimestamps} /></section>
     <form action={signOut} className="md:col-start-1 md:row-start-2"><button className="min-h-12 w-full rounded-xl border border-slate-700 font-semibold text-slate-200" type="submit">Sign out</button></form>
     </div>
+    <GoalSettings key={profile?.weekly_goal ?? 3} goal={profile?.weekly_goal ?? 3} action={saveGoalAction} />
     <AppearanceSettings action={saveAppearanceAction} />
   </main>;
 }

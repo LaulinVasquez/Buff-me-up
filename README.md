@@ -99,12 +99,15 @@ Apply these files in order without modifying already-applied migrations:
 8. 20261102010000_add_profile_accent_theme.sql
 9. 20261102020000_add_workout_set_logging.sql
 10. 20261102030000_add_session_adaptations.sql
+11. 20261102040000_add_weekly_training_goal.sql
 
 Apply migration 6 to development/staging before running this version's completion/cancellation flows: they now use `gym_set_workout_status`. It adds functions and triggers without rewriting existing rows. Test the same migration in staging before an approved production rollout.
 
 Apply migration 9 in staging before using individual set logging. It adds actual-set JSON records, conflict revisions and an owner-scoped save RPC; historical reps are not backfilled. See `docs/SET_LOGGING.md`.
 
 Apply migration 10 before session adaptation controls. It retains deferred snapshots, records reviewed scope changes, and protects logged/finished work. See `docs/SESSION_ADAPTATIONS.md`.
+
+Apply migration 11 before account weekly goals. Weekly review uses distinct local attendance days and actual saved sets. See `docs/WEEKLY_PROGRESS.md`.
 
 All application objects use the gym_ prefix. Recommended templates remain static application data; attendance is derived from completed workouts.
 

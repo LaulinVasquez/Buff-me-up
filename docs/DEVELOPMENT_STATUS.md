@@ -1,3 +1,7 @@
+## Flexible weekly goals and progress feedback (BMU-015)
+
+Implemented on `agent/weekly-progress`, stacked on PR #10. Account-saved 1–7 attendance-day goals, current local week/last week, schedule-focused next step and actual weighted-set explanations on Home/History. Comparisons are explicitly limited to up to 100 completed sessions/90 days; no inferred historical reps or all-time claims. Migration 11 and staging acceptance required. See WEEKLY_PROGRESS.md.
+
 ## Session adaptations (BMU-013/014)
 
 Implemented on `agent/session-adaptations`, stacked on PR #9. Reviewed short sessions, optional comeback and full restore preserve logged work and saved routines. Migration 10 retains deferred snapshots and rejects stale scope changes. Pure/local SQL and five responsive fixture checks pass; live/device acceptance pending. See SESSION_ADAPTATIONS.md.

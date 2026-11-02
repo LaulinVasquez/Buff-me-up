@@ -236,3 +236,11 @@ Added reviewed short sessions (15/20/30-minute estimates), optional comeback (ha
 Final lint/build/sequential typecheck, five training tests, SQL suite and diff check pass after preview cleanup. Home/resume excludes deferred exercises; previous-weight queries exclude deferred and unlogged/incomplete rows.
 
 Git: `ee9fefd` on `agent/session-adaptations`, draft [PR #10](https://github.com/LaulinVasquez/Buff-me-up/pull/10), base `agent/set-logging` (PR #9).
+
+## 2026-11-02 — Flexible weekly goal and explained progress
+
+Added Profile goal (1–7 distinct attendance days), Home/History weekly review in local timezone, goal feedback and comparable best-set rep / limited-window load explanations. Review is labeled up to 100 sessions/90 days; no inferred old reps, unknown-identity/unweighted/deferred comparisons or all-time claims. Kept start controls/charts ahead of the review on phones. Migration 11 uses existing profile owner RLS. Eight training tests and full local SQL suite pass, including DST/week/duplicate dates, comparison exclusions and goal isolation. Synthetic component browser checks pass goal save/reload/met state, failed-save selection retention, empty state and five widths; no overflow or console warnings/errors. Next: personal gym equipment/settings/notes.
+
+Final lint/build/sequential typecheck, eight training tests, 12 History tests and diff check pass after preview cleanup.
+
+Git: `3d881b4` on `agent/weekly-progress`, draft [PR #11](https://github.com/LaulinVasquez/Buff-me-up/pull/11), base `agent/session-adaptations` (PR #10).

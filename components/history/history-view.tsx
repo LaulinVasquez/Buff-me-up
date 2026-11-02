@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useId, useMemo, useState, useSyncExternalStore } from "react";
+import { useId, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
 import { calculateCurrentStreak, localDateKey } from "@/lib/dates/local";
 import {
   buildHistoryProgress, formatTrainingTime, historyHref, historyRange, isValidHistoryDate,
@@ -10,6 +10,7 @@ import {
 } from "@/lib/history/progress";
 
 type Props = Readonly<{
+  review?: ReactNode;
   date: string;
   period: HistoryPeriod;
   timeZone: string;
@@ -86,6 +87,8 @@ export function HistoryView(props: Props) {
     {props.period !== "year" ? <AttendanceCalendar date={props.date} timeZone={props.timeZone} timestamps={props.attendanceTimestamps} today={today} /> : null}
 
     </div></div>
+
+    {props.review}
 
     <section className="mt-8">
       <div className="flex items-center justify-between gap-3"><h2 className="text-lg font-bold tracking-tight">The work you put in</h2><span className="text-[11px] text-slate-500">{progress.workouts} {progress.workouts === 1 ? "session" : "sessions"}</span></div>
