@@ -25,11 +25,11 @@ export async function getPlansWithDays() {
   return data.map((plan) => ({ ...plan, days: [...plan.gym_workout_days].sort((a, b) => a.day_order - b.day_order) }));
 }
 
-export async function getDayExerciseCount(dayId: string) {
+export async function getNextExerciseOrder(dayId: string) {
   const { supabase } = await getAuthenticatedWorkoutClient();
-  const { count, error } = await supabase.from("gym_exercises").select("id", { count: "exact", head: true }).eq("workout_day_id", dayId);
+  const { data, error } = await supabase.from("gym_exercises").select("exercise_order").eq("workout_day_id", dayId).order("exercise_order", { ascending: false }).limit(1).maybeSingle();
   assertNoError(error, "Unable to inspect workout day");
-  return count ?? 0;
+  return data ? data.exercise_order + 1 : 0;
 }
 
 export async function getActivePlan() {

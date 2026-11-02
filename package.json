@@ -14,7 +14,8 @@
     "test:history": "node scripts/test-history.mjs",
     "ios": "npx cap sync ios && npx cap open ios",
     "ios:sync": "npx cap sync ios",
-    "ios:open": "npx cap open ios"
+    "ios:open": "npx cap open ios",
+    "test:training": "node scripts/test-training.mjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.1",

@@ -52,13 +52,13 @@ Browser acceptance for M1–M7, including Google sign-in/out, plan/exercise edit
 
 ## BMU-003 — P0: ordering after deleting a middle item
 
-**Status:** source finding; regression reproduction and focused fix needed.
+**Status:** fixed on `agent/training-foundation-fixes`; append uses the highest remaining position plus one for days, custom exercises and catalog additions. Gap/deletion regression passes. Concurrent append/reorder atomicity remains outside this focused fix.
 
 `addWorkoutDay` assigns order using `plan.gym_workout_days.length`; `addExercise` and catalog additions also use counts. Deleting a middle item leaves a gap, and a later insertion can reuse the last item's order. Sorting tied orders has no stable database guarantee. Reproduce with orders 0/1/2, delete 1, add another item; verify the new item is appended and workout rotation follows displayed order.
 
 ## BMU-004 — P0: latest previous weight query
 
-**Status:** source finding; PostgREST reproduction needed.
+**Status:** corrected on `agent/training-foundation-fixes`; top-level order now references the to-one workout completion time before the limit, with a deterministic snapshot-ID tie break. SDK request-contract regression passes; live PostgREST acceptance remains pending.
 
 `getPreviousExerciseWeight` orders the embedded `gym_workouts` relation, then limits the parent `gym_workout_exercises` query to one row. Confirm that this returns the latest completed workout's weight with three distinct dated sessions; add a regression and order the top-level result appropriately if it does not.
 

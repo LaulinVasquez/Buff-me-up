@@ -1,4 +1,5 @@
 import { assertNoError, getAuthenticatedWorkoutClient } from "./auth";
+import { previousWeightQuery } from "./queries";
 import { getActivePlan } from "./plans";
 
 export async function getCurrentWorkout() {
@@ -95,15 +96,7 @@ async function setWorkoutStatus(id: string, status: "completed" | "cancelled") {
 export async function getPreviousExerciseWeight(exerciseId: string | null) {
   if (!exerciseId) return null;
   const { supabase } = await getAuthenticatedWorkoutClient();
-  const { data, error } = await supabase
-    .from("gym_workout_exercises")
-    .select("weight, gym_workouts!inner(completed_at)")
-    .eq("exercise_id", exerciseId)
-    .eq("gym_workouts.status", "completed")
-    .not("weight", "is", null)
-    .order("completed_at", { referencedTable: "gym_workouts", ascending: false })
-    .limit(1)
-    .maybeSingle();
+  const { data, error } = await previousWeightQuery(supabase, exerciseId);
   assertNoError(error, "Unable to load previous weight");
   return data?.weight ?? null;
 }
