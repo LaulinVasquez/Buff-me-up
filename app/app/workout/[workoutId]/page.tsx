@@ -12,6 +12,8 @@ import { SubstitutionHistory } from "@/components/workout/substitution-history";
 import { getSwapSource, readSubstitutionDetails } from "@/lib/workouts/substitutions";
 import { swapExerciseAction } from "../substitution-actions";
 import { SetLogger } from "@/components/workout/set-logger";
+import { SessionAdaptations } from "@/components/workout/session-adaptations";
+import { adaptWorkoutAction } from "../adaptation-actions";
 import { RestTimer } from "@/components/workout/rest-timer";
 import { UnsavedWorkoutGuard } from "@/components/workout/unsaved-guard";
 import { saveSetsAction } from "../set-actions";
@@ -24,7 +26,9 @@ export default async function WorkoutPage({ params, searchParams }: Props) {
   const workout = await getWorkout(workoutId).catch(() => null);
   if (!workout) notFound();
 
-  const exercises = [...workout.gym_workout_exercises].sort((a, b) => a.exercise_order - b.exercise_order);
+  const allExercises = [...workout.gym_workout_exercises].sort((a, b) => a.exercise_order - b.exercise_order);
+  const exercises = allExercises.filter(item => !item.deferred);
+  const deferred = allExercises.filter(item => item.deferred);
   const previousWeights = await Promise.all(exercises.map((item) => getPreviousExerciseWeight(item.exercise_id).catch(() => null)));
   const completeCount = exercises.filter((item) => item.completed).length;
   const percent = exercises.length ? Math.round((completeCount / exercises.length) * 100) : 0;
@@ -42,6 +46,7 @@ export default async function WorkoutPage({ params, searchParams }: Props) {
     {query.error ? <p className="mt-5 rounded-xl bg-red-400/10 p-4 text-sm text-red-200">That update did not save. Please try again.</p> : null}
     {!exercises.length ? <section className="mt-8 rounded-3xl border border-dashed border-slate-700 p-6"><h2 className="font-bold">No exercises in this workout.</h2><p className="mt-2 text-sm text-slate-400">You can finish or cancel this session, then add exercises to the plan.</p></section> : null}
 
+    <SessionAdaptations key={workout.mode_revision} action={adaptWorkoutAction} exercises={allExercises} workoutId={workout.id} mode={workout.session_mode} revision={workout.mode_revision} />
     <RestTimer />
     <WorkoutLayout actions={<>
       <form action={finishWorkoutAction} data-leaves-workout="true"><input name="workoutId" type="hidden" value={workout.id} />{completeCount < exercises.length ? <ConfirmSubmitButton className="min-h-14 w-full rounded-xl bg-accent-400 font-black text-slate-950" message={`${exercises.length - completeCount} exercises are incomplete. Finish anyway?`}>Finish workout</ConfirmSubmitButton> : <SubmitButton className="min-h-14 w-full rounded-xl bg-accent-400 font-black text-slate-950">Finish workout</SubmitButton>}</form>
@@ -61,6 +66,7 @@ export default async function WorkoutPage({ params, searchParams }: Props) {
           <ExerciseSwap key={`${exercise.id}-${exercise.updated_at}`} action={swapExerciseAction} exercise={exercise} exercises={exercises} workoutId={workout.id} />
         </article>;
       })}
+      {deferred.length ? <section className="rounded-2xl border border-dashed border-slate-700 p-5 md:col-span-full"><h2 className="font-bold">Set aside for this session</h2><ul className="mt-3 space-y-1 text-sm text-slate-400">{deferred.map(item => <li key={item.id}>{item.name}</li>)}</ul><p className="mt-3 text-xs text-slate-400">These are saved in History as set aside, rather than completed. Restore the full session above to include them today.</p></section> : null}
     </WorkoutLayout>
   </main>;
 }

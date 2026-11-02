@@ -1,3 +1,7 @@
+## Session adaptations (BMU-013/014)
+
+Implemented on `agent/session-adaptations`, stacked on PR #9. Reviewed short sessions, optional comeback and full restore preserve logged work and saved routines. Migration 10 retains deferred snapshots and rejects stale scope changes. Pure/local SQL and five responsive fixture checks pass; live/device acceptance pending. See SESSION_ADAPTATIONS.md.
+
 ## Set logging and rest timer (BMU-012)
 
 Implemented on `agent/set-logging`, stacked on foundation PR #8. Individual reps/weight/completion, explicit saves, dirty/error feedback, History details, swap archives and a page-local rest timer. Additive migration 9 required before deployment. Local SQL validation/RLS/concurrency tests and five responsive synthetic fixture widths pass; authenticated staging/device acceptance remains pending. See SET_LOGGING.md.

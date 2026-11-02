@@ -18,7 +18,7 @@ export default async function ApplicationHome({ searchParams }: Props) {
     getWorkoutStatsData().catch(() => ({ totalWorkouts: 0, attendanceTimestamps: [] })),
   ]);
   const exercises = selection.day ? [...selection.day.gym_exercises].sort((a, b) => a.exercise_order - b.exercise_order) : [];
-  const currentExercises = selection.currentWorkout?.gym_workout_exercises ?? [];
+  const currentExercises = selection.currentWorkout?.gym_workout_exercises.filter(item => !item.deferred) ?? [];
   const currentComplete = currentExercises.filter((item) => item.completed).length;
 
   return <main className="min-h-[calc(100dvh-9rem)] py-10 pb-28 lg:pb-8">

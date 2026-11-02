@@ -12,7 +12,7 @@ export default async function WorkoutHistoryDetail({ params }: Props) {
   const workout = await getWorkoutDetail(workoutId).catch(() => null);
   if (!workout || !workout.completed_at) notFound();
   const exercises = [...workout.gym_workout_exercises].sort((a, b) => a.exercise_order - b.exercise_order);
-  const completedCount = exercises.filter((item) => item.completed).length;
+  const completedCount = exercises.filter((item) => item.completed && !item.deferred).length;
   const minutes = Math.max(1, Math.round((new Date(workout.completed_at).getTime() - new Date(workout.started_at).getTime()) / 60000));
 
   return <main className="pb-28 pt-8 lg:pb-8">
@@ -22,10 +22,12 @@ export default async function WorkoutHistoryDetail({ params }: Props) {
     <p className="mt-3 text-slate-300"><LocalDateTime mode="date" value={workout.completed_at} /></p>
     <p className="mt-1 text-sm text-slate-500"><LocalDateTime mode="time" value={workout.started_at} /> – <LocalDateTime mode="time" value={workout.completed_at} /> · {minutes} minutes</p>
 
-    <section className="mt-7 grid max-w-xl grid-cols-2 gap-3"><Stat label="Exercises" value={String(exercises.length)} /><Stat label="Completed" value={`${completedCount} / ${exercises.length}`} /></section>
+    {workout.session_mode !== "full" ? <p className="mt-4 rounded-xl bg-accent-400/10 p-3 text-sm text-accent-300">{workout.session_mode === "short" ? `${workout.mode_minutes}-minute session` : "Comeback session"} · {exercises.filter(item=>item.deferred).length} exercises set aside. Your saved routine is unchanged.</p> : null}
+    <section className="mt-7 grid max-w-xl grid-cols-2 gap-3"><Stat label="Exercises" value={String(exercises.filter(item=>!item.deferred).length)} /><Stat label="Completed" value={`${completedCount} / ${exercises.filter(item=>!item.deferred).length}`} /></section>
     <section className="mt-9 grid items-start gap-4 md:grid-cols-2"><h2 className="text-xl font-bold md:col-span-2">Exercise snapshots</h2>
       {exercises.map((exercise) => <article className="min-w-0 rounded-2xl border border-slate-800 bg-slate-900/70 p-5" key={exercise.id}>
         <div className="flex items-start justify-between gap-3"><div><h3 className="font-bold">{exercise.completed ? "✓ " : ""}{exercise.name}</h3><p className="mt-1 text-sm text-slate-500">{exercise.target_sets ?? "—"} sets × {exercise.target_reps ?? "—"}</p></div><strong className="shrink-0 text-accent-400">{exercise.weight !== null ? `${exercise.weight} lb` : "No weight"}</strong></div>
+        {exercise.deferred ? <p className="mt-3 text-sm text-amber-300">Set aside for this session · not completed</p> : null}
         <SetSummary value={exercise.logged_sets} />
         <SubstitutionHistory history={exercise.substitution_history} />
       </article>)}
