@@ -1,6 +1,10 @@
+# Current review queue — 2026-11-02
+
+Review [integration PR #14](https://github.com/LaulinVasquez/Buff-me-up/pull/14) for the complete remaining product batch. The developer merged #8 to main and #9–#13 into feature branches; their older issue/PR records below are historical milestones, not evidence that every feature reached main. No PR was merged by the agent. See AUTONOMOUS_UPDATES_2026-11-02.md for verified status, migrations and acceptance limits.
+
 ## BMU-018 — Generator validation / continuous quality
 
-**Status:** implemented on `agent/generator-quality-ci`; final PR/remote checks pending. Reject empty/duplicate/fractional edited plans, guarantee deterministic populated 3–6 day fallback schedules with selected-muscle coverage, protect atomic saves and add secret-free CI. Migration 13 required for direct database validation. See GENERATOR_QUALITY.md.
+**Status:** implemented in `be4d160`, [integration PR #14](https://github.com/LaulinVasquez/Buff-me-up/pull/14) targeting main; local aggregate and GitHub CI run 41547160238 pass. Reject empty/duplicate/fractional edited plans, guarantee deterministic populated 3–6 day fallback schedules with selected-muscle coverage, protect atomic saves and add secret-free CI. Migration 13 required for direct database validation. See GENERATOR_QUALITY.md.
 
 ## BMU-017 — Portable account export
 

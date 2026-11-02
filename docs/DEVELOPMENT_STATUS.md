@@ -12,9 +12,9 @@ Updated **2026-11-02**. Autonomous batch baseline: `c092c6a` (appearance PR #7 m
 | [#11](https://github.com/LaulinVasquez/Buff-me-up/pull/11) · agent/weekly-progress | Flexible distinct-day goal, readable comparable set feedback | WEEKLY_PROGRESS.md; migration 11; up to 100 sessions/90-day review. |
 | [#12](https://github.com/LaulinVasquez/Buff-me-up/pull/12) · agent/personal-gyms | Named equipment setups, per-gym settings/notes and valid preferred alternatives | PERSONAL_GYMS.md; migration 12. |
 | [#13](https://github.com/LaulinVasquez/Buff-me-up/pull/13) · agent/data-export-quality | Owner-scoped portable JSON with readable text fallback | DATA_EXPORT.md; no new migration, schema through 12 required. Actual disk/native download pending. |
-| Final quality PR pending · agent/generator-quality-ci | Strict generator validation, complete bounded fallback schedules and automated quality workflow | GENERATOR_QUALITY.md; migration 13; final/remote outcomes in session log. |
+| [#14](https://github.com/LaulinVasquez/Buff-me-up/pull/14) · agent/generator-quality-ci | Strict generator validation, complete bounded fallback schedules and automated quality workflow | GENERATOR_QUALITY.md; migration 13; final/remote outcomes in session log. |
 
-PRs are stacked in this order; each targets the preceding feature branch to keep its review diff focused. Review/merge in order and retarget as parent changes are merged; do not deploy a newer app before its required migrations are verified in staging. See AUTONOMOUS_UPDATES_2026-11-02.md for the complete review and rollout checklist.
+**Current review queue:** the developer merged #8 into main (`54ef508`), #9/#10 into foundation, #11 into session-adaptations, #12 into weekly-progress and #13 into personal-gyms. These feature-branch merges did not carry all product changes to main. **Review #14**, now targeting main and integrating the remaining complete batch. The agent preserved those merge histories without changing file contents or merging a PR. Local `npm run check` and GitHub CI run 41547160238 pass for implementation `be4d160`; documentation follow-ups may trigger new runs. Verify migrations 9–13 in staging before deploying. See AUTONOMOUS_UPDATES_2026-11-02.md for the rollout checklist.
 
 ## Existing merged improvements
 

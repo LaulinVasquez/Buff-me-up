@@ -12,9 +12,9 @@
 | [#11](https://github.com/LaulinVasquez/Buff-me-up/pull/11) | agent/weekly-progress | Flexible distinct-day goal, local weekly review and comparable actual-set explanations | 3d881b4 |
 | [#12](https://github.com/LaulinVasquez/Buff-me-up/pull/12) | agent/personal-gyms | Private named equipment setups, per-gym machine settings/notes and preferred alternatives | c495325 |
 | [#13](https://github.com/LaulinVasquez/Buff-me-up/pull/13) | agent/data-export-quality | Authenticated paginated JSON export and selectable-text fallback | 4e27624 |
-| Quality PR pending | agent/generator-quality-ci | Strict generator/edit validation, atomic save rejection and automated CI | Commit/remote result recorded in session log |
+| [#14](https://github.com/LaulinVasquez/Buff-me-up/pull/14) | agent/generator-quality-ci | Integrates the complete remaining batch into main, including generator validation/CI | be4d160 |
 
-All PRs are drafts and stacked: #8 targets main, each later PR targets its predecessor’s branch. This keeps review diffs focused. Review/merge in order and retarget later PRs to main as their parents merge. No PR was merged by the agent. Documentation follow-up commits are separate from the implementation references above.
+**Current review state:** #8 was merged by the developer into main (`54ef508`). #9/#10 were merged into the foundation branch; #11 into session-adaptations; #12 into weekly-progress; #13 into personal-gyms. A closed feature PR therefore does not mean its changes reached main. **#14 is the remaining integration PR targeting main and contains all unreleased batch changes. Review #14.** User merge histories were incorporated into its branch without content changes; no PR was merged by the agent. Documentation follow-up commits are separate from implementation references. This is a verified snapshot, not a promise that later human actions cannot change status.
 
 ## What users can do
 
@@ -33,7 +33,7 @@ Actual component fixtures passed **30 screen/width combinations** across six fea
 
 Manual acceptance still required: actual saved export file (browser download-event inspection timed out), native confirmation dialogs, authenticated Supabase/PostgREST flows, cross-device account reloads, physical iPhone/PWA/Capacitor and background timer behavior. Export text payload and HTML-rejection paths were verified. No physical-device, live OAuth or remote database acceptance is claimed.
 
-The new GitHub workflow uses pinned official checkout/setup-node commits, Node 22, Ubuntu 24.04 and disposable PostgreSQL with loopback placeholders; no production secrets or deployment action. **Remote CI result pending push**, tracked in AGENT_SESSION_LOG.md.
+The new GitHub workflow uses pinned official checkout/setup-node commits, Node 22, Ubuntu 24.04 and disposable PostgreSQL with loopback placeholders; no production secrets or deployment action. **GitHub CI passed** for implementation `be4d160`: [Application quality run](https://github.com/LaulinVasquez/Buff-me-up/actions/runs/41547160238). History-sync merges changed no files; documentation follow-up pushes may start fresh runs.
 
 ## Supabase rollout dependency
 
