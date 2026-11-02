@@ -1,8 +1,16 @@
 # Development issues
 
+## BMU-010 — Gym is packed session-only exercise swaps
+
+**Status:** implemented on `agent/gym-packed-mode`, based on merged responsive baseline `e45f53f`; lint/build/typecheck, seven matching tests, 12 History tests, SQL/concurrency and 20 responsive fixture-state checks pass. Staging rollout and signed-in/device acceptance remain pending.
+
+Scope explicitly selected by the developer: an unfinished exercise can be replaced for the current workout using available equipment, with review/confirmation and saved original data. The bundled catalog supplies same-primary-muscle/type alternatives; existing session exercises are excluded and unclassified custom moves require a muscle choice. Targets/order stay intact; replacement weight resets, original data is retained, and the plan/completed work remains unchanged.
+
+The additive migration introduces versioned, owner-scoped swap/progress RPCs, automatic swap history and legacy/stale-client guards. Local SQL tests cover preserved data/plan, validation, resume/finalization, two-user/anonymous RLS and concurrent saves/swaps/finalization. Pure helper tests and a labeled synthetic browser preview cover selection and responsive states. See `GYM_PACKED_MODE.md` for the migration dependency, catalog limits and required staging checks. No remote database or production deployment was changed.
+
 ## BMU-009 — Phone-first responsive layout for larger devices
 
-**Status:** implemented in `9fdf744` on `agent/responsive-layout`, draft [PR #5](https://github.com/LaulinVasquez/Buff-me-up/pull/5), based on merged upstream `95b4b92`; local layout/build checks pass. Signed-in staging and physical-device acceptance pending.
+**Status:** implemented in `9fdf744` on `agent/responsive-layout`, merged [PR #5](https://github.com/LaulinVasquez/Buff-me-up/pull/5), based on merged upstream `95b4b92`; local layout/build checks pass. Signed-in staging and physical-device acceptance pending.
 
 Shared shell now expands beyond the former 512px cap, with bottom navigation below 1024px and a 240px sidebar at desktop widths. Dashboard, History, library, plans/generator, profile and detail pages use responsive grids. Workout actions stay fixed at the bottom on phones/tablets and become a sticky side panel on desktop. The sign-in page gains a desktop two-column layout.
 

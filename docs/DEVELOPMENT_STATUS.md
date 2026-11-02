@@ -1,10 +1,16 @@
 # Development status
 
-Last updated: **2026-11-02**. Responsive-layout baseline: **`95b4b92`**. Working branch: **`agent/responsive-layout`**. The original audit baseline was `f4828cc`.
+Last updated: **2026-11-02**. Responsive-layout baseline: **`95b4b92`**. Working branch: **`agent/gym-packed-mode`**. The original audit baseline was `f4828cc`.
 
 BMU-001 implementation: `a0abae4`, [PR #2](https://github.com/LaulinVasquez/Buff-me-up/pull/2), now merged upstream. Deployed migration/test-account acceptance is still unverified.
 
 BMU-007 dependency repair: `828dfdc`, [PR #3](https://github.com/LaulinVasquez/Buff-me-up/pull/3), now merged upstream. The history branch includes those patched lockfiles; 21 moderate development-tool findings remain from the earlier audit. Production/native rollout is not inferred from a Git merge.
+
+## Gym is packed mode (BMU-010)
+
+Scope confirmed by the developer: replace one unfinished exercise in the current workout using available equipment. Implemented a reviewable picker backed by the bundled catalog, same-primary-muscle/type matching and duplicate exclusion, with manual muscle selection for unclassified custom moves. Saved plans, completed exercises, original snapshot/weight history and order are preserved; replacement weight is explicitly cleared while targets/instructions remain visible.
+
+Added an additive migration for replacement metadata/history/version, owner-scoped swap/progress RPCs and stale-client guards. Lint, production build, sequential typecheck, seven matching tests, 12 History tests and local SQL persistence/RLS/finalization/concurrency checks pass. The sample-data picker preview passes 20 responsive-state checks; Git/PR results are in the session log. Apply migration 7 in staging before deploying the updated application. Signed-in PostgREST/iPhone acceptance remains pending. No production migration or deployment was performed. Baseline: merged responsive PR #5, `e45f53f`; branch `agent/gym-packed-mode`.
 
 ## Responsive layout (BMU-009)
 
@@ -12,7 +18,7 @@ Requested by the developer: retain the phone-first experience and make larger de
 
 Acceptance: no horizontal page overflow at 320/390/768/1024/1440px, a single visible primary navigation, accurate active links, working History controls and generator interactions, and usable workout actions at phone and desktop sizes. Validate actual components using labeled synthetic fixtures in an isolated preview, plus lint/build/typecheck and existing History regressions. Signed-in staging and physical-device checks remain separate.
 
-Implementation `9fdf744` is pushed in draft [PR #5](https://github.com/LaulinVasquez/Buff-me-up/pull/5). All 55 initial screen/width measurements (11 screens × 320/390/768/1024/1440px) passed after fixing a History-card grid overflow. Expanded plan forms also fit at 320/768/1024px. History metric controls, keyboard selection and year → month → day navigation, plus generator build/start-over interactions, were verified in fixtures. Final lint, build, sequential typecheck and all 12 History tests pass. See `RESPONSIVE_LAYOUT.md` for breakpoints and staging checks. Git/PR references are recorded in the session log.
+Implementation `9fdf744` is merged via [PR #5](https://github.com/LaulinVasquez/Buff-me-up/pull/5). All 55 initial screen/width measurements (11 screens × 320/390/768/1024/1440px) passed after fixing a History-card grid overflow. Expanded plan forms also fit at 320/768/1024px. History metric controls, keyboard selection and year → month → day navigation, plus generator build/start-over interactions, were verified in fixtures. Final lint, build, sequential typecheck and all 12 History tests pass. See `RESPONSIVE_LAYOUT.md` for breakpoints and staging checks. Git/PR references are recorded in the session log.
 
 ## History refresh (BMU-008)
 

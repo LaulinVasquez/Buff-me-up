@@ -1,6 +1,42 @@
 # Agent session log
 
 
+## 2026-11-02 — Gym is packed mode (BMU-010)
+
+**Branch:** `agent/gym-packed-mode`, based on merged responsive baseline `e45f53f`. The developer explicitly selected Gym is packed mode as the first implementation; broader roadmap work is outside this change. Commit/PR references are recorded after publication below.
+
+### Completed
+
+- Read the development workflow, preserved the original untracked guide, fetched upstream and confirmed no matching substitution issue or open PR. No applicable AGENTS.md was found.
+- Built the unfinished-exercise picker, equipment filtering, manual muscle selection for unclassified custom moves, radio-choice review, keep-original cancellation, pending/empty/error states, refresh action and swap-history display in workouts and finished History details.
+- Recompute eligible choices on the server from the owned workout and bundled catalog; match primary muscle/known movement type and exclude all current-session exercises/known aliases. Clients submit an ID, not trusted exercise content.
+- Added an additive migration with replacement JSON/history/version, invoker-permission owner-scoped swap/progress RPCs and trigger-managed history. Preserve original saved data, targets/order, completed work and saved plans; clear the replacement's weight/template link. Future sessions keep the original routine.
+- Added stale-client protection to weight/completion forms and RPCs. Swaps require the reviewed update time as well as the identity version. Direct unversioned legacy writes on replaced rows are rejected. Existing finalization/RLS guards stay enabled.
+- Added seven pure matching/metadata tests and transactional/concurrent database coverage; documented rollout, staging acceptance, architecture and current catalog limits.
+
+### Verification
+
+- `npm run lint` — PASS.
+- `npm run build` — PASS with all application routes compiled.
+- Sequential `npm run typecheck` after the build — PASS.
+- `npm run test:swaps` — PASS, 7/7 tests covering aliases, equipment/muscle/movement filters, duplicate exclusion, unclassified/custom and saved metadata, malformed values and unchanged inputs.
+- `npm run test:history` — PASS, 12/12 existing regressions.
+- `npm run test:db` — PASS: all migrations, existing workout/finalization/RLS tests, swap preservation/validation/repeated history, future-session plan integrity, completion/cancellation, two-user/anonymous denial, stale timestamp/version/legacy-client rejection. Concurrency: swaps reject a waiting stale save and competing swap; a prior progress save invalidates an open review; finalization rejects a late swap. The disposable cluster used synthetic users with no TCP listener or application database credentials.
+- Browser fixture preview — PASS: actual picker/history/shell/workout-layout components, 20 open-picker checks across normal/custom/empty/error scenarios at 320/390/768/1024/1440px, without horizontal document overflow. Verified equipment filter, selected review/weight-reset notice, fixture swap/reload with original 90 lb archived and replacement weight blank, completed 35 lb card unchanged, manual focus choice excluding the used exercise, cancellation and error/refresh controls. A selected review also fits at 320px. Browser warning/error log was empty.
+- Browser persistence used a cookie-backed **fixture action**, not the production server action or Supabase. SQL tests exercised the real RPCs separately. Signed-in PostgREST, real OAuth/session behavior and physical iPhone/PWA acceptance remain pending. No production database was queried or changed.
+- Sample screenshots/measurement JSON saved as chat artifacts. Stopped the port-4320 preview server, closed its browser tab, reset the viewport and removed the temporary project before final lint/build/typecheck. No fixture route/auth bypass is shipped.
+
+### Review, rollout and next steps
+
+The new app requires migration `20261102000000_add_workout_substitutions.sql` before its progress forms can work. Apply/verify in designated staging first. No production migration, merge, signing or deployment occurred. The first release uses the 29-entry bundled catalog, so some movements have no eligible alternative; it does not automatically rewrite the whole remaining workout. Authentication/RLS are retained and there are no new dependencies or shared FlowDesk objects. The pre-existing untracked development plan remains outside commits.
+
+1. Review this draft PR and apply its migration in designated staging before deploying that app version.
+2. Complete the signed-in/two-tab/iPhone checklist in `GYM_PACKED_MODE.md`, including replacement saves, completion, resume and History.
+3. After acceptance, prioritize per-set logging/stronger progress feedback and the existing ordering/latest-weight backlog as separate changes.
+
+Learning note: a workout uses a saved session snapshot rather than editing the plan template. A replacement increments that snapshot's version; an old tab still holds the previous version and its save is rejected. This is why a stale 90 lb entry cannot accidentally become the weight for a different exercise. The archived original remains visible while future workouts still use the unchanged plan.
+
+
 ## 2026-11-02 — responsive layout (BMU-009)
 
 **Branch:** `agent/responsive-layout`, based on upstream `95b4b92` after PRs #2/#3/#4 merged. **Implementation:** `9fdf744`, pushed to origin. **Draft PR:** [PR #5](https://github.com/LaulinVasquez/Buff-me-up/pull/5), attached to this chat. GitHub connector writes were already known to be unavailable (403); the existing repository Git credential created this PR through GitHub REST, kept only in process memory.

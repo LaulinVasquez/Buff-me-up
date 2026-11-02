@@ -8,7 +8,7 @@ type PlanRow = { id: string; user_id: string; name: string; description: string 
 type DayRow = { id: string; plan_id: string; name: string; day_order: number; created_at: string; updated_at: string };
 type ExerciseRow = { id: string; workout_day_id: string; name: string; sets: number; target_reps: string; default_weight: number | null; exercise_order: number; notes: string | null; external_exercise_id: string | null; exercise_provider: string | null; muscle_group: string | null; equipment: string | null; created_at: string; updated_at: string };
 type WorkoutRow = { id: string; user_id: string; workout_day_id: string | null; plan_id: string | null; name: string; status: string; started_at: string; completed_at: string | null; created_at: string; updated_at: string };
-type WorkoutExerciseRow = { id: string; workout_id: string; exercise_id: string | null; name: string; target_sets: number | null; target_reps: string | null; weight: number | null; completed: boolean; exercise_order: number; created_at: string; updated_at: string };
+type WorkoutExerciseRow = { substitution_version: number; substitution_details: Json; substitution_history: Json; id: string; workout_id: string; exercise_id: string | null; name: string; target_sets: number | null; target_reps: string | null; weight: number | null; completed: boolean; exercise_order: number; created_at: string; updated_at: string };
 
 export type Database = {
   public: {
@@ -21,7 +21,7 @@ export type Database = {
         { foreignKeyName: "gym_workouts_workout_day_id_fkey"; columns: ["workout_day_id"]; isOneToOne: false; referencedRelation: "gym_workout_days"; referencedColumns: ["id"] },
         { foreignKeyName: "gym_workouts_plan_id_fkey"; columns: ["plan_id"]; isOneToOne: false; referencedRelation: "gym_workout_plans"; referencedColumns: ["id"] }
       ]>;
-      gym_workout_exercises: RelatedTable<WorkoutExerciseRow, { id?: string; workout_id: string; exercise_id?: string | null; name: string; target_sets?: number | null; target_reps?: string | null; weight?: number | null; completed?: boolean; exercise_order: number; created_at?: string; updated_at?: string }, Partial<WorkoutExerciseRow>, [
+      gym_workout_exercises: RelatedTable<WorkoutExerciseRow, { substitution_version?: number; substitution_details?: Json; substitution_history?: Json; id?: string; workout_id: string; exercise_id?: string | null; name: string; target_sets?: number | null; target_reps?: string | null; weight?: number | null; completed?: boolean; exercise_order: number; created_at?: string; updated_at?: string }, Partial<WorkoutExerciseRow>, [
         { foreignKeyName: "gym_workout_exercises_workout_id_fkey"; columns: ["workout_id"]; isOneToOne: false; referencedRelation: "gym_workouts"; referencedColumns: ["id"] },
         { foreignKeyName: "gym_workout_exercises_exercise_id_fkey"; columns: ["exercise_id"]; isOneToOne: false; referencedRelation: "gym_exercises"; referencedColumns: ["id"] }
       ]>;
@@ -32,6 +32,8 @@ export type Database = {
       gym_adopt_recommended_plan: { Args: { template: Json }; Returns: string };
       gym_start_workout: { Args: { target_day_id: string }; Returns: string };
       gym_set_workout_status: { Args: { target_workout_id: string; target_status: "completed" | "cancelled" }; Returns: string };
+      gym_update_workout_progress: { Args: { target_workout_id: string; target_exercise_id: string; expected_version: number; changes: Json }; Returns: string };
+      gym_swap_workout_exercise: { Args: { target_workout_id: string; target_exercise_id: string; expected_version: number; expected_updated_at: string; source_muscle: string; replacement: Json }; Returns: string };
       gym_save_generated_plan: { Args: { template: Json; make_active: boolean }; Returns: string };
     };
     Enums: Record<never, never>;

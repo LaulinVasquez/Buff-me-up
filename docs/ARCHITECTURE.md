@@ -46,6 +46,14 @@ Static recommendations live in `data/recommended-plans.ts`. The `gym_adopt_recom
 
 `gym_set_workout_status` locks the owned workout row before completing or cancelling it. Repeating the same final state returns its existing ID; a conflicting final state fails. The database assigns the completion time and prevents later changes to final status/timestamps. Snapshot writes lock that same parent row and require an in-progress workout, so a stale tab cannot change finished exercise data. Deleting an exercise template can still clear its optional foreign key, and deleting a workout still cascades to its snapshots. These functions use invoker permissions and retain RLS.
 
+## Session-only exercise substitutions
+
+`ExerciseSwap` reviews an unfinished snapshot against the bundled catalog. Pure helpers in `lib/workouts/substitutions.ts` match primary muscles and known compound/isolation types, filter equipment and exclude current-session exercises (including known template aliases). Custom movements with no classification require an explicit primary-muscle selection. The server reloads the owned workout and recomputes eligibility; form-supplied names, instructions or equipment are not trusted.
+
+`gym_swap_workout_exercise` locks the owned workout and snapshot, requires an in-progress session/unfinished exercise, and checks both the snapshot version and reviewed update time. The trigger appends the old name, template reference, targets, weight, details and time to `substitution_history`, increments the version, clears the template reference and replacement weight, and leaves the existing row/order/targets intact. Completed snapshots cannot change identity. JSON details keep the replacement instructions available without a provider request. Neither the saved plan nor other exercises are updated.
+
+`gym_update_workout_progress` acquires the same parent lock and requires the version sent by the weight/completion form. This prevents an old form from saving onto a different exercise after a swap. A transaction-local marker also rejects direct unversioned legacy progress writes on replaced snapshots. The marker is a concurrency check, not an authentication boundary; both RPCs use invoker permissions, verified identity, explicit ownership and the existing RLS. The finalization guards remain in force. There is no new public endpoint or elevated database function.
+
 ## History and local dates
 
 Attendance is derived from `gym_workouts.status = 'completed'` and `completed_at`; cancelled and in-progress sessions never count. History supports day, month, and year views. A bounded, paginated query selects session summaries (`id`, name, status, start/completion timestamps) within a padded UTC window; it keeps ownership filters and RLS and avoids downloading every exercise snapshot for a year. Full exercise snapshots are loaded on the existing workout-detail route.

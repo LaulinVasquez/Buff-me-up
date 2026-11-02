@@ -20,7 +20,7 @@ export async function saveWeightAction(form: FormData) {
     const raw = value(form, "weight", true);
     const weight = raw ? Number(raw) : null;
     if (weight !== null && (!Number.isFinite(weight) || weight < 0)) throw new Error("Invalid weight");
-    await updateWorkoutExercise(workoutId, value(form, "exerciseId"), { weight });
+    await updateWorkoutExercise(workoutId, value(form, "exerciseId"), version(form), { weight });
   } catch { redirect(`/app/workout/${workoutId}?error=weight`); }
   revalidatePath(`/app/workout/${workoutId}`);
 }
@@ -28,7 +28,7 @@ export async function saveWeightAction(form: FormData) {
 export async function toggleExerciseAction(form: FormData) {
   const workoutId = value(form, "workoutId");
   try {
-    await updateWorkoutExercise(workoutId, value(form, "exerciseId"), { completed: value(form, "completed") !== "true" });
+    await updateWorkoutExercise(workoutId, value(form, "exerciseId"), version(form), { completed: value(form, "completed") !== "true" });
   } catch { redirect(`/app/workout/${workoutId}?error=exercise`); }
   revalidatePath(`/app/workout/${workoutId}`);
 }
@@ -47,6 +47,11 @@ export async function cancelWorkoutAction(form: FormData) {
   redirect("/app?cancelled=true");
 }
 
+function version(form: FormData) {
+  const raw = value(form, "version");
+  if (!/^\d+$/.test(raw) || !Number.isSafeInteger(Number(raw))) throw new Error("Invalid exercise version");
+  return Number(raw);
+}
 function value(form: FormData, key: string, optional = false) {
   const item = form.get(key);
   if (typeof item !== "string" || (!optional && !item)) throw new Error(`Missing ${key}`);
