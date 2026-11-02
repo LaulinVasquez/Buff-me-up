@@ -12,7 +12,7 @@ Requested by the developer: retain the phone-first experience and make larger de
 
 Acceptance: no horizontal page overflow at 320/390/768/1024/1440px, a single visible primary navigation, accurate active links, working History controls and generator interactions, and usable workout actions at phone and desktop sizes. Validate actual components using labeled synthetic fixtures in an isolated preview, plus lint/build/typecheck and existing History regressions. Signed-in staging and physical-device checks remain separate.
 
-Implementation is complete locally. All 55 initial screen/width measurements (11 screens × 320/390/768/1024/1440px) passed after fixing a History-card grid overflow. Expanded plan forms also fit at 320/768/1024px. History metric controls, keyboard selection and year → month → day navigation, plus generator build/start-over interactions, were verified in fixtures. Final lint, build, sequential typecheck and all 12 History tests pass. See `RESPONSIVE_LAYOUT.md` for breakpoints and staging checks. Git/PR references are recorded in the session log.
+Implementation `9fdf744` is pushed in draft [PR #5](https://github.com/LaulinVasquez/Buff-me-up/pull/5). All 55 initial screen/width measurements (11 screens × 320/390/768/1024/1440px) passed after fixing a History-card grid overflow. Expanded plan forms also fit at 320/768/1024px. History metric controls, keyboard selection and year → month → day navigation, plus generator build/start-over interactions, were verified in fixtures. Final lint, build, sequential typecheck and all 12 History tests pass. See `RESPONSIVE_LAYOUT.md` for breakpoints and staging checks. Git/PR references are recorded in the session log.
 
 ## History refresh (BMU-008)
 

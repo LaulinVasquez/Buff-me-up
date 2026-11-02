@@ -3,7 +3,7 @@
 
 ## 2026-11-02 — responsive layout (BMU-009)
 
-**Branch:** `agent/responsive-layout`, based on upstream `95b4b92` after PRs #2/#3/#4 merged. Implementation and PR references are added after publication below.
+**Branch:** `agent/responsive-layout`, based on upstream `95b4b92` after PRs #2/#3/#4 merged. **Implementation:** `9fdf744`, pushed to origin. **Draft PR:** [PR #5](https://github.com/LaulinVasquez/Buff-me-up/pull/5), attached to this chat. GitHub connector writes were already known to be unavailable (403); the existing repository Git credential created this PR through GitHub REST, kept only in process memory.
 
 ### Completed
 
@@ -24,6 +24,7 @@
 - Browser interactions — History Minutes control, year/month/day drill-down, annual keyboard selection, and 3-/4-day generator build/Start over verified. Desktop actions remained sticky 24px from the top after scrolling; mobile fixed actions and hidden workout navigation measured.
 - Browser limitations — native disclosure toggles and workout +/- interactions were not established in this isolated preview; expanded form layout was measured with fixture-only initial `open` attributes. One unlocated `MutationObserver.observe` error was captured by browser automation during the run; it had no source URL and was not attributed to application code. Recheck these interactions on staging/device; no claim of full signed-in acceptance.
 - Tests used actual shared/client components with synthetic data and copied server-page presentation with fixture services/stub actions. No real account or Supabase data was accessed. Sample-data screenshots and measurement JSON were saved as local chat artifacts; no preview route/auth bypass is shipped. Removed the temporary preview and stopped its port-4320 process.
+- `git diff --check` and final staged diff review — PASS; only the original untracked guide remains outside commits.
 - Database regression tests were not rerun for this presentation-only change; persistence code/migrations are unchanged.
 
 ### Git, risks, next steps and learning note

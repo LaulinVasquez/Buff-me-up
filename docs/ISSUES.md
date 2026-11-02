@@ -2,7 +2,7 @@
 
 ## BMU-009 — Phone-first responsive layout for larger devices
 
-**Status:** implemented on `agent/responsive-layout`, based on merged upstream `95b4b92`; local layout/build checks pass. Signed-in staging and physical-device acceptance pending.
+**Status:** implemented in `9fdf744` on `agent/responsive-layout`, draft [PR #5](https://github.com/LaulinVasquez/Buff-me-up/pull/5), based on merged upstream `95b4b92`; local layout/build checks pass. Signed-in staging and physical-device acceptance pending.
 
 Shared shell now expands beyond the former 512px cap, with bottom navigation below 1024px and a 240px sidebar at desktop widths. Dashboard, History, library, plans/generator, profile and detail pages use responsive grids. Workout actions stay fixed at the bottom on phones/tablets and become a sticky side panel on desktop. The sign-in page gains a desktop two-column layout.
 
