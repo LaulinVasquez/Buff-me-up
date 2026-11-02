@@ -50,8 +50,8 @@ export function getSwapCandidates(source: SwapSource, snapshots: Pick<SwapSnapsh
     && (!equipment.length || equipment.includes(item.equipment ?? "")))
     .sort((a, b) => a.name.localeCompare(b.name));
 }
-export function substitutionRecords(value: Json): { name: string; weight: number | null }[] {
+export function substitutionRecords(value: Json): { name: string; weight: number | null; loggedSets?: Json }[] {
   if (!Array.isArray(value)) return [];
   return value.flatMap(item => item && typeof item === "object" && !Array.isArray(item) && typeof item.name === "string"
-    ? [{ name: item.name, weight: typeof item.weight === "number" ? item.weight : null }] : []);
+    ? [{ name: item.name, ...(item.logged_sets ? { loggedSets: item.logged_sets } : {}), weight: typeof item.weight === "number" ? item.weight : null }] : []);
 }

@@ -97,8 +97,11 @@ Apply these files in order without modifying already-applied migrations:
 6. 20261101000000_guard_gym_workout_finalization.sql
 7. 20261102000000_add_workout_substitutions.sql
 8. 20261102010000_add_profile_accent_theme.sql
+9. 20261102020000_add_workout_set_logging.sql
 
 Apply migration 6 to development/staging before running this version's completion/cancellation flows: they now use `gym_set_workout_status`. It adds functions and triggers without rewriting existing rows. Test the same migration in staging before an approved production rollout.
+
+Apply migration 9 in staging before using individual set logging. It adds actual-set JSON records, conflict revisions and an owner-scoped save RPC; historical reps are not backfilled. See `docs/SET_LOGGING.md`.
 
 All application objects use the gym_ prefix. Recommended templates remain static application data; attendance is derived from completed workouts.
 

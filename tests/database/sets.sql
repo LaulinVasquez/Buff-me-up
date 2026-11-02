@@ -1,0 +1,32 @@
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-000000000001';
+insert into public.gym_workout_plans (id,user_id,name) values ('11000000-0000-0000-0000-000000000001',auth.uid(),'Set test plan');
+insert into public.gym_workout_days (id,plan_id,name,day_order) values ('21000000-0000-0000-0000-000000000001','11000000-0000-0000-0000-000000000001','Set day',0);
+insert into public.gym_exercises (workout_day_id,name,sets,target_reps,exercise_order,muscle_group) values ('21000000-0000-0000-0000-000000000001','Set curl',2,'8-12',0,'Biceps');
+select public.gym_activate_workout_plan('11000000-0000-0000-0000-000000000001');
+select public.gym_start_workout('21000000-0000-0000-0000-000000000001') as sets_workout \gset
+select id as sets_exercise from public.gym_workout_exercises where workout_id=:'sets_workout' \gset
+select public.gym_save_workout_sets(:'sets_workout',:'sets_exercise',0,0,'[{"set":1,"reps":8,"weight":25,"completed":true},{"set":2,"reps":null,"weight":null,"completed":false}]');
+select test.assert((select log_revision=1 and not completed and weight=25 and jsonb_array_length(logged_sets)=2 from public.gym_workout_exercises where id=:'sets_exercise'),'Partial sets persist without completing exercise');
+select test.assert_raises(format('select public.gym_save_workout_sets(%L,%L,0,0,%L)',:'sets_workout',:'sets_exercise','[]'),'Set log changed');
+select test.assert_raises(format('select public.gym_save_workout_sets(%L,%L,0,1,%L)',:'sets_workout',:'sets_exercise','[{"set":1,"reps":null,"weight":25,"completed":true}]'),'Enter reps');
+select test.assert_raises(format('select public.gym_save_workout_sets(%L,%L,0,1,%L)',:'sets_workout',:'sets_exercise','[{"set":1,"reps":8.5,"weight":25,"completed":true}]'),'Invalid reps');
+select test.assert_raises(format('select public.gym_save_workout_sets(%L,%L,0,1,%L)',:'sets_workout',:'sets_exercise','[{"set":1,"reps":8,"weight":-1,"completed":true}]'),'Invalid weight');
+select test.assert_raises(format('update public.gym_workout_exercises set weight=999 where id=%L',:'sets_exercise'),'Use the set logger');
+select test.assert_raises(format('update public.gym_workout_exercises set log_revision=10 where id=%L',:'sets_exercise'),'managed automatically');
+set request.jwt.claim.sub = '00000000-0000-0000-0000-000000000002';
+select test.assert_raises(format('select public.gym_save_workout_sets(%L,%L,0,1,%L)',:'sets_workout',:'sets_exercise','[]'),'Workout not found');
+select test.assert((select count(*)=0 from public.gym_workout_exercises where id=:'sets_exercise'),'Other users cannot read sets');
+set request.jwt.claim.sub = '00000000-0000-0000-0000-000000000001';
+select public.gym_swap_workout_exercise(:'sets_workout',:'sets_exercise',0,(select updated_at from public.gym_workout_exercises where id=:'sets_exercise'),'Biceps','{"id":"set-test-replacement","name":"Other curl","primaryMuscle":"Biceps","equipment":"Dumbbells","instructions":[]}');
+select test.assert((select logged_sets='[]'::jsonb and log_revision=2 and substitution_history->0->'logged_sets'->0->>'reps'='8' from public.gym_workout_exercises where id=:'sets_exercise'),'Swap archives actual sets and clears replacement');
+select test.assert_raises(format('select public.gym_save_workout_sets(%L,%L,0,2,%L)',:'sets_workout',:'sets_exercise','[]'),'Set log changed');
+select public.gym_save_workout_sets(:'sets_workout',:'sets_exercise',1,2,'[{"set":1,"reps":10,"weight":null,"completed":true},{"set":2,"reps":8,"weight":30,"completed":true}]');
+select test.assert((select completed and weight=30 and log_revision=3 from public.gym_workout_exercises where id=:'sets_exercise'),'All completed sets complete exercise; last set weight is summary');
+select public.gym_set_workout_status(:'sets_workout','completed');
+select test.assert_raises(format('select public.gym_save_workout_sets(%L,%L,1,3,%L)',:'sets_workout',:'sets_exercise','[]'),'Workout is no longer in progress');
+select test.assert_raises(format('update public.gym_workout_exercises set logged_sets=%L where id=%L','[]',:'sets_exercise'),'Workout is no longer in progress');
+select public.gym_activate_workout_plan('10000000-0000-0000-0000-000000000001');
+set role anon;
+select test.assert_raises(format('select public.gym_save_workout_sets(%L,%L,1,3,%L)',:'sets_workout',:'sets_exercise','[]'),'permission denied');
+reset role;

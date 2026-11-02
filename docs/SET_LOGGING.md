@@ -1,0 +1,11 @@
+# Actual sets and rest timer
+
+Branch `agent/set-logging` stacks on foundation PR #8. Workout cards now record actual reps, weight in pounds and completion for each set. Blank weight means unweighted/unspecified; it is not an inferred load. Save is explicit; invalid completed sets cannot save. Add/remove unfinished trailing sets, responsive controls, dirty-state feedback, failed-save retention and navigation/unload warnings are included. Existing exercise-level records remain visible without invented reps. History details show the actual saved rows and recorded weight × reps volume.
+
+The additive migration `20261102020000_add_workout_set_logging.sql` stores `logged_sets` and `log_revision` on each owned snapshot. Validation covers direct writes as well as the RPC. Saves lock the workout then the snapshot and reject stale revisions/substitution versions; finished snapshots remain protected. A substitution archives actual sets before clearing the replacement. Legacy exercise-level writes cannot overwrite summaries when actual sets exist. No new table or policy bypass is used.
+
+Rest timer: manual 30/60/90/120/180-second presets, restart/stop and wall-clock deadlines to catch up after tab suspension. It is page-local and does not promise background alerts or survive leaving/reloading the workout.
+
+Verification: training validation/volume/request-contract tests; local PostgreSQL persistence, malformed input, optimistic conflict, swap archive/clear, owner/anonymous isolation, legacy-write rejection and finished-record protection. Concurrency tests cover competing set saves and finalization vs set save. Actual components were tested in a synthetic cookie-backed preview for save/reload, invalid completion, failed-save draft retention, timer start/stop, and 320/390/768/1024/1440 widths (no horizontal overflow). Browser warning/error log empty. Native confirmation dialogs could not be conclusively inspected by automation; navigation/unload warning acceptance remains manual. Preview removed before final checks. No real accounts or data used.
+
+Rollout: apply migration 9 to staging after migrations 1–8, verify signed-in save/reload and two-tab conflicts, finish/swap/History flows, then review for approved deployment. No production migration or deployment was performed. Physical-device/background timer behavior remains unverified.

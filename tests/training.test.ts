@@ -31,3 +31,18 @@ test("previous weight orders parent snapshots by completion before limiting", as
   assert.equal(captured?.searchParams.get("weight"), "not.is.null");
   assert.equal(captured?.searchParams.get("exercise_id"), "eq.exercise-template");
 });
+
+import { initialSets, readSets, setVolume, validateSets } from "../lib/workouts/sets";
+test("actual set records validate reps/weight/completion without inventing historical reps", () => {
+  assert.deepEqual(initialSets([], 2), [{set:1,reps:null,weight:null,completed:false},{set:2,reps:null,weight:null,completed:false}]);
+  assert.equal(validateSets([{set:1,reps:null,weight:25,completed:true}]),false);
+  assert.equal(validateSets([{set:1,reps:8.5,weight:25,completed:true}]),false);
+  assert.equal(validateSets([{set:1,reps:8,weight:Infinity,completed:true}]),false);
+  assert.equal(validateSets([{set:1,reps:8,weight:25,completed:true},{set:1,reps:8,weight:25,completed:true}]),false);
+  assert.equal(validateSets([{set:1,reps:8,weight:25,completed:true,hidden:true}]),false);
+  const sets = [{set:2,reps:10,weight:25,completed:true},{set:1,reps:8,weight:30,completed:true},{set:3,reps:10,weight:100,completed:false},{set:4,reps:12,weight:null,completed:true}];
+  assert.equal(validateSets(sets),true);
+  assert.equal(setVolume(sets),490);
+  assert.deepEqual(readSets(sets).map(item=>item.set),[1,2,3,4]);
+  assert.equal(initialSets([],1000).length,100);
+});
