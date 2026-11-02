@@ -13,6 +13,8 @@ body {
 }
 @layer base {
   a { color: inherit; text-decoration: none; }
+  h1, h2, h3, h4, p, strong { overflow-wrap: anywhere; }
+  input, select, textarea { min-width: 0; }
 }
 
 @keyframes buff-logo-fade {

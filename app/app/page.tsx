@@ -21,7 +21,7 @@ export default async function ApplicationHome({ searchParams }: Props) {
   const currentExercises = selection.currentWorkout?.gym_workout_exercises ?? [];
   const currentComplete = currentExercises.filter((item) => item.completed).length;
 
-  return <main className="min-h-[calc(100dvh-9rem)] py-10 pb-28">
+  return <main className="min-h-[calc(100dvh-9rem)] py-10 pb-28 lg:pb-8">
     <LocalDate className="text-sm font-bold uppercase tracking-[0.16em] text-lime-400" />
     <LocalGreeting />
     <p className="mt-5 text-xs font-bold uppercase tracking-wider text-slate-500">Today&apos;s workout</p>
@@ -31,6 +31,7 @@ export default async function ApplicationHome({ searchParams }: Props) {
     <ConsistencySummary compact timestamps={stats.attendanceTimestamps} />
     {latest?.completed_at ? <CompletedTodayBanner completedAt={latest.completed_at} name={latest.name} startedAt={latest.started_at} /> : null}
 
+    <div className="lg:grid lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:items-start lg:gap-6">
     {selection.currentWorkout ? <section className="mt-8 rounded-3xl border border-lime-400/30 bg-lime-400/10 p-6">
       <p className="text-xs font-bold uppercase tracking-wider text-lime-400">Workout in progress</p>
       <h2 className="mt-3 text-2xl font-bold">{selection.currentWorkout.name}</h2>
@@ -43,7 +44,10 @@ export default async function ApplicationHome({ searchParams }: Props) {
       {exercises.length ? <form action={startWorkoutAction} className="mt-7"><SubmitButton className="min-h-14 w-full rounded-xl bg-lime-400 font-black text-slate-950 hover:bg-lime-300" pendingLabel="Starting...">Start workout</SubmitButton></form> : <Link className="mt-6 flex min-h-12 items-center justify-center rounded-xl bg-slate-100 font-bold text-slate-950" href={`/app/plan/${selection.plan?.id}`}>Edit plan</Link>}
     </section> : <section className="mt-8 rounded-3xl border border-dashed border-slate-700 p-6"><h2 className="font-bold">{selection.plan ? "No workout days" : "No active plan"}</h2><p className="mt-2 text-sm leading-6 text-slate-400">{selection.plan ? "Add a workout day and exercises to get started." : "Choose a recommended plan or create your own."}</p><Link className="mt-5 flex min-h-12 items-center justify-center rounded-xl bg-lime-400 font-bold text-slate-950" href={selection.plan ? `/app/plan/${selection.plan.id}` : "/app/plan"}>{selection.plan ? "Edit plan" : "Choose a plan"}</Link></section>}
 
-    {latest && !selection.currentWorkout ? <section className="mt-6 rounded-2xl border border-slate-800 p-5"><p className="text-xs font-bold uppercase tracking-wider text-slate-500">Most recent</p><div className="mt-2 flex items-center justify-between"><span><strong className="block">{latest.name} ✓</strong><span className="text-sm text-slate-500">{latest.completed_at ? <LocalDateTime mode="date" value={latest.completed_at} /> : null}</span></span><span className="text-sm font-semibold text-lime-400">Complete</span></div></section> : null}
+    <aside className="mt-6 space-y-5 lg:mt-8">
+    {latest && !selection.currentWorkout ? <section className="rounded-2xl border border-slate-800 p-5"><p className="text-xs font-bold uppercase tracking-wider text-slate-500">Most recent</p><div className="mt-2 flex items-center justify-between"><span><strong className="block">{latest.name} ✓</strong><span className="text-sm text-slate-500">{latest.completed_at ? <LocalDateTime mode="date" value={latest.completed_at} /> : null}</span></span><span className="text-sm font-semibold text-lime-400">Complete</span></div></section> : null}
+      <section className="rounded-3xl border border-slate-800 bg-slate-900/40 p-5"><h2 className="text-lg font-bold">Your routine</h2><p className="mt-2 text-sm leading-6 text-slate-400">{selection.plan?.name ?? "Build a plan that works for you."}</p><div className="mt-4 grid gap-2"><Link className="flex min-h-12 items-center justify-between rounded-xl bg-slate-800/70 px-4 text-sm font-semibold" href="/app/plan">Manage plans <span aria-hidden="true">↗</span></Link><Link className="flex min-h-12 items-center justify-between rounded-xl bg-slate-800/70 px-4 text-sm font-semibold" href="/app/history">View progress <span aria-hidden="true">↗</span></Link></div></section>
+    </aside></div>
   </main>;
 }
 

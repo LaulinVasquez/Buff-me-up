@@ -1,16 +1,24 @@
 # Development status
 
-Last updated: **2026-11-01**. History feature baseline: **`5f503c0`**. Working branch: **`agent/history-progress`**. The original audit baseline was `f4828cc`.
+Last updated: **2026-11-02**. Responsive-layout baseline: **`95b4b92`**. Working branch: **`agent/responsive-layout`**. The original audit baseline was `f4828cc`.
 
 BMU-001 implementation: `a0abae4`, [PR #2](https://github.com/LaulinVasquez/Buff-me-up/pull/2), now merged upstream. Deployed migration/test-account acceptance is still unverified.
 
 BMU-007 dependency repair: `828dfdc`, [PR #3](https://github.com/LaulinVasquez/Buff-me-up/pull/3), now merged upstream. The history branch includes those patched lockfiles; 21 moderate development-tool findings remain from the earlier audit. Production/native rollout is not inferred from a Git merge.
 
+## Responsive layout (BMU-009)
+
+Requested by the developer: retain the phone-first experience and make larger devices useful. Plan: expand the shared content shell on tablets, switch bottom navigation to a sidebar at 1024px, and introduce readable grids for dashboard, History, plans, exercises, profile and workout screens. Keep phone safe areas and workout controls reachable. Presentation changes only; no schema, authentication or workout-state changes.
+
+Acceptance: no horizontal page overflow at 320/390/768/1024/1440px, a single visible primary navigation, accurate active links, working History controls and generator interactions, and usable workout actions at phone and desktop sizes. Validate actual components using labeled synthetic fixtures in an isolated preview, plus lint/build/typecheck and existing History regressions. Signed-in staging and physical-device checks remain separate.
+
+Implementation is complete locally. All 55 initial screen/width measurements (11 screens × 320/390/768/1024/1440px) passed after fixing a History-card grid overflow. Expanded plan forms also fit at 320/768/1024px. History metric controls, keyboard selection and year → month → day navigation, plus generator build/start-over interactions, were verified in fixtures. Final lint, build, sequential typecheck and all 12 History tests pass. See `RESPONSIVE_LAYOUT.md` for breakpoints and staging checks. Git/PR references are recorded in the session log.
+
 ## History refresh (BMU-008)
 
 Requested by the developer: a more appealing History tab with day/month/year progress graphs. Implemented a graph-led mobile layout with workout/minute metric controls, active-day/time summaries, streak/all-time context, selectable bars, year → month → day drill-downs, an expandable attendance calendar, and period-specific workout cards. Empty/loading states and keyboard-accessible chart data are included. A base link-style layering correction restores the intended active-tab/link contrast.
 
-Implementation `96639e3`, draft [PR #4](https://github.com/LaulinVasquez/Buff-me-up/pull/4). Lint, build, sequential typecheck, all 12 History tests and the database regression suite pass. Review and signed-in/device verification remain pending.
+Implementation `96639e3`, [PR #4](https://github.com/LaulinVasquez/Buff-me-up/pull/4), now merged upstream. Lint, build, sequential typecheck, all 12 History tests and the database regression suite pass. Signed-in/device verification remains pending.
 
 Progress uses existing completed sessions; no database schema or external chart dependency is added. Query results are paginated as narrow session summaries and filtered to exact local dates. Time logged is elapsed session time grouped by completion time. The same pure aggregation functions drive graph totals and the workout list.
 
@@ -54,7 +62,7 @@ Rollout risk: application completion/cancellation now depends on `gym_set_workou
 
 ## Prioritized next steps
 
-1. Review the two draft PRs; establish staging/test accounts, apply the finalization migration there, and demonstrate M1–M7 using `TESTING.md`. Merge/production rollout remain human decisions.
+1. Review the responsive-layout PR; establish staging/test accounts, verify the merged finalization migration there, and demonstrate M1–M7 plus the responsive checklist. PRs #2/#3/#4 are merged upstream; production rollout is not inferred from a Git merge.
 2. Resolve append-order/latest-weight findings (BMU-003/BMU-004) with focused regressions.
 3. Test existing generator schedules and exercise-provider behavior before expanding stretch scope (BMU-005); then add CI/mobile evidence and track the residual moderate tooling advisories.
 

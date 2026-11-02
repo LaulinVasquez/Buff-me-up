@@ -8,7 +8,7 @@ export function UserMenu({ avatarUrl, name }: UserMenuProps) {
     {avatarUrl ? (
       <Image alt="" className="size-10 shrink-0 rounded-full border border-slate-700 object-cover" height={40} referrerPolicy="no-referrer" src={avatarUrl} unoptimized width={40} />
     ) : (
-      <span aria-hidden="true" className="flex size-10 items-center justify-center rounded-full bg-lime-400 font-black text-slate-950">{name.charAt(0).toUpperCase()}</span>
+      <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-full bg-lime-400 font-black text-slate-950">{name.charAt(0).toUpperCase()}</span>
     )}
     <div className="min-w-0 text-right">
       <p className="max-w-36 truncate text-sm font-semibold text-slate-100">{name}</p>

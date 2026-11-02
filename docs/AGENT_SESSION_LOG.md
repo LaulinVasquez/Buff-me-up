@@ -1,5 +1,41 @@
 # Agent session log
 
+
+## 2026-11-02 — responsive layout (BMU-009)
+
+**Branch:** `agent/responsive-layout`, based on upstream `95b4b92` after PRs #2/#3/#4 merged. Implementation and PR references are added after publication below.
+
+### Completed
+
+- Followed the supplied development workflow; preserved the pre-existing untracked development guide, fetched upstream and searched existing responsive issues/open PRs (no matches).
+- Extracted the presentation shell, expanded tablet/desktop content, added a desktop sidebar with icons/active links and a keyboard skip link; retained phone bottom navigation and safe-area spacing.
+- Added responsive grids to dashboard, plans/detail, generator, exercise library/detail, History/detail and profile, plus a balanced desktop sign-in page.
+- Extracted the workout layout so existing forms appear once: bottom-fixed on phones/tablets, sticky beside exercises on desktop. Wider desktop workout grids and bounded completion/status cards avoid oversized controls.
+- Found and fixed a 320px History session-card overflow during browser measurements.
+- Updated development status/issues and the responsive behavior/acceptance guide. No package, database, service or server-action changes.
+
+### Verification
+
+- `npm run lint` — PASS.
+- `npm run build` — PASS, all application routes compiled; temporary preview removed before this final build.
+- `npm run typecheck` — PASS, run sequentially after build.
+- `npm run test:history` — PASS, 12/12 tests.
+- Browser fixture matrix — PASS: 11 screens × five actual document widths (320/390/768/1024/1440px), 55 measurements with `scrollWidth === clientWidth` after the overflow repair. Initially open plan forms also fit at 320/768/1024px.
+- Browser interactions — History Minutes control, year/month/day drill-down, annual keyboard selection, and 3-/4-day generator build/Start over verified. Desktop actions remained sticky 24px from the top after scrolling; mobile fixed actions and hidden workout navigation measured.
+- Browser limitations — native disclosure toggles and workout +/- interactions were not established in this isolated preview; expanded form layout was measured with fixture-only initial `open` attributes. One unlocated `MutationObserver.observe` error was captured by browser automation during the run; it had no source URL and was not attributed to application code. Recheck these interactions on staging/device; no claim of full signed-in acceptance.
+- Tests used actual shared/client components with synthetic data and copied server-page presentation with fixture services/stub actions. No real account or Supabase data was accessed. Sample-data screenshots and measurement JSON were saved as local chat artifacts; no preview route/auth bypass is shipped. Removed the temporary preview and stopped its port-4320 process.
+- Database regression tests were not rerun for this presentation-only change; persistence code/migrations are unchanged.
+
+### Git, risks, next steps and learning note
+
+Final diff review checks authentication/ownership logic and mutation form names/values remain unchanged; there are no new dependencies, migrations or generated preview files. The pre-existing untracked guide remains outside the commit. This change is not merged or deployed.
+
+1. Review the responsive PR and verify the staging/device checklist in `RESPONSIVE_LAYOUT.md`, including save/finish flows at breakpoint transitions.
+2. Complete the existing staging M1–M7 acceptance and migration verification with dedicated accounts.
+3. Address append-order/latest-weight findings (BMU-003/BMU-004), then generator/provider and CI/device gaps.
+
+Learning note: `minmax(0, 1fr)` and `min-w-0` let grid items become narrower than their text’s natural width. Without both a shrinkable track/item and wrapping or truncation, a card can overflow a 320px phone even when its parent is correctly sized. Resize History to demonstrate the same content moving from one column to a chart/summary grid while navigation changes from bottom bar to sidebar.
+
 ## 2026-11-01 — History layout and progress (BMU-008)
 
 **Branch:** `agent/history-progress`, based on `origin/main` at `5f503c0`. Earlier PRs #2/#3 were merged upstream before this task. The supplied untracked development guide remains untouched.

@@ -17,7 +17,7 @@ export default async function PlanDetailPage({ params, searchParams }: Props) {
   if (!plan) notFound();
   const days = [...plan.gym_workout_days].sort((a, b) => a.day_order - b.day_order);
 
-  return <main className="pb-28 pt-8">
+  return <main className="pb-28 pt-8 lg:pb-8">
     <Link className="inline-flex min-h-11 items-center text-sm text-slate-400 hover:text-white" href="/app/plan">← All plans</Link>
     <div className="mt-3 flex items-start justify-between gap-4">
       <div><p className="text-sm font-bold uppercase tracking-wider text-lime-400">{plan.source} plan</p><h1 className="mt-2 text-3xl font-black">{plan.name}</h1><p className="mt-2 text-slate-400">{plan.description || "No description"}</p></div>
@@ -27,7 +27,7 @@ export default async function PlanDetailPage({ params, searchParams }: Props) {
     {query.activated ? <Notice>This is now your active plan.</Notice> : null}
     {query.error ? <p className="mt-5 rounded-xl bg-red-400/10 p-4 text-sm text-red-200">That update failed. Check your entries and try again.</p> : null}
 
-    <div className="mt-7 flex gap-3">
+    <div className="mt-7 flex max-w-xl gap-3">
       {!plan.is_active ? <form action={activatePlanAction} className="flex-1"><Hidden name="planId" value={plan.id} /><SubmitButton className="min-h-12 w-full rounded-xl bg-lime-400 px-4 font-bold text-slate-950">Make active</SubmitButton></form> : null}
       <details className="flex-1 rounded-xl border border-slate-700">
         <summary className="flex min-h-12 cursor-pointer items-center justify-center font-semibold">Edit plan</summary>
@@ -40,11 +40,11 @@ export default async function PlanDetailPage({ params, searchParams }: Props) {
 
     <section className="mt-10">
       <div className="flex items-end justify-between"><div><h2 className="text-xl font-bold">Workout days</h2><p className="mt-1 text-sm text-slate-500">Sequence-based, not tied to weekdays.</p></div><span className="text-sm text-slate-500">{days.length} total</span></div>
-      {!days.length ? <p className="mt-5 rounded-2xl border border-dashed border-slate-700 p-5 text-slate-400">No workout days. Add your first day below.</p> : null}
-      <div className="mt-5 space-y-5">
+      {!days.length ? <p className="mt-5 max-w-xl rounded-2xl border border-dashed border-slate-700 p-5 text-slate-400">No workout days. Add your first day below.</p> : null}
+      <div className="mt-5 grid items-start gap-5 md:grid-cols-2">
         {days.map((day, dayIndex) => {
           const exercises = [...day.gym_exercises].sort((a, b) => a.exercise_order - b.exercise_order);
-          return <article className="rounded-3xl border border-slate-800 bg-slate-900/70 p-5" key={day.id}>
+          return <article className="min-w-0 rounded-3xl border border-slate-800 bg-slate-900/70 p-5" key={day.id}>
             <div className="flex items-center justify-between gap-3"><div><p className="text-xs font-bold uppercase text-slate-500">Day {dayIndex + 1}</p><h3 className="mt-1 text-lg font-bold">{day.name}</h3></div><OrderButtons action={moveWorkoutDay} idName="dayId" id={day.id} parentId={plan.id} first={dayIndex === 0} last={dayIndex === days.length - 1} /></div>
             <details className="mt-3"><summary className="flex min-h-10 cursor-pointer items-center text-sm font-semibold text-slate-400">Rename or delete day</summary>
               <form action={renameWorkoutDay} className="space-y-3 pt-3"><Hidden name="planId" value={plan.id} /><Hidden name="dayId" value={day.id} /><Input label="Day name" name="name" defaultValue={day.name} required /><SubmitButton className="min-h-11 w-full rounded-lg bg-slate-100 font-bold text-slate-950">Rename day</SubmitButton></form>
@@ -76,10 +76,10 @@ export default async function PlanDetailPage({ params, searchParams }: Props) {
           </article>;
         })}
       </div>
-      <details className="mt-5 rounded-2xl border border-dashed border-slate-700 p-4"><summary className="flex min-h-11 cursor-pointer items-center font-bold text-lime-400">+ Add workout day</summary><form action={addWorkoutDay} className="mt-4 space-y-3"><Hidden name="planId" value={plan.id} /><Input label="Day name" name="name" placeholder="Push" required /><SubmitButton className="min-h-11 w-full rounded-lg bg-lime-400 font-bold text-slate-950">Add day</SubmitButton></form></details>
+      <details className="mt-5 max-w-xl rounded-2xl border border-dashed border-slate-700 p-4"><summary className="flex min-h-11 cursor-pointer items-center font-bold text-lime-400">+ Add workout day</summary><form action={addWorkoutDay} className="mt-4 space-y-3"><Hidden name="planId" value={plan.id} /><Input label="Day name" name="name" placeholder="Push" required /><SubmitButton className="min-h-11 w-full rounded-lg bg-lime-400 font-bold text-slate-950">Add day</SubmitButton></form></details>
     </section>
 
-    <form action={deletePlanAction} className="mt-12 border-t border-slate-800 pt-8"><Hidden name="planId" value={plan.id} /><ConfirmSubmitButton className="min-h-12 w-full rounded-xl border border-red-400/30 font-semibold text-red-300" message={`Delete ${plan.name}? This also deletes its days and exercises.`}>Delete plan</ConfirmSubmitButton></form>
+    <form action={deletePlanAction} className="mt-12 max-w-xl border-t border-slate-800 pt-8"><Hidden name="planId" value={plan.id} /><ConfirmSubmitButton className="min-h-12 w-full rounded-xl border border-red-400/30 font-semibold text-red-300" message={`Delete ${plan.name}? This also deletes its days and exercises.`}>Delete plan</ConfirmSubmitButton></form>
   </main>;
 }
 
