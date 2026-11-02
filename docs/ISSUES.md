@@ -1,3 +1,7 @@
+## BMU-017 — Portable account export
+
+**Status:** implemented on `agent/data-export-quality`; review/staging pending. Explicit owner-scoped table allowlist, keyset pages, all-or-error download preparation, sign-in HTML rejection and readable JSON fallback. No token/provider/FlowDesk export. Actual saved file and native download acceptance remain pending. See DATA_EXPORT.md.
+
 ## BMU-016 — Personal gym equipment / exercise memory
 
 **Status:** implemented on `agent/personal-gyms`; review/staging pending. Save/edit/select up to ten gyms, remember per-gym settings/notes and highlight a valid preferred alternative without auto-swapping. Migration 12 adds owned tables, one-selection invariant and reviewed saves. See PERSONAL_GYMS.md.

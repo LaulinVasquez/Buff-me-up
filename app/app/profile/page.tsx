@@ -1,3 +1,4 @@
+import { DataExport } from "@/components/progress/data-export";
 import { GymSettings } from "@/components/gyms/gym-settings";
 import { getGymLocations } from "@/lib/gyms/service";
 import { saveGymAction, selectGymAction } from "./gym-actions";
@@ -39,5 +40,6 @@ export default async function ProfilePage() {
     {gyms ? <GymSettings gyms={gyms} saveAction={saveGymAction} selectAction={selectGymAction} /> : <p className="mt-8 text-sm text-slate-400">Gym setups are temporarily unavailable.</p>}
     <GoalSettings key={profile?.weekly_goal ?? 3} goal={profile?.weekly_goal ?? 3} action={saveGoalAction} />
     <AppearanceSettings action={saveAppearanceAction} />
+    <DataExport />
   </main>;
 }

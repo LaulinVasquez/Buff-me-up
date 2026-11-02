@@ -1,3 +1,7 @@
+## Account data export (BMU-017)
+
+Implemented on `agent/data-export-quality`, stacked on PR #12. Profile downloads all eight owned gym tables as versioned JSON with keyset pagination, no-store/auth checks, failure feedback and readable-text fallback. Eleven training tests and five synthetic fixture widths pass. Actual disk download and authenticated/native export remain manual acceptance. No new migration. See DATA_EXPORT.md.
+
 ## Personal gym setup (BMU-016)
 
 Implemented on `agent/personal-gyms`, stacked on PR #11. Named equipment setups, per-gym exercise settings/notes/preferred alternatives, explicit selection and equipment-aware swap defaults. Owner-isolated tables and stale-save/selection RPCs in migration 12. Nine training tests, local SQL/isolation and five expanded fixture widths pass; staging/device acceptance pending. See PERSONAL_GYMS.md.
