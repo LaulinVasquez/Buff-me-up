@@ -7,8 +7,8 @@ Authorized by Laurin on 2026-11-02: continue the previously proposed opportuniti
 | 0 | Training correctness (BMU-003/004) | Append after deletion; query latest completed non-null weight. Implemented in PR #8; live acceptance pending. |
 | 1 | Per-set logging and rest timer | Implemented on agent/set-logging: actual sets, immutable finished records, swap archives, responsive controls, reload persistence and rest timer. Staging/device acceptance pending. |
 | 2 | “I only have 20 minutes” | Implemented on agent/session-adaptations: reviewed shorter session, protected logs/plan, explained changes and restore. Staging pending. |
-| 3 | Progress explained / weekly review | Use recorded sets, distinguish comparable performance, personal bests, flexible attendance goal and one clear next action. |
-| 4 | Comeback mode | Opt-in reduced session implemented with respectful copy and no load prescriptions. Flexible weekly goal follows with progress review. |
+| 3 | Progress explained / weekly review | Implemented on agent/weekly-progress: comparable best-set reps, labeled 90-day load best, distinct-day goal and schedule-focused next action. All-time records remain outside scope. |
+| 4 | Comeback mode | Opt-in reduced session implemented with respectful copy and no load prescriptions. Flexible weekly goal implemented with progress review. |
 | 5 | Personal gym setup | Account-owned equipment, settings/notes and preferred alternatives; easy access during training. |
 | 6 | Quality essentials | Data export and interruption recovery; offline claims only with tested queue/conflict/account isolation. |
 | 7 | Private partners | Deliberate sharing controls, revocable access and two-account acceptance required before release; never a public feed by default. |

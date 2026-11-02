@@ -3,7 +3,7 @@ type Relationship = { foreignKeyName: string; columns: string[]; isOneToOne: boo
 type Table<Row, Insert, Update> = { Row: Row; Insert: Insert; Update: Update; Relationships: Relationship[] };
 type RelatedTable<Row, Insert, Update, Relations extends Relationship[]> = Omit<Table<Row, Insert, Update>, "Relationships"> & { Relationships: Relations };
 
-type ProfileRow = { accent_theme: string; id: string; full_name: string | null; avatar_url: string | null; created_at: string; updated_at: string };
+type ProfileRow = { weekly_goal: number; accent_theme: string; id: string; full_name: string | null; avatar_url: string | null; created_at: string; updated_at: string };
 type PlanRow = { id: string; user_id: string; name: string; description: string | null; is_active: boolean; source: string; created_at: string; updated_at: string };
 type DayRow = { id: string; plan_id: string; name: string; day_order: number; created_at: string; updated_at: string };
 type ExerciseRow = { id: string; workout_day_id: string; name: string; sets: number; target_reps: string; default_weight: number | null; exercise_order: number; notes: string | null; external_exercise_id: string | null; exercise_provider: string | null; muscle_group: string | null; equipment: string | null; created_at: string; updated_at: string };
@@ -13,7 +13,7 @@ type WorkoutExerciseRow = { deferred: boolean; logged_sets: Json; log_revision: 
 export type Database = {
   public: {
     Tables: {
-      gym_profiles: Table<ProfileRow, { accent_theme?: string; id: string; full_name?: string | null; avatar_url?: string | null; created_at?: string; updated_at?: string }, Partial<ProfileRow>>;
+      gym_profiles: Table<ProfileRow, { weekly_goal?: number; accent_theme?: string; id: string; full_name?: string | null; avatar_url?: string | null; created_at?: string; updated_at?: string }, Partial<ProfileRow>>;
       gym_workout_plans: Table<PlanRow, { id?: string; user_id: string; name: string; description?: string | null; is_active?: boolean; source?: string; created_at?: string; updated_at?: string }, Partial<PlanRow>>;
       gym_workout_days: RelatedTable<DayRow, { id?: string; plan_id: string; name: string; day_order: number; created_at?: string; updated_at?: string }, Partial<DayRow>, [{ foreignKeyName: "gym_workout_days_plan_id_fkey"; columns: ["plan_id"]; isOneToOne: false; referencedRelation: "gym_workout_plans"; referencedColumns: ["id"] }]>;
       gym_exercises: RelatedTable<ExerciseRow, { id?: string; workout_day_id: string; name: string; sets: number; target_reps: string; default_weight?: number | null; exercise_order: number; notes?: string | null; external_exercise_id?: string | null; exercise_provider?: string | null; muscle_group?: string | null; equipment?: string | null; created_at?: string; updated_at?: string }, Partial<ExerciseRow>, [{ foreignKeyName: "gym_exercises_workout_day_id_fkey"; columns: ["workout_day_id"]; isOneToOne: false; referencedRelation: "gym_workout_days"; referencedColumns: ["id"] }]>;

@@ -67,3 +67,29 @@ test("comeback keeps half of untouched work and never drops completed or saved s
  assert.equal(huge.keep.length,1);assert.equal(huge.estimatedMinutes,204);
  assert.equal(adaptationPreview([],"short").estimatedMinutes,0);
 });
+
+import { explainProgress, weeklyAttendance, isWeeklyGoal, type ProgressSession } from "../lib/progress/review";
+test("weekly attendance uses distinct local days, Monday boundaries and excludes future/invalid timestamps",()=>{
+ const week=weeklyAttendance(["2026-11-02T08:00:00Z","2026-11-02T09:00:00Z","2026-11-01T07:30:00Z","2026-11-01T08:30:00Z","2026-11-05T08:00:00Z","bad"],"America/Boise",3,new Date("2026-11-04T18:00:00Z"));
+ assert.equal(week.current,1);assert.equal(week.previous,1);assert.equal(week.remaining,2);assert.equal(week.days[0].key,"2026-11-02");assert.equal(week.days[0].done,true);assert.equal(week.days[6].future,true);
+ const boundary=weeklyAttendance(["2026-11-01T15:30:00Z"],"Asia/Tokyo",1,new Date("2026-11-02T01:00:00Z"));assert.equal(boundary.current,1);assert.equal(boundary.goalMet,true);
+ for(const value of [0,8,2.5,"3",null])assert.equal(isWeeklyGoal(value),false);assert.equal(isWeeklyGoal(1),true);assert.equal(isWeeklyGoal(7),true);
+});
+function progressSession(id:string,at:string,reps:number,weight:number|null=25,template:string|null="curl"):ProgressSession{return {id,status:"completed",completed_at:at,gym_workout_exercises:[{name:"Curl",exercise_id:template,substitution_details:null,logged_sets:[{set:1,reps,weight,completed:true}],deferred:false}]};}
+const reviewNow=new Date("2026-11-04T18:00:00Z");
+test("progress explains best-set reps at the same load and labels a limited-window load record",()=>{
+ const trend=explainProgress([progressSession("old","2026-10-20T12:00:00Z",8),progressSession("new","2026-11-02T12:00:00Z",10)],reviewNow);
+ assert.equal(trend[0].kind,"reps");assert.match(trend[0].text,/8 → 10 reps/);
+ const load=explainProgress([progressSession("old","2026-10-20T12:00:00Z",8),progressSession("new","2026-11-02T12:00:00Z",6,30)],reviewNow);
+ assert.equal(load[0].kind,"load");assert.match(load[0].text,/90-day/);assert.match(load[0].text,/Reps may differ/);
+});
+test("progress does not compare unrelated, deleted, unweighted, deferred or incomplete logs",()=>{
+ const current=progressSession("new","2026-11-02T12:00:00Z",10);
+ const unrelated=progressSession("old","2026-10-20T12:00:00Z",8,25,"other-template");
+ assert(explainProgress([current,unrelated],reviewNow).every(item=>item.kind==="baseline"));
+ const excluded=[progressSession("missing","2026-11-02T12:00:00Z",10,25,null),progressSession("unweighted","2026-11-02T12:00:00Z",10,null),progressSession("ancient","2025-01-01T12:00:00Z",10),progressSession("future","2027-01-01T12:00:00Z",10)];
+ const deferred=progressSession("deferred","2026-11-02T12:00:00Z",10);deferred.gym_workout_exercises[0].deferred=true;excluded.push(deferred);
+ const unfinished=progressSession("unfinished","2026-11-02T12:00:00Z",10);unfinished.status="in_progress";excluded.push(unfinished);
+ assert.deepEqual(explainProgress(excluded,reviewNow),[]);
+ assert.equal(explainProgress([current,current],reviewNow).length,1);
+});

@@ -46,6 +46,9 @@ try {
   runFile("tests/database/sets.sql");
   console.log("PASS: actual set persistence, validation, conflicts, substitution archives, finalization and RLS");
 
+  runFile("tests/database/goals.sql");
+  console.log("PASS: weekly attendance goal persistence, validation and owner isolation");
+
   runFile("tests/database/appearance.sql");
   console.log("PASS: profile accent persistence/defaults, validation, callback preservation and owner isolation");
 
