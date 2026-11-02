@@ -10,7 +10,7 @@ Authorized by Laurin on 2026-11-02: continue the previously proposed opportuniti
 | 3 | Progress explained / weekly review | Implemented on agent/weekly-progress: comparable best-set reps, labeled 90-day load best, distinct-day goal and schedule-focused next action. All-time records remain outside scope. |
 | 4 | Comeback mode | Opt-in reduced session implemented with respectful copy and no load prescriptions. Flexible weekly goal implemented with progress review. |
 | 5 | Personal gym setup | Implemented on agent/personal-gyms: account-owned named equipment setups, per-gym settings/notes, preferred alternatives and workout access. Staging pending. |
-| 6 | Quality essentials | Data export and interruption recovery; offline claims only with tested queue/conflict/account isolation. |
+| 6 | Quality essentials | Account export implemented with readable-text fallback. Rest timer and failed-save retention implemented. Durable offline queue remains a separate design/test item; no offline guarantee is made. |
 | 7 | Private partners | Deliberate sharing controls, revocable access and two-account acceptance required before release; never a public feed by default. |
 
 Already implemented and merged: responsive History, phone/desktop layouts, Gym is packed mode, account color themes. Existing authentication, provider/generator and device acceptance gaps stay visible in ISSUES.md; local fixtures do not establish live acceptance. Features after the first PR may be stacked with explicit dependencies until reviewed.
