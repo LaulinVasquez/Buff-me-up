@@ -40,6 +40,9 @@ try {
   runFile("tests/database/substitutions.sql");
   console.log("PASS: session substitutions, preserved originals/plans, stale writes, validation and RLS");
 
+  runFile("tests/database/appearance.sql");
+  console.log("PASS: profile accent persistence/defaults, validation, callback preservation and owner isolation");
+
   // Hold finalization open while a stale tab tries to save a weight.
   const firstUser = "00000000-0000-0000-0000-000000000001";
   const asUser = `set role authenticated; set request.jwt.claim.sub = '${firstUser}';`;

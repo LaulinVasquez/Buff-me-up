@@ -32,6 +32,14 @@ In Capacitor, OAuth uses `com.laurinvasquez.buffmeup://auth/callback` in Capacit
 - `/app/history/[workoutId]` — attendance calendar and snapshots
 - `/app/profile` — account and consistency summary
 
+## Account appearance
+
+`lib/appearance/themes.ts` defines five allowed accent palettes and shared CSS custom properties. Tailwind's accent utilities reference those variables, so buttons, navigation, headings, focus styles, chart bars and glows use one palette. Fixed semantic success/warning/error colors and Google/brand image assets remain distinct. The dark backgrounds stay unchanged.
+
+The authenticated layout reads the current user's `gym_profiles.accent_theme`, normalizes unknown/missing reads to Lime and server-renders a keyed `ThemeProvider`. No browser storage, theme cookie or initial client effect is needed to apply the saved color. Provider identity changes with the user ID to prevent account-state reuse.
+
+Profile's `AppearanceSettings` maintains a temporary preview through context; native controlled radio inputs support keyboard selection. The sample chart is explicitly labeled color-only. Cancel/navigation discard the preview, Reset selects Lime for review, and Save calls a server action that validates the allowlist, verifies the user and updates only that user's profile. Existing profile RLS/trigger stay enabled. Revalidating the authenticated layout loads the saved preference for subsequent routes; other devices receive it on the next authenticated load/refresh. The controlled form prevents native action resets from desynchronizing radio selection after a successful or failed save.
+
 ## Workout-plan foundation
 
 Workout persistence follows two ownership trees: users own plans, which own days and exercises; users also own workout sessions, which own workout-exercise snapshots. Nested RLS policies resolve ownership through these parent relationships.

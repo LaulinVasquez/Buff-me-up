@@ -40,7 +40,7 @@ export function GoogleSignInButton() {
   }
 
   return <div className="mt-9">
-    <button className="flex min-h-14 w-full items-center justify-center gap-3 rounded-2xl bg-white px-6 font-bold text-slate-950 transition-colors hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-lime-400 disabled:cursor-wait disabled:opacity-70" disabled={isLoading} onClick={signIn} type="button">
+    <button className="flex min-h-14 w-full items-center justify-center gap-3 rounded-2xl bg-white px-6 font-bold text-slate-950 transition-colors hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-400 disabled:cursor-wait disabled:opacity-70" disabled={isLoading} onClick={signIn} type="button">
       <GoogleMark />{isLoading ? "Connecting..." : "Continue with Google"}
     </button>
     {error ? <p className="mt-4 text-sm leading-6 text-red-300" role="alert">{error}</p> : null}

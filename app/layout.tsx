@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { NativeAuthListener } from "@/components/auth/native-auth-listener";
+import { accentVariables, DEFAULT_ACCENT_THEME } from "@/lib/appearance/themes";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -19,5 +20,5 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
-  return <html lang="en"><body><NativeAuthListener />{children}</body></html>;
+  return <html lang="en" style={accentVariables(DEFAULT_ACCENT_THEME)}><body><NativeAuthListener />{children}</body></html>;
 }

@@ -1,8 +1,16 @@
 # Development issues
 
+## BMU-011 — Account accent-color preferences
+
+**Status:** implemented in `02fb241`, draft [PR #7](https://github.com/LaulinVasquez/Buff-me-up/pull/7), on `agent/appearance-themes`, based on merged Gym is packed PR #6 (`aa44d5f`); lint/build/typecheck, 23 pure tests, SQL regressions and 25 fixture theme/width checks pass. Staging/device acceptance pending.
+
+Profile → Appearance offers five presets, whole-view live preview with a labeled sample chart, explicit Save/Cancel and reset-to-Lime preview. Saved choices live on the owned profile and apply through shared accent tokens across authenticated navigation/buttons/charts; account keys and preview cleanup prevent transient state from leaking between views/accounts. Error/warning/completion semantics and brand assets remain distinct. No custom input/light mode or new package is added.
+
+The additive migration checks allowed IDs under existing profile RLS. Pure contrast/validation tests, owner-isolated persistence tests and 25 fixture theme/width checks pass; browser interaction checks found and fixed the native action-reset/radio desynchronization. Real signed-in PostgREST/cross-device/iPhone acceptance remains pending. See `APPEARANCE_THEMES.md` for architecture, PR dependency, limits and rollout checks. No production migration or deployment was performed.
+
 ## BMU-010 — Gym is packed session-only exercise swaps
 
-**Status:** implemented in `7a1ba02`, draft [PR #6](https://github.com/LaulinVasquez/Buff-me-up/pull/6), on `agent/gym-packed-mode`, based on merged responsive baseline `e45f53f`; lint/build/typecheck, seven matching tests, 12 History tests, SQL/concurrency and 20 responsive fixture-state checks pass. Staging rollout and signed-in/device acceptance remain pending.
+**Status:** implemented in `7a1ba02`, merged [PR #6](https://github.com/LaulinVasquez/Buff-me-up/pull/6), on `agent/gym-packed-mode`, based on merged responsive baseline `e45f53f`; lint/build/typecheck, seven matching tests, 12 History tests, SQL/concurrency and 20 responsive fixture-state checks pass. Staging rollout and signed-in/device acceptance remain pending.
 
 Scope explicitly selected by the developer: an unfinished exercise can be replaced for the current workout using available equipment, with review/confirmation and saved original data. The bundled catalog supplies same-primary-muscle/type alternatives; existing session exercises are excluded and unclassified custom moves require a muscle choice. Targets/order stay intact; replacement weight resets, original data is retained, and the plan/completed work remains unchanged.
 

@@ -20,7 +20,7 @@ export function LaunchSplash() {
   return <div aria-label="Buff Me Up is loading" className="fixed inset-0 z-50 flex min-h-dvh items-center justify-center bg-slate-950">
     <div className="buff-launch-logo flex flex-col items-center gap-5">
       <Image alt="Buff Me Up" height={128} priority src="/icon.svg" width={128} />
-      <span className="text-xs font-bold uppercase tracking-[0.3em] text-lime-400">Buff Me Up</span>
+      <span className="text-xs font-bold uppercase tracking-[0.3em] text-accent-400">Buff Me Up</span>
     </div>
   </div>;
 }
