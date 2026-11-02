@@ -1,3 +1,7 @@
+## BMU-016 — Personal gym equipment / exercise memory
+
+**Status:** implemented on `agent/personal-gyms`; review/staging pending. Save/edit/select up to ten gyms, remember per-gym settings/notes and highlight a valid preferred alternative without auto-swapping. Migration 12 adds owned tables, one-selection invariant and reviewed saves. See PERSONAL_GYMS.md.
+
 ## BMU-015 — Weekly goal / progress explained
 
 **Status:** implemented on `agent/weekly-progress`; review/staging pending. Distinct local days, account goal, readable best-set rep changes and limited-window load records. Eight training tests, goal SQL isolation and five fixture widths pass. Migration 11 required; no automatic progression prescription. See WEEKLY_PROGRESS.md.

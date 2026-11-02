@@ -7,16 +7,17 @@ import { getSwapCandidates, getSwapSource, type SwapActionState, type SwapSnapsh
 
 const control = "min-h-12 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 text-sm focus-visible:outline-2 focus-visible:outline-accent-400";
 type Props = Readonly<{
+  savedGym?: { name: string; equipment: string[] }; preferredId?: string | null;
   workoutId: string; exercise: SwapSnapshot;
   exercises: Pick<SwapSnapshot, "name" | "substitution_details">[];
   action: (previous: SwapActionState, form: FormData) => Promise<SwapActionState>;
 }>;
 
-export function ExerciseSwap({ workoutId, exercise, exercises, action }: Props) {
+export function ExerciseSwap({ workoutId, exercise, exercises, action, savedGym, preferredId }: Props) {
   const source = getSwapSource(exercise);
   const [open, setOpen] = useState(false);
   const [muscle, setMuscle] = useState<MuscleGroup | "">(source.primaryMuscle ?? "");
-  const [equipment, setEquipment] = useState("");
+  const [equipment, setEquipment] = useState(savedGym?.equipment.length ? "__gym" : "");
   const [selectedId, setSelectedId] = useState("");
   const [state, submit, pending] = useActionState(action, {});
   const id = useId();
@@ -26,7 +27,7 @@ export function ExerciseSwap({ workoutId, exercise, exercises, action }: Props) 
   const selectedSource = { ...source, primaryMuscle: muscle || null };
   const allCandidates = getSwapCandidates(selectedSource, exercises);
   const equipmentOptions = [...new Set(allCandidates.flatMap(item => item.equipment ? [item.equipment] : []))].sort();
-  const candidates = getSwapCandidates(selectedSource, exercises, equipment ? [equipment] : []);
+  const candidates = getSwapCandidates(selectedSource, exercises, equipment === "__gym" ? savedGym?.equipment ?? [] : equipment ? [equipment] : []).sort((a,b) => Number(b.id === preferredId)-Number(a.id === preferredId) || a.name.localeCompare(b.name));
   const selected = candidates.find(item => item.id === selectedId);
   const close = () => { setOpen(false); setSelectedId(""); trigger.current?.focus(); };
 
@@ -40,11 +41,11 @@ export function ExerciseSwap({ workoutId, exercise, exercises, action }: Props) 
       <h3 className="mt-2 text-lg font-bold">Keep your session moving.</h3>
       <p className="mt-2 text-sm leading-6 text-slate-400">Replace <strong className="text-slate-200">{exercise.name}</strong> for this session. Your saved plan and other exercises stay the same.</p>
       <fieldset className="mt-4 min-w-0 space-y-4" disabled={pending}>
-        {!source.primaryMuscle ? <label className="block text-sm font-semibold">What does this exercise train?<select className={`${control} mt-2`} onChange={event => { setMuscle(event.target.value as MuscleGroup | ""); setEquipment(""); setSelectedId(""); }} required value={muscle}><option value="">Choose its primary muscle</option>{MUSCLE_GROUPS.map(item => <option key={item}>{item}</option>)}</select><span className="mt-2 block text-xs font-normal leading-5 text-slate-500">Choose the focus for this custom exercise so we can show relevant alternatives.</span></label> : <p className="text-xs text-slate-400">Primary muscle: <strong className="text-slate-200">{source.primaryMuscle}</strong></p>}
+        {!source.primaryMuscle ? <label className="block text-sm font-semibold">What does this exercise train?<select className={`${control} mt-2`} onChange={event => { setMuscle(event.target.value as MuscleGroup | ""); setEquipment(savedGym?.equipment.length ? "__gym" : ""); setSelectedId(""); }} required value={muscle}><option value="">Choose its primary muscle</option>{MUSCLE_GROUPS.map(item => <option key={item}>{item}</option>)}</select><span className="mt-2 block text-xs font-normal leading-5 text-slate-500">Choose the focus for this custom exercise so we can show relevant alternatives.</span></label> : <p className="text-xs text-slate-400">Primary muscle: <strong className="text-slate-200">{source.primaryMuscle}</strong></p>}
         {muscle ? <>
-          <label className="block text-sm font-semibold">What equipment is free?<select className={`${control} mt-2`} onChange={event => { setEquipment(event.target.value); setSelectedId(""); }} value={equipment}><option value="">Any equipment</option>{equipmentOptions.map(item => <option key={item}>{item}</option>)}</select></label>
+          <label className="block text-sm font-semibold">What equipment is free?<select className={`${control} mt-2`} onChange={event => { setEquipment(event.target.value); setSelectedId(""); }} value={equipment}><option value="">Any equipment</option>{savedGym?.equipment.length ? <option value="__gym">{savedGym.name} equipment</option> : null}{equipmentOptions.map(item => <option key={item}>{item}</option>)}</select></label>
           <fieldset className="min-w-0"><legend className="text-sm font-bold">Choose an alternative</legend><p className="mt-1 text-xs leading-5 text-slate-500">Same primary muscle{source.mechanic ? ` and ${source.mechanic} movement type` : ""}. Review the movement and targets before switching.</p>
-            <div className="mt-3 space-y-2">{candidates.map(item => <label className={`flex min-h-16 cursor-pointer items-start gap-3 rounded-xl border p-3 ${selectedId === item.id ? "border-accent-400/60 bg-accent-400/10" : "border-slate-700 bg-slate-900/60"}`} key={item.id}><input checked={selectedId === item.id} className="mt-1 size-4 shrink-0 accent-accent-400" name="replacementId" onChange={() => setSelectedId(item.id)} required type="radio" value={item.id} /><span className="min-w-0"><strong className="block text-sm">{item.name}</strong><span className="mt-1 block text-xs text-slate-400">{item.equipment} · {item.primaryMuscle}</span></span></label>)}</div>
+            <div className="mt-3 space-y-2">{candidates.map(item => <label className={`flex min-h-16 cursor-pointer items-start gap-3 rounded-xl border p-3 ${selectedId === item.id ? "border-accent-400/60 bg-accent-400/10" : "border-slate-700 bg-slate-900/60"}`} key={item.id}><input checked={selectedId === item.id} className="mt-1 size-4 shrink-0 accent-accent-400" name="replacementId" onChange={() => setSelectedId(item.id)} required type="radio" value={item.id} /><span className="min-w-0"><strong className="block text-sm">{item.name}{item.id === preferredId ? " · your preference" : ""}</strong><span className="mt-1 block text-xs text-slate-400">{item.equipment} · {item.primaryMuscle}</span></span></label>)}</div>
             {!candidates.length ? <p className="mt-3 rounded-xl border border-dashed border-slate-700 p-4 text-sm leading-6 text-slate-400">{equipment ? "No matching alternatives are available with this equipment. Try another equipment option or keep the original exercise." : "No matching alternative is available for this exercise. Keep the original exercise."}</p> : null}
           </fieldset>
         </> : null}

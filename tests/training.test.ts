@@ -93,3 +93,11 @@ test("progress does not compare unrelated, deleted, unweighted, deferred or inco
  assert.deepEqual(explainProgress(excluded,reviewNow),[]);
  assert.equal(explainProgress([current,current],reviewNow).length,1);
 });
+
+import { gymExerciseKey,validEquipment } from "../lib/gyms/preferences";
+test("gym notes normalize known names and equipment stays a bounded explicit list",()=>{
+ assert.equal(gymExerciseKey("  Bench   Press "),gymExerciseKey("Barbell Bench Press"));
+ assert.equal(gymExerciseKey(""),null);assert.equal(gymExerciseKey("x".repeat(161)),null);
+ assert.equal(validEquipment(["Dumbbells","Cable"]),true);assert.equal(validEquipment([]),true);
+ assert.equal(validEquipment(["Dumbbells","Dumbbells"]),false);assert.equal(validEquipment(["Unknown machine"]),false);assert.equal(validEquipment([null]),false);
+});

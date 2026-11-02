@@ -13,6 +13,8 @@ type WorkoutExerciseRow = { deferred: boolean; logged_sets: Json; log_revision: 
 export type Database = {
   public: {
     Tables: {
+      gym_locations: Table<{id:string;user_id:string;name:string;equipment:string[];is_active:boolean;created_at:string;updated_at:string},{id?:string;user_id:string;name:string;equipment?:string[];is_active?:boolean;created_at?:string;updated_at?:string},{name?:string;equipment?:string[];is_active?:boolean;updated_at?:string}>;
+      gym_exercise_notes: Table<{id:string;user_id:string;gym_id:string;exercise_key:string;exercise_name:string;machine_settings:string;notes:string;preferred_exercise_id:string|null;created_at:string;updated_at:string},{id?:string;user_id:string;gym_id:string;exercise_key:string;exercise_name:string;machine_settings?:string;notes?:string;preferred_exercise_id?:string|null;created_at?:string;updated_at?:string},{exercise_name?:string;machine_settings?:string;notes?:string;preferred_exercise_id?:string|null;updated_at?:string}>;
       gym_profiles: Table<ProfileRow, { weekly_goal?: number; accent_theme?: string; id: string; full_name?: string | null; avatar_url?: string | null; created_at?: string; updated_at?: string }, Partial<ProfileRow>>;
       gym_workout_plans: Table<PlanRow, { id?: string; user_id: string; name: string; description?: string | null; is_active?: boolean; source?: string; created_at?: string; updated_at?: string }, Partial<PlanRow>>;
       gym_workout_days: RelatedTable<DayRow, { id?: string; plan_id: string; name: string; day_order: number; created_at?: string; updated_at?: string }, Partial<DayRow>, [{ foreignKeyName: "gym_workout_days_plan_id_fkey"; columns: ["plan_id"]; isOneToOne: false; referencedRelation: "gym_workout_plans"; referencedColumns: ["id"] }]>;
@@ -28,6 +30,9 @@ export type Database = {
     };
     Views: Record<never, never>;
     Functions: {
+      gym_save_location: {Args:{target_gym_id:string|null;expected_updated_at:string|null;gym_name:string;available_equipment:string[]};Returns:string};
+      gym_select_location: {Args:{target_gym_id:string|null};Returns:undefined};
+      gym_save_exercise_note: {Args:{target_gym_id:string;target_key:string;display_name:string;settings:string;note_text:string;preferred_id:string|null;expected_updated_at:string|null};Returns:string};
       gym_activate_workout_plan: { Args: { target_plan_id: string }; Returns: undefined };
       gym_adopt_recommended_plan: { Args: { template: Json }; Returns: string };
       gym_start_workout: { Args: { target_day_id: string }; Returns: string };

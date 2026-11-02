@@ -52,6 +52,9 @@ try {
   runFile("tests/database/appearance.sql");
   console.log("PASS: profile accent persistence/defaults, validation, callback preservation and owner isolation");
 
+  runFile("tests/database/gyms.sql");
+  console.log("PASS: gym equipment/selection, note persistence/conflicts, bounds and two-user isolation");
+
   // Hold finalization open while a stale tab tries to save a weight.
   const firstUser = "00000000-0000-0000-0000-000000000001";
   const asUser = `set role authenticated; set request.jwt.claim.sub = '${firstUser}';`;
@@ -166,6 +169,15 @@ try {
   if (setFinishResults[0].code !== 0 || setFinishResults[1].code === 0 || !setFinishResults[1].output.includes("Workout is no longer in progress")) throw new Error("Late sets changed a finished session");
   sql(`${asUser} select test.assert((select logged_sets='${firstSets}'::jsonb and log_revision=1 from public.gym_workout_exercises where id='${setExercise}'), 'Concurrent sets/finalization must preserve saved records');`);
   console.log("PASS: concurrent set saves/scope reviews reject stale state; finalization preserves set records");
+
+  const noteGym=sql(`${asUser} select id from public.gym_locations where name='Synthetic gym A edited';`).match(/[0-9a-f]{8}-[0-9a-f-]{27}/)?.[0];
+  const firstNote=runAsync(`${asUser} begin; select public.gym_save_exercise_note('${noteGym}','concurrent-note','Concurrent note','Seat 4','First saved',null,null); select pg_sleep(1); commit;`);
+  await waitForBarrier();
+  const secondNote=runAsync(`${asUser} select public.gym_save_exercise_note('${noteGym}','concurrent-note','Concurrent note','Seat 5','Stale edit',null,null);`);
+  const noteResults=await Promise.all([firstNote,secondNote]);
+  if(noteResults[0].code!==0||noteResults[1].code===0||!noteResults[1].output.includes("Notes changed"))throw new Error("Concurrent gym notes overwrote each other");
+  sql(`${asUser} select test.assert((select machine_settings='Seat 4' and notes='First saved' from public.gym_exercise_notes where gym_id='${noteGym}' and exercise_key='concurrent-note'),'First saved gym note must survive');`);
+  console.log("PASS: concurrent gym note creation rejects stale overwrites");
 
 } catch (error) {
   console.error(error.stderr?.toString() || error.message);

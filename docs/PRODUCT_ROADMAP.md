@@ -9,7 +9,7 @@ Authorized by Laurin on 2026-11-02: continue the previously proposed opportuniti
 | 2 | “I only have 20 minutes” | Implemented on agent/session-adaptations: reviewed shorter session, protected logs/plan, explained changes and restore. Staging pending. |
 | 3 | Progress explained / weekly review | Implemented on agent/weekly-progress: comparable best-set reps, labeled 90-day load best, distinct-day goal and schedule-focused next action. All-time records remain outside scope. |
 | 4 | Comeback mode | Opt-in reduced session implemented with respectful copy and no load prescriptions. Flexible weekly goal implemented with progress review. |
-| 5 | Personal gym setup | Account-owned equipment, settings/notes and preferred alternatives; easy access during training. |
+| 5 | Personal gym setup | Implemented on agent/personal-gyms: account-owned named equipment setups, per-gym settings/notes, preferred alternatives and workout access. Staging pending. |
 | 6 | Quality essentials | Data export and interruption recovery; offline claims only with tested queue/conflict/account isolation. |
 | 7 | Private partners | Deliberate sharing controls, revocable access and two-account acceptance required before release; never a public feed by default. |
 

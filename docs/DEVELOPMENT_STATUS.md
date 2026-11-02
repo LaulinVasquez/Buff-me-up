@@ -1,3 +1,7 @@
+## Personal gym setup (BMU-016)
+
+Implemented on `agent/personal-gyms`, stacked on PR #11. Named equipment setups, per-gym exercise settings/notes/preferred alternatives, explicit selection and equipment-aware swap defaults. Owner-isolated tables and stale-save/selection RPCs in migration 12. Nine training tests, local SQL/isolation and five expanded fixture widths pass; staging/device acceptance pending. See PERSONAL_GYMS.md.
+
 ## Flexible weekly goals and progress feedback (BMU-015)
 
 Implemented on `agent/weekly-progress`, stacked on PR #10. Account-saved 1–7 attendance-day goals, current local week/last week, schedule-focused next step and actual weighted-set explanations on Home/History. Comparisons are explicitly limited to up to 100 completed sessions/90 days; no inferred historical reps or all-time claims. Migration 11 and staging acceptance required. See WEEKLY_PROGRESS.md.
