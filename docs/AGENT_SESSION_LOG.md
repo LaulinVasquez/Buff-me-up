@@ -222,3 +222,49 @@ BMU-003: append after the highest remaining day/exercise position instead of cou
 Passed: `npm run test:training` (2), `npm run lint`, `npm run build`, sequential `npm run typecheck`, `npm run test:db`, `npm run test:history` (12), `npm run test:swaps` (7), `npm run test:appearance` (4), `git diff --check`. No signed-in/live PostgREST or device testing. Next: actual per-set records and rest timer.
 
 Git: `58e7ade` on `agent/training-foundation-fixes`; draft [PR #8](https://github.com/LaulinVasquez/Buff-me-up/pull/8) targets main.
+
+## 2026-11-02 — Actual set logging / rest timer
+
+Implemented per-set fields, explicit Save, validation/dirty/error states, saved History summary and page-local wall-clock rest timer. Migration 9 adds validated snapshot JSON/revisions, owner-scoped lock-ordered save RPC and original-set swap archives; prevents stale/finished and legacy summary overwrites. No historical backfill or live changes. Fixed a local SQL fixture to activate its own test plan before starting; suite passes. Three training tests, existing seven swap tests and full SQL suite (including competing sets/finalization) pass. Browser fixture save/reload, invalid completion, failed-save retention, timer start/stop and five widths pass with no horizontal overflow/warnings/errors. Native dialog inspection was inconclusive; manual acceptance retained. Screenshot: set-logging-phone.png in the session visualization directory (synthetic data). Temporary preview removed before final lint/build/typecheck. Next: short-session/comeback adaptation.
+
+Final lint/build/sequential typecheck and training/swap tests pass after preview cleanup. Git: `d4f92cf`, draft [PR #9](https://github.com/LaulinVasquez/Buff-me-up/pull/9), base `agent/training-foundation-fixes` (PR #8).
+
+## 2026-11-02 — Short/comeback session adaptations
+
+Added reviewed short sessions (15/20/30-minute estimates), optional comeback (half untouched work), full restore and retained set-aside snapshots. Existing saved plans and completed/partial logs stay unchanged; History identifies reduced scope. Migration 10 adds owner-scoped parent/snapshot locks, reviewed timestamp/mode revision checks, adaptation history and finished/deferred guards. Five training tests and SQL persistence/stale-review/RLS/finalization checks pass. Browser synthetic actual component verifies short save/reload, full restore, comeback save and open review at five widths without overflow or console warnings/errors. No live data changes. Next: flexible weekly goal and evidence-based progress feedback.
+
+Final lint/build/sequential typecheck, five training tests, SQL suite and diff check pass after preview cleanup. Home/resume excludes deferred exercises; previous-weight queries exclude deferred and unlogged/incomplete rows.
+
+Git: `ee9fefd` on `agent/session-adaptations`, draft [PR #10](https://github.com/LaulinVasquez/Buff-me-up/pull/10), base `agent/set-logging` (PR #9).
+
+## 2026-11-02 — Flexible weekly goal and explained progress
+
+Added Profile goal (1–7 distinct attendance days), Home/History weekly review in local timezone, goal feedback and comparable best-set rep / limited-window load explanations. Review is labeled up to 100 sessions/90 days; no inferred old reps, unknown-identity/unweighted/deferred comparisons or all-time claims. Kept start controls/charts ahead of the review on phones. Migration 11 uses existing profile owner RLS. Eight training tests and full local SQL suite pass, including DST/week/duplicate dates, comparison exclusions and goal isolation. Synthetic component browser checks pass goal save/reload/met state, failed-save selection retention, empty state and five widths; no overflow or console warnings/errors. Next: personal gym equipment/settings/notes.
+
+Final lint/build/sequential typecheck, eight training tests, 12 History tests and diff check pass after preview cleanup.
+
+Git: `3d881b4` on `agent/weekly-progress`, draft [PR #11](https://github.com/LaulinVasquez/Buff-me-up/pull/11), base `agent/session-adaptations` (PR #10).
+
+## 2026-11-02 — Personal gym setup
+
+Added Profile gym setup, explicit equipment/selection, per-gym exercise settings/notes and preferred alternative. Gym is packed defaults to saved equipment and highlights eligible preference; acceptance is always explicit. Migration 12 preserves account isolation with owner/nested RLS and atomic selection/reviewed saves. Nine training tests, SQL bounds/persistence/stale saves/isolation pass. Synthetic actual-component browser verifies add, save notes/preference, switch, reload, preferred swap display and five expanded phone-to-desktop widths without overflow or warnings/errors. No real data or location permissions. Next: data export and automated checks, then consolidated review report.
+
+Final SQL/concurrency suite (including competing gym notes), lint/build/sequential typecheck, nine training tests, seven swap tests and diff check pass after preview cleanup.
+
+Git: `c495325` on `agent/personal-gyms`, draft [PR #12](https://github.com/LaulinVasquez/Buff-me-up/pull/12), base `agent/weekly-progress` (PR #11).
+
+## 2026-11-02 — Portable account data export
+
+Added authenticated, no-store owner-scoped JSON export across eight explicit gym tables with keyset pages of 500/start-time cutoff. No tokens/provider secrets/FlowDesk objects or new migration. Any query failure aborts; HTML sign-in responses and unexpected format are rejected. UI prepares download and selectable-text fallback. Eleven training tests pass. Synthetic actual-component browser verifies visible JSON payload, HTML rejection/clearing and five expanded widths without overflow. Browser download event timed out; no disk download/native success is claimed. Temporary preview removed before final checks. Next: automated CI and generator validation, consolidated report.
+
+Final lint/build/sequential typecheck, eleven training tests and diff check pass after preview cleanup.
+
+Git: `4e27624` on `agent/data-export-quality`, draft [PR #13](https://github.com/LaulinVasquez/Buff-me-up/pull/13), base `agent/personal-gyms` (PR #12).
+
+## 2026-11-02 — Generator validation and continuous quality
+
+Tests found empty generated days could save and fractional day counts could choose the wrong split. Added strict unknown-input plan validation in UI/server, generation bounds/selected-muscle coverage, catalog deduplication, bounded rotating focus and error feedback. Migration 13 replaces generated save validation with atomic empty/duplicate/malformed rejection. Four generator tests cover 12 day/experience combinations and sparse/edited cases; local SQL verifies four populated days, rollback and isolation. Browser fixture checks fractional/empty-day blocking, regeneration, empty catalog, four generated days at five widths without overflow/warnings/errors. Never submitted the production save action. A temporary iframe outer-scroll obstruction was resolved by using an iframe shorter than the outer viewport; product layout was unaffected. Added npm test/check and pinned, secret-free GitHub quality workflow. Final aggregate/remote results follow.
+
+Final `npm run check` passes after all product/preview changes: lint, production build, sequential typecheck, 38 pure tests and full local SQL/RLS/concurrency suite. `git diff --check` passes. Consolidated report: AUTONOMOUS_UPDATES_2026-11-02.md. No dependency upgrade or remote schema/data/deploy change.
+
+Git: quality implementation `be4d160`, [PR #14](https://github.com/LaulinVasquez/Buff-me-up/pull/14). GitHub Application quality run [41547160238](https://github.com/LaulinVasquez/Buff-me-up/actions/runs/41547160238) passed all steps on Node 22/Ubuntu 24.04. During the session the developer merged #8 to main (`54ef508`), #9/#10 into foundation, #11 into session-adaptations, #12 into weekly-progress and #13 into personal-gyms. The agent merged those existing remote branch histories into its quality branch; `git diff --exit-code be4d160 -- .` confirmed no content changes before documentation edits. PRs #11/#12 had already closed when retargeting was attempted, so they were left unchanged. Retargeted remaining #14 to main and rewrote title/body for the complete integration scope. No PR was merged by the agent. Consolidated report/status now explain the true review queue rather than treating all closed PRs as main merges. Documentation-only follow-up runs may be queued after this evidence.

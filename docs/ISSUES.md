@@ -1,3 +1,31 @@
+# Current review queue — 2026-11-02
+
+Review [integration PR #14](https://github.com/LaulinVasquez/Buff-me-up/pull/14) for the complete remaining product batch. The developer merged #8 to main and #9–#13 into feature branches; their older issue/PR records below are historical milestones, not evidence that every feature reached main. No PR was merged by the agent. See AUTONOMOUS_UPDATES_2026-11-02.md for verified status, migrations and acceptance limits.
+
+## BMU-018 — Generator validation / continuous quality
+
+**Status:** implemented in `be4d160`, [integration PR #14](https://github.com/LaulinVasquez/Buff-me-up/pull/14) targeting main; local aggregate and GitHub CI run 41547160238 pass. Reject empty/duplicate/fractional edited plans, guarantee deterministic populated 3–6 day fallback schedules with selected-muscle coverage, protect atomic saves and add secret-free CI. Migration 13 required for direct database validation. See GENERATOR_QUALITY.md.
+
+## BMU-017 — Portable account export
+
+**Status:** implemented on `agent/data-export-quality`; review/staging pending. Explicit owner-scoped table allowlist, keyset pages, all-or-error download preparation, sign-in HTML rejection and readable JSON fallback. No token/provider/FlowDesk export. Actual saved file and native download acceptance remain pending. See DATA_EXPORT.md.
+
+## BMU-016 — Personal gym equipment / exercise memory
+
+**Status:** implemented on `agent/personal-gyms`; review/staging pending. Save/edit/select up to ten gyms, remember per-gym settings/notes and highlight a valid preferred alternative without auto-swapping. Migration 12 adds owned tables, one-selection invariant and reviewed saves. See PERSONAL_GYMS.md.
+
+## BMU-015 — Weekly goal / progress explained
+
+**Status:** implemented on `agent/weekly-progress`; review/staging pending. Distinct local days, account goal, readable best-set rep changes and limited-window load records. Eight training tests, goal SQL isolation and five fixture widths pass. Migration 11 required; no automatic progression prescription. See WEEKLY_PROGRESS.md.
+
+## BMU-013/014 — Short and comeback sessions
+
+**Status:** implemented on `agent/session-adaptations`; PR/staging review pending. Explicit keep/set-aside review, 15/20/30-minute estimates, half-untouched comeback, safe restore, plan/log preservation and stale-review protection. Additive migration 10. See SESSION_ADAPTATIONS.md for scope and acceptance limits.
+
+## BMU-012 — Actual set logging / rest timer
+
+**Status:** implemented on `agent/set-logging`, pending PR and staging acceptance. Save actual reps/weight/completion with optimistic revision checks, preserve finished sets and originals during swaps, show saved sets in History, and provide a manual rest timer. No historical reps are inferred. See SET_LOGGING.md for migration 9, evidence and limits.
+
 # Development issues
 
 ## BMU-011 — Account accent-color preferences
@@ -64,13 +92,13 @@ Browser acceptance for M1–M7, including Google sign-in/out, plan/exercise edit
 
 ## BMU-005 — P1: exercise provider and generator verification
 
-**Status:** partially implemented; not live-verified.
+**Status:** generator schedule/edit validation implemented on `agent/generator-quality-ci`; local pure/SQL and component checks pass. Provider contract/licensing and signed-in staging remain unverified.
 
 ExerciseDB browsing, fallback data, details, and a 3–6 day generator already exist upstream. Verify the provider's current contract, pagination/filtering, limits, and media terms/attribution before marking S1/S4 complete. Add deterministic generator tests for 3/4/5/6 days, sparse catalogs, duplicate avoidance, empty-day rejection, and edited-plan validation. Then demonstrate four populated days and saving/reloading in staging.
 
 ## BMU-006 — P2: mobile, CI, and demonstration evidence
 
-**Status:** pending.
+**Status:** quality workflow/aggregate scripts implemented on `agent/generator-quality-ci`; remote result recorded in the session log. Physical-device/native and authenticated smoke acceptance remain pending.
 
 No repository CI configuration or existing automated test script was present at baseline. This session adds `test:db`; CI integration and browser smoke coverage remain. Physical iPhone OAuth/deep links, installation, PWA layout, network failures, real screenshots, and TestFlight checks require device/staging evidence. The approved requirements draft was not available in this repository; confirm scope before changing commitments. Publishing/signing/invites require human approval per the development plan.
 

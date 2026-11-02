@@ -1,3 +1,5 @@
+import { WeeklyReview } from "@/components/progress/weekly-review";
+import { getProgressReviewData } from "@/lib/progress/service";
 import Link from "next/link";
 import { SubmitButton } from "@/components/forms/submit-button";
 import { LocalDate, LocalDateTime } from "@/components/local-date";
@@ -12,13 +14,14 @@ type Props = Readonly<{ searchParams: Promise<{ cancelled?: string; error?: stri
 
 export default async function ApplicationHome({ searchParams }: Props) {
   const query = await searchParams;
-  const [selection, latest, stats] = await Promise.all([
+  const [review, selection, latest, stats] = await Promise.all([
+    getProgressReviewData().catch(() => null),
     getNextWorkoutDay().catch(() => ({ plan: null, day: null, currentWorkout: null })),
     getLatestCompletedWorkout().catch(() => null),
     getWorkoutStatsData().catch(() => ({ totalWorkouts: 0, attendanceTimestamps: [] })),
   ]);
   const exercises = selection.day ? [...selection.day.gym_exercises].sort((a, b) => a.exercise_order - b.exercise_order) : [];
-  const currentExercises = selection.currentWorkout?.gym_workout_exercises ?? [];
+  const currentExercises = selection.currentWorkout?.gym_workout_exercises.filter(item => !item.deferred) ?? [];
   const currentComplete = currentExercises.filter((item) => item.completed).length;
 
   return <main className="min-h-[calc(100dvh-9rem)] py-10 pb-28 lg:pb-8">
@@ -48,6 +51,7 @@ export default async function ApplicationHome({ searchParams }: Props) {
     {latest && !selection.currentWorkout ? <section className="rounded-2xl border border-slate-800 p-5"><p className="text-xs font-bold uppercase tracking-wider text-slate-500">Most recent</p><div className="mt-2 flex items-center justify-between"><span><strong className="block">{latest.name} ✓</strong><span className="text-sm text-slate-500">{latest.completed_at ? <LocalDateTime mode="date" value={latest.completed_at} /> : null}</span></span><span className="text-sm font-semibold text-success-400">Complete</span></div></section> : null}
       <section className="rounded-3xl border border-slate-800 bg-slate-900/40 p-5"><h2 className="text-lg font-bold">Your routine</h2><p className="mt-2 text-sm leading-6 text-slate-400">{selection.plan?.name ?? "Build a plan that works for you."}</p><div className="mt-4 grid gap-2"><Link className="flex min-h-12 items-center justify-between rounded-xl bg-slate-800/70 px-4 text-sm font-semibold" href="/app/plan">Manage plans <span aria-hidden="true">↗</span></Link><Link className="flex min-h-12 items-center justify-between rounded-xl bg-slate-800/70 px-4 text-sm font-semibold" href="/app/history">View progress <span aria-hidden="true">↗</span></Link></div></section>
     </aside></div>
+    {review ? <WeeklyReview {...review} timestamps={stats.attendanceTimestamps} /> : <p className="mt-6 text-sm text-slate-400">Weekly review is temporarily unavailable.</p>}
   </main>;
 }
 

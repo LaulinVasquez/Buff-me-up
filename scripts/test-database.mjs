@@ -40,8 +40,23 @@ try {
   runFile("tests/database/substitutions.sql");
   console.log("PASS: session substitutions, preserved originals/plans, stale writes, validation and RLS");
 
+  runFile("tests/database/adaptations.sql");
+  console.log("PASS: reviewed session scope, retained work/plans, restore, stale review, finalization and RLS");
+
+  runFile("tests/database/sets.sql");
+  console.log("PASS: actual set persistence, validation, conflicts, substitution archives, finalization and RLS");
+
+  runFile("tests/database/goals.sql");
+  console.log("PASS: weekly attendance goal persistence, validation and owner isolation");
+
   runFile("tests/database/appearance.sql");
   console.log("PASS: profile accent persistence/defaults, validation, callback preservation and owner isolation");
+
+  runFile("tests/database/gyms.sql");
+  console.log("PASS: gym equipment/selection, note persistence/conflicts, bounds and two-user isolation");
+
+  runFile("tests/database/generator.sql");
+  console.log("PASS: generated-plan persistence, invalid edits, atomic rollback and owner isolation");
 
   // Hold finalization open while a stale tab tries to save a weight.
   const firstUser = "00000000-0000-0000-0000-000000000001";
@@ -137,6 +152,35 @@ try {
   }
   sql(`${asUser} select test.assert((select name = 'Hammer Curl' and weight = 42 and substitution_version = 1 from public.gym_workout_exercises where id = '${original.id}'), 'Saved replacement progress was not preserved');`);
   console.log("PASS: swap vs stale progress/second swap, progress vs stale review, and finalization vs swap");
+
+  const setWorkout = sql(`${asUser} select public.gym_start_workout('${day}');`).match(/[0-9a-f]{8}-[0-9a-f-]{27}/)?.[0];
+  const setExercise = sql(`${asUser} select id from public.gym_workout_exercises where workout_id='${setWorkout}';`).match(/[0-9a-f]{8}-[0-9a-f-]{27}/)?.[0];
+  const firstSets = JSON.stringify([{set:1,reps:10,weight:25,completed:true},{set:2,reps:null,weight:null,completed:false}]);
+  const competingSets = JSON.stringify([{set:1,reps:8,weight:50,completed:true}]);
+  const oldScopeReview = JSON.parse(sql(`${asUser} select jsonb_agg(jsonb_build_object('id',id,'updatedAt',updated_at)) from public.gym_workout_exercises where workout_id='${setWorkout}';`).split("\n").find(line=>line.trim().startsWith("[")));
+  const setSave = runAsync(`${asUser} begin; select public.gym_save_workout_sets('${setWorkout}','${setExercise}',0,0,'${firstSets}'); select pg_sleep(1); commit;`);
+  await waitForBarrier();
+  const competingSetSave = runAsync(`${asUser} select public.gym_save_workout_sets('${setWorkout}','${setExercise}',0,0,'${competingSets}');`);
+  const staleScope = runAsync(`${asUser} select public.gym_adapt_workout('${setWorkout}','full',null,0,'${JSON.stringify(oldScopeReview)}',array[]::uuid[]);`);
+  const setResults = await Promise.all([setSave, competingSetSave, staleScope]);
+  if (setResults[2].code === 0 || !setResults[2].output.includes("Exercise changed")) throw new Error("Stale scope review discarded new sets");
+  if (setResults[0].code !== 0 || setResults[1].code === 0 || !setResults[1].output.includes("Set log changed")) throw new Error("Concurrent sets overwrote one another");
+  const setFinish = runAsync(`${asUser} begin; select public.gym_set_workout_status('${setWorkout}','completed'); select pg_sleep(1); commit;`);
+  await waitForBarrier();
+  const lateSets = runAsync(`${asUser} select public.gym_save_workout_sets('${setWorkout}','${setExercise}',0,1,'${competingSets}');`);
+  const setFinishResults = await Promise.all([setFinish, lateSets]);
+  if (setFinishResults[0].code !== 0 || setFinishResults[1].code === 0 || !setFinishResults[1].output.includes("Workout is no longer in progress")) throw new Error("Late sets changed a finished session");
+  sql(`${asUser} select test.assert((select logged_sets='${firstSets}'::jsonb and log_revision=1 from public.gym_workout_exercises where id='${setExercise}'), 'Concurrent sets/finalization must preserve saved records');`);
+  console.log("PASS: concurrent set saves/scope reviews reject stale state; finalization preserves set records");
+
+  const noteGym=sql(`${asUser} select id from public.gym_locations where name='Synthetic gym A edited';`).match(/[0-9a-f]{8}-[0-9a-f-]{27}/)?.[0];
+  const firstNote=runAsync(`${asUser} begin; select public.gym_save_exercise_note('${noteGym}','concurrent-note','Concurrent note','Seat 4','First saved',null,null); select pg_sleep(1); commit;`);
+  await waitForBarrier();
+  const secondNote=runAsync(`${asUser} select public.gym_save_exercise_note('${noteGym}','concurrent-note','Concurrent note','Seat 5','Stale edit',null,null);`);
+  const noteResults=await Promise.all([firstNote,secondNote]);
+  if(noteResults[0].code!==0||noteResults[1].code===0||!noteResults[1].output.includes("Notes changed"))throw new Error("Concurrent gym notes overwrote each other");
+  sql(`${asUser} select test.assert((select machine_settings='Seat 4' and notes='First saved' from public.gym_exercise_notes where gym_id='${noteGym}' and exercise_key='concurrent-note'),'First saved gym note must survive');`);
+  console.log("PASS: concurrent gym note creation rejects stale overwrites");
 
 } catch (error) {
   console.error(error.stderr?.toString() || error.message);
