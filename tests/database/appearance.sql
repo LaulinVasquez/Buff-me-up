@@ -1,0 +1,31 @@
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-0000-0000-000000000001';
+select test.assert((select accent_theme = 'lime' from public.gym_profiles where id = auth.uid()), 'Existing accounts must default to Lime');
+update public.gym_profiles set accent_theme = 'ocean' where id = auth.uid();
+select test.assert((select accent_theme = 'ocean' and full_name = 'Synthetic user one' from public.gym_profiles where id = auth.uid()), 'Saving an accent must preserve profile details');
+select test.assert_raises($$update public.gym_profiles set accent_theme = 'arbitrary-css' where id = auth.uid()$$, 'violates check constraint');
+select test.assert_raises($$update public.gym_profiles set accent_theme = null where id = auth.uid()$$, 'null value');
+-- Mirrors the OAuth callback's partial profile upsert: sign-in must not reset appearance.
+insert into public.gym_profiles (id, full_name, avatar_url) values (auth.uid(), 'Synthetic user one', null)
+on conflict (id) do update set full_name = excluded.full_name, avatar_url = excluded.avatar_url;
+select test.assert((select accent_theme = 'ocean' from public.gym_profiles where id = auth.uid()), 'Signing in again must not reset the saved theme');
+set request.jwt.claim.sub = '00000000-0000-0000-0000-000000000002';
+insert into public.gym_profiles (id, full_name) values (auth.uid(), 'Synthetic user two');
+select test.assert((select accent_theme = 'lime' from public.gym_profiles where id = auth.uid()), 'New accounts must default to Lime');
+update public.gym_profiles set accent_theme = 'rose' where id = auth.uid();
+update public.gym_profiles set accent_theme = 'purple' where id = '00000000-0000-0000-0000-000000000001';
+select test.assert((select count(*) = 0 from public.gym_profiles where id = '00000000-0000-0000-0000-000000000001'), 'Other accounts cannot read saved appearance');
+select test.assert_raises($$insert into public.gym_profiles (id, accent_theme) values ('00000000-0000-0000-0000-000000000001', 'purple')$$, 'row-level security');
+set request.jwt.claim.sub = '00000000-0000-0000-0000-000000000001';
+select test.assert((select accent_theme = 'ocean' from public.gym_profiles where id = auth.uid()), 'Other accounts cannot overwrite the saved theme');
+update public.gym_profiles set accent_theme = 'purple' where id = auth.uid();
+update public.gym_profiles set accent_theme = 'orange' where id = auth.uid();
+update public.gym_profiles set accent_theme = 'rose' where id = auth.uid();
+update public.gym_profiles set accent_theme = 'lime' where id = auth.uid();
+select test.assert((select accent_theme = 'lime' from public.gym_profiles where id = auth.uid()), 'Every preset and reset to default must persist');
+set request.jwt.claim.sub = '';
+update public.gym_profiles set accent_theme = 'purple';
+select test.assert((select count(*) = 0 from public.gym_profiles), 'Missing identities cannot access appearance');
+set role anon;
+select test.assert_raises($$update public.gym_profiles set accent_theme = 'purple'$$, 'permission denied');
+reset role;

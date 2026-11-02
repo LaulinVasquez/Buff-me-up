@@ -1,14 +1,20 @@
 # Development status
 
-Last updated: **2026-11-02**. Responsive-layout baseline: **`95b4b92`**. Working branch: **`agent/gym-packed-mode`**. The original audit baseline was `f4828cc`.
+Last updated: **2026-11-02**. Appearance baseline: **`aa44d5f`** (merged PR #6). Working branch: **`agent/appearance-themes`**. The original audit baseline was `f4828cc`.
 
 BMU-001 implementation: `a0abae4`, [PR #2](https://github.com/LaulinVasquez/Buff-me-up/pull/2), now merged upstream. Deployed migration/test-account acceptance is still unverified.
 
 BMU-007 dependency repair: `828dfdc`, [PR #3](https://github.com/LaulinVasquez/Buff-me-up/pull/3), now merged upstream. The history branch includes those patched lockfiles; 21 moderate development-tool findings remain from the earlier audit. Production/native rollout is not inferred from a Git merge.
 
+## Appearance themes (BMU-011)
+
+Implemented Profile → Appearance with five accent presets, live preview and a labeled sample chart, explicit Save/Cancel, reset-to-default preview and account-backed persistence. Existing primary colors use shared tokens; semantic success/warning/error colors and Google/brand assets stay distinct. The authenticated layout server-renders saved preferences and keys the provider by account. Dark backgrounds stay unchanged; light mode/custom input are outside this change.
+
+Added a checked `gym_profiles.accent_theme` column under existing owner RLS and a validated server action. Palette contrast/validation, local owner-isolated SQL and sample-data save/preview/cancel/error/reset/navigation checks pass, along with 25 theme/width measurements; final quality/Git results are recorded in the session log. Apply migration 8 in staging before verifying saved preferences. Signed-in PostgREST, cross-device and native-device acceptance remain pending. No production migration or deployment. Based on merged Gym is packed PR #6 (`aa44d5f`), including that feature’s accent controls. The appearance PR targets `main`.
+
 ## Gym is packed mode (BMU-010)
 
-Implementation `7a1ba02`, draft [PR #6](https://github.com/LaulinVasquez/Buff-me-up/pull/6).
+Implementation `7a1ba02`, merged [PR #6](https://github.com/LaulinVasquez/Buff-me-up/pull/6).
 
 Scope confirmed by the developer: replace one unfinished exercise in the current workout using available equipment. Implemented a reviewable picker backed by the bundled catalog, same-primary-muscle/type matching and duplicate exclusion, with manual muscle selection for unclassified custom moves. Saved plans, completed exercises, original snapshot/weight history and order are preserved; replacement weight is explicitly cleared while targets/instructions remain visible.
 

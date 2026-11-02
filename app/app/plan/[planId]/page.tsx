@@ -20,15 +20,15 @@ export default async function PlanDetailPage({ params, searchParams }: Props) {
   return <main className="pb-28 pt-8 lg:pb-8">
     <Link className="inline-flex min-h-11 items-center text-sm text-slate-400 hover:text-white" href="/app/plan">← All plans</Link>
     <div className="mt-3 flex items-start justify-between gap-4">
-      <div><p className="text-sm font-bold uppercase tracking-wider text-lime-400">{plan.source} plan</p><h1 className="mt-2 text-3xl font-black">{plan.name}</h1><p className="mt-2 text-slate-400">{plan.description || "No description"}</p></div>
-      <span className={`rounded-full px-3 py-1 text-xs font-bold ${plan.is_active ? "bg-lime-400/10 text-lime-400" : "bg-slate-800 text-slate-400"}`}>{plan.is_active ? "Active" : "Inactive"}</span>
+      <div><p className="text-sm font-bold uppercase tracking-wider text-accent-400">{plan.source} plan</p><h1 className="mt-2 text-3xl font-black">{plan.name}</h1><p className="mt-2 text-slate-400">{plan.description || "No description"}</p></div>
+      <span className={`rounded-full px-3 py-1 text-xs font-bold ${plan.is_active ? "bg-accent-400/10 text-accent-400" : "bg-slate-800 text-slate-400"}`}>{plan.is_active ? "Active" : "Inactive"}</span>
     </div>
     {query.created ? <Notice>Plan created. Add or adjust anything you need.</Notice> : null}
     {query.activated ? <Notice>This is now your active plan.</Notice> : null}
     {query.error ? <p className="mt-5 rounded-xl bg-red-400/10 p-4 text-sm text-red-200">That update failed. Check your entries and try again.</p> : null}
 
     <div className="mt-7 flex max-w-xl gap-3">
-      {!plan.is_active ? <form action={activatePlanAction} className="flex-1"><Hidden name="planId" value={plan.id} /><SubmitButton className="min-h-12 w-full rounded-xl bg-lime-400 px-4 font-bold text-slate-950">Make active</SubmitButton></form> : null}
+      {!plan.is_active ? <form action={activatePlanAction} className="flex-1"><Hidden name="planId" value={plan.id} /><SubmitButton className="min-h-12 w-full rounded-xl bg-accent-400 px-4 font-bold text-slate-950">Make active</SubmitButton></form> : null}
       <details className="flex-1 rounded-xl border border-slate-700">
         <summary className="flex min-h-12 cursor-pointer items-center justify-center font-semibold">Edit plan</summary>
         <form action={renamePlan} className="space-y-3 border-t border-slate-800 p-4">
@@ -66,17 +66,17 @@ export default async function PlanDetailPage({ params, searchParams }: Props) {
               </div>
             </details>) : <p className="text-sm text-slate-500">No exercises yet.</p>}</div>
 
-            <details className="mt-4 rounded-xl border border-dashed border-slate-700 p-3"><summary className="flex min-h-10 cursor-pointer items-center font-semibold text-lime-400">+ Add exercise</summary>
+            <details className="mt-4 rounded-xl border border-dashed border-slate-700 p-3"><summary className="flex min-h-10 cursor-pointer items-center font-semibold text-accent-400">+ Add exercise</summary>
               <form action={addExercise} className="mt-3 grid grid-cols-2 gap-3"><Hidden name="planId" value={plan.id} /><Hidden name="dayId" value={day.id} />
                 <div className="col-span-2"><Input label="Exercise name" name="name" required /></div><Input label="Sets" name="sets" type="number" min="1" defaultValue="3" required /><Input label="Target reps" name="targetReps" placeholder="8-12" required />
                 <div className="col-span-2"><Input label="Default weight (lb)" name="defaultWeight" type="number" min="0" step="0.25" /></div><div className="col-span-2"><Input label="Notes" name="notes" /></div>
-                <SubmitButton className="col-span-2 min-h-11 rounded-lg bg-lime-400 font-bold text-slate-950">Add exercise</SubmitButton>
+                <SubmitButton className="col-span-2 min-h-11 rounded-lg bg-accent-400 font-bold text-slate-950">Add exercise</SubmitButton>
               </form>
             </details>
           </article>;
         })}
       </div>
-      <details className="mt-5 max-w-xl rounded-2xl border border-dashed border-slate-700 p-4"><summary className="flex min-h-11 cursor-pointer items-center font-bold text-lime-400">+ Add workout day</summary><form action={addWorkoutDay} className="mt-4 space-y-3"><Hidden name="planId" value={plan.id} /><Input label="Day name" name="name" placeholder="Push" required /><SubmitButton className="min-h-11 w-full rounded-lg bg-lime-400 font-bold text-slate-950">Add day</SubmitButton></form></details>
+      <details className="mt-5 max-w-xl rounded-2xl border border-dashed border-slate-700 p-4"><summary className="flex min-h-11 cursor-pointer items-center font-bold text-accent-400">+ Add workout day</summary><form action={addWorkoutDay} className="mt-4 space-y-3"><Hidden name="planId" value={plan.id} /><Input label="Day name" name="name" placeholder="Push" required /><SubmitButton className="min-h-11 w-full rounded-lg bg-accent-400 font-bold text-slate-950">Add day</SubmitButton></form></details>
     </section>
 
     <form action={deletePlanAction} className="mt-12 max-w-xl border-t border-slate-800 pt-8"><Hidden name="planId" value={plan.id} /><ConfirmSubmitButton className="min-h-12 w-full rounded-xl border border-red-400/30 font-semibold text-red-300" message={`Delete ${plan.name}? This also deletes its days and exercises.`}>Delete plan</ConfirmSubmitButton></form>
@@ -84,8 +84,8 @@ export default async function PlanDetailPage({ params, searchParams }: Props) {
 }
 
 function Hidden({ name, value }: Readonly<{ name: string; value: string }>) { return <input name={name} type="hidden" value={value} />; }
-function Input({ label, ...props }: Readonly<{ label: string; name: string; defaultValue?: string; placeholder?: string; required?: boolean; type?: string; min?: string; step?: string }>) { return <label className="block text-xs font-semibold text-slate-400">{label}<input className="mt-1.5 min-h-11 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 text-base text-slate-100 outline-none focus:border-lime-400" {...props} /></label>; }
-function Notice({ children }: Readonly<{ children: React.ReactNode }>) { return <p className="mt-5 rounded-xl bg-lime-400/10 p-4 text-sm text-lime-300">{children}</p>; }
+function Input({ label, ...props }: Readonly<{ label: string; name: string; defaultValue?: string; placeholder?: string; required?: boolean; type?: string; min?: string; step?: string }>) { return <label className="block text-xs font-semibold text-slate-400">{label}<input className="mt-1.5 min-h-11 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 text-base text-slate-100 outline-none focus:border-accent-400" {...props} /></label>; }
+function Notice({ children }: Readonly<{ children: React.ReactNode }>) { return <p className="mt-5 rounded-xl bg-success-400/10 p-4 text-sm text-success-300">{children}</p>; }
 function OrderButtons({ action, idName, id, parentId, dayId, first, last }: Readonly<{ action: (form: FormData) => Promise<void>; idName: string; id: string; parentId: string; dayId?: string; first: boolean; last: boolean }>) {
   return <div className="flex gap-2"><form action={action}><Hidden name="planId" value={parentId} /><Hidden name={idName} value={id} />{dayId ? <Hidden name="dayId" value={dayId} /> : null}<Hidden name="direction" value="up" /><button aria-label="Move up" className="min-h-10 min-w-10 rounded-lg bg-slate-800 disabled:opacity-30" disabled={first}>↑</button></form><form action={action}><Hidden name="planId" value={parentId} /><Hidden name={idName} value={id} />{dayId ? <Hidden name="dayId" value={dayId} /> : null}<Hidden name="direction" value="down" /><button aria-label="Move down" className="min-h-10 min-w-10 rounded-lg bg-slate-800 disabled:opacity-30" disabled={last}>↓</button></form></div>;
 }

@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test:db": "node scripts/test-database.mjs",
+    "test:appearance": "node scripts/test-appearance.mjs",
     "test:swaps": "node scripts/test-workout-swaps.mjs",
     "test:history": "node scripts/test-history.mjs",
     "ios": "npx cap sync ios && npx cap open ios",

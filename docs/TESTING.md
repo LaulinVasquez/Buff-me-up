@@ -18,6 +18,12 @@ In staging with a test account:
 
 The development component preview used synthetic fixtures only. It verifies rendering/interactions, not a deployed Supabase/PostgREST configuration, and is not a shipped demo route.
 
+## Appearance themes
+
+Run `npm run test:appearance` for preset validation/defaults, CSS-variable mapping, 4.5:1 accent-text/button-label contrast targets and 3:1 chart/focus targets. `npm run test:db` also verifies the new profile column's default, all five allowed IDs/reset, invalid/null rejection, unchanged profile details, callback-style partial upsert preservation and two-user/anonymous isolation. These tests do not verify a deployed PostgREST or OAuth session.
+
+Apply `20261102010000_add_profile_accent_theme.sql` in designated staging and follow `APPEARANCE_THEMES.md` for save/cancel/reset/failure/navigation, real account switching, cross-device and phone/native checks before a release.
+
 ## Gym is packed mode
 
 Run `npm run test:swaps` for pure matching tests and `npm run test:db` for transactional acceptance in the disposable local cluster. Tests include template aliases, equipment/movement filters, completed/incomplete duplicate exclusion, unclassified custom moves, saved replacement metadata, malformed data and non-mutation of input lists. SQL verifies original weights/history/targets/order, unchanged plans and completed exercises, repeat swaps, future sessions, resume/finalization, validation, anonymous/two-user isolation, stale version/update-time rejection and legacy writes. Concurrent tests cover swap vs save/another swap, a save invalidating the reviewed timestamp, and finalization vs swap.

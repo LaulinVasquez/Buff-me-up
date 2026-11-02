@@ -5,6 +5,7 @@ Buff Me Up is a mobile-first gym tracking SaaS with authentication, plan managem
 ## Features
 
 - Google sign-in and protected user data
+- Account-saved accent themes with live preview, explicit save/cancel and reset in Profile → Appearance
 - Recommended and custom workout plans
 - Ordered workout days and editable exercises
 - Refresh-safe workout execution, weights, and completion tracking
@@ -69,6 +70,7 @@ Set both public Supabase variables for Preview and Production. ExerciseDB V1 req
 - npm run lint - ESLint
 - npm run build - production build
 - npm run test:db - isolated PostgreSQL regression tests (requires local PostgreSQL binaries)
+- npm run test:appearance - theme validation, token mapping and palette contrast tests
 - npm run test:swaps - exercise matching, equipment filtering, duplicate exclusion and metadata tests
 - npm run test:history - history aggregation, timezone/DST, date navigation, and duration tests
 - npm start - production server
@@ -94,12 +96,15 @@ Apply these files in order without modifying already-applied migrations:
 5. 20260818000000_add_gym_exercise_catalog.sql
 6. 20261101000000_guard_gym_workout_finalization.sql
 7. 20261102000000_add_workout_substitutions.sql
+8. 20261102010000_add_profile_accent_theme.sql
 
 Apply migration 6 to development/staging before running this version's completion/cancellation flows: they now use `gym_set_workout_status`. It adds functions and triggers without rewriting existing rows. Test the same migration in staging before an approved production rollout.
 
 All application objects use the gym_ prefix. Recommended templates remain static application data; attendance is derived from completed workouts.
 
 Apply migration 7 to development/staging **before deploying this application version**. Progress saves now use `gym_update_workout_progress`, and swaps use `gym_swap_workout_exercise`. Existing sessions receive empty swap history/version zero; no plan or workout records are backfilled or renamed. Verify staging ownership, stale-tab and resume/history behavior in `docs/GYM_PACKED_MODE.md` before any approved production rollout.
+
+Apply migration 8 in development/staging to enable saved appearance preferences. It adds a checked, owner-protected `accent_theme` column with Lime as the default. See `docs/APPEARANCE_THEMES.md` for preview/save behavior and staging acceptance. Production migration/deployment still require explicit approval.
 
 ## Vercel deployment
 
