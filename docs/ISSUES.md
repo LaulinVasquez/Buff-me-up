@@ -2,7 +2,7 @@
 
 ## BMU-011 — Account accent-color preferences
 
-**Status:** implemented on `agent/appearance-themes`, based on merged Gym is packed PR #6 (`aa44d5f`); lint/build/typecheck, 23 pure tests, SQL regressions and 25 fixture theme/width checks pass. Staging/device acceptance pending.
+**Status:** implemented in `02fb241`, draft [PR #7](https://github.com/LaulinVasquez/Buff-me-up/pull/7), on `agent/appearance-themes`, based on merged Gym is packed PR #6 (`aa44d5f`); lint/build/typecheck, 23 pure tests, SQL regressions and 25 fixture theme/width checks pass. Staging/device acceptance pending.
 
 Profile → Appearance offers five presets, whole-view live preview with a labeled sample chart, explicit Save/Cancel and reset-to-Lime preview. Saved choices live on the owned profile and apply through shared accent tokens across authenticated navigation/buttons/charts; account keys and preview cleanup prevent transient state from leaking between views/accounts. Error/warning/completion semantics and brand assets remain distinct. No custom input/light mode or new package is added.
 

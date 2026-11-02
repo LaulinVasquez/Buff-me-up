@@ -3,7 +3,7 @@
 
 ## 2026-11-02 — account appearance themes (BMU-011)
 
-**Branch:** `agent/appearance-themes`. Started from `374831d` so the Gym is packed UI could use the same tokens. PR #6 merged during development; fetched `aa44d5f`, confirmed its tree matches the original baseline and safely fast-forwarded this feature branch without changing source or discarding edits. The new PR targets `main`; publication references are added below.
+**Branch:** `agent/appearance-themes`. Started from `374831d` so the Gym is packed UI could use the same tokens. PR #6 merged during development; fetched `aa44d5f`, confirmed its tree matches the original baseline and safely fast-forwarded this feature branch without changing source or discarding edits. The new PR targets `main`. **Implementation:** `02fb241`, pushed to origin. **Draft PR:** [PR #7](https://github.com/LaulinVasquez/Buff-me-up/pull/7), attached to this chat. The existing Git credential created the PR through GitHub REST because connector writes were already known to return 403; credentials remained only in process memory.
 
 ### Completed
 
@@ -16,6 +16,7 @@
 
 ### Verification
 
+- `git diff --check` and final staged diff review — PASS; original untracked guide remains outside commits.
 - `npm run lint` — PASS.
 - `npm run build` — PASS; all application routes compiled after removing the temporary preview.
 - Sequential `npm run typecheck` after build — PASS.

@@ -8,6 +8,8 @@ BMU-007 dependency repair: `828dfdc`, [PR #3](https://github.com/LaulinVasquez/B
 
 ## Appearance themes (BMU-011)
 
+Implementation `02fb241`, draft [PR #7](https://github.com/LaulinVasquez/Buff-me-up/pull/7).
+
 Implemented Profile → Appearance with five accent presets, live preview and a labeled sample chart, explicit Save/Cancel, reset-to-default preview and account-backed persistence. Existing primary colors use shared tokens; semantic success/warning/error colors and Google/brand assets stay distinct. The authenticated layout server-renders saved preferences and keys the provider by account. Dark backgrounds stay unchanged; light mode/custom input are outside this change.
 
 Added a checked `gym_profiles.accent_theme` column under existing owner RLS and a validated server action. Palette contrast/validation, local owner-isolated SQL and sample-data save/preview/cancel/error/reset/navigation checks pass, along with 25 theme/width measurements; final quality/Git results are recorded in the session log. Apply migration 8 in staging before verifying saved preferences. Signed-in PostgREST, cross-device and native-device acceptance remain pending. No production migration or deployment. Based on merged Gym is packed PR #6 (`aa44d5f`), including that feature’s accent controls. The appearance PR targets `main`.
