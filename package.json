@@ -17,8 +17,9 @@
     "ios:open": "npx cap open ios",
     "test:training": "node scripts/test-training.mjs",
     "test:generator": "node scripts/test-generator.mjs",
-    "test": "npm run test:training && npm run test:generator && npm run test:history && npm run test:swaps && npm run test:appearance",
-    "check": "npm run lint && npm run build && npm run typecheck && npm test && npm run test:db"
+    "test": "npm run test:training && npm run test:generator && npm run test:history && npm run test:swaps && npm run test:appearance && npm run test:search",
+    "check": "npm run lint && npm run build && npm run typecheck && npm test && npm run test:db",
+    "test:search": "node scripts/test-exercise-search.mjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.1",

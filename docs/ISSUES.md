@@ -90,9 +90,13 @@ Browser acceptance for M1–M7, including Google sign-in/out, plan/exercise edit
 
 `getPreviousExerciseWeight` orders the embedded `gym_workouts` relation, then limits the parent `gym_workout_exercises` query to one row. Confirm that this returns the latest completed workout's weight with three distinct dated sessions; add a regression and order the top-level result appropriately if it does not.
 
+## BMU-019 — P1: inefficient exercise search
+
+**Status:** implemented on `agent/exercise-search`; review/staging pending. `/exercises` now receives its documented `name` parameter and at most 25 results. Complete equipment metadata, DB/BB/RDL expansion, flexible built-in matches and pagination, timeout, responsive controls, cancellation/cache and clear failure/retry feedback address reproducible code defects. Five regression tests and synthetic component checks pass. Live provider calls returned HTTP 403 in this environment; staging availability and native acceptance remain unverified. No migration required. See EXERCISE_SEARCH.md.
+
 ## BMU-005 — P1: exercise provider and generator verification
 
-**Status:** generator schedule/edit validation implemented on `agent/generator-quality-ci`; local pure/SQL and component checks pass. Provider contract/licensing and signed-in staging remain unverified.
+**Status:** generator schedule/edit validation implemented on `agent/generator-quality-ci`; local pure/SQL and component checks pass. Search parameter/limit/equipment contracts and free-tier attribution requirements were inspected during BMU-019; live provider availability, media redistribution rights and signed-in staging remain unverified.
 
 ExerciseDB browsing, fallback data, details, and a 3–6 day generator already exist upstream. Verify the provider's current contract, pagination/filtering, limits, and media terms/attribution before marking S1/S4 complete. Add deterministic generator tests for 3/4/5/6 days, sparse catalogs, duplicate avoidance, empty-day rejection, and edited-plan validation. Then demonstrate four populated days and saving/reloading in staging.
 
