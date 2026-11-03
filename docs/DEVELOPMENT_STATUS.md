@@ -4,7 +4,7 @@ Updated **2026-11-03**. Autonomous batch baseline: `c092c6a` (appearance PR #7 m
 
 ## Latest search repair
 
-Implemented on `agent/exercise-search` from updated main (`2eaab86`, developer merged #14): corrected provider name parameter/25-result bound, added a six-second timeout, complete equipment choices, shorthand/flexible built-in matching, local pagination, responsive clear/filter controls, cached debounced requests and visible loading/error/retry states. `npm run check` passes: 43 tests plus full disposable database suite. Synthetic component checks cover error/retry/filter/pagination and five widths without overflow. Official contract inspected; live provider access returned HTTP 403, so staging/provider/native acceptance remains pending. No Supabase update required. See EXERCISE_SEARCH.md and session log for review reference.
+Implemented on `agent/exercise-search` from updated main (`2eaab86`, developer merged #14): corrected provider name parameter/25-result bound, added a six-second timeout, complete equipment choices, shorthand/flexible built-in matching, local pagination, responsive clear/filter controls, cached debounced requests and visible loading/error/retry states. `npm run check` passes: 43 tests plus full disposable database suite. Synthetic component checks cover error/retry/filter/pagination and five widths without overflow. Official contract inspected; live provider access returned HTTP 403, so staging/provider/native acceptance remains pending. No Supabase update required. Review [draft PR #15](https://github.com/LaulinVasquez/Buff-me-up/pull/15), implementation `8d69e0f`. See EXERCISE_SEARCH.md and session log.
 
 ## Review queue
 

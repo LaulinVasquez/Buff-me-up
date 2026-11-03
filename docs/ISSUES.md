@@ -92,7 +92,7 @@ Browser acceptance for M1–M7, including Google sign-in/out, plan/exercise edit
 
 ## BMU-019 — P1: inefficient exercise search
 
-**Status:** implemented on `agent/exercise-search`; review/staging pending. `/exercises` now receives its documented `name` parameter and at most 25 results. Complete equipment metadata, DB/BB/RDL expansion, flexible built-in matches and pagination, timeout, responsive controls, cancellation/cache and clear failure/retry feedback address reproducible code defects. Five regression tests and synthetic component checks pass. Live provider calls returned HTTP 403 in this environment; staging availability and native acceptance remain unverified. No migration required. See EXERCISE_SEARCH.md.
+**Status:** implemented in [draft PR #15](https://github.com/LaulinVasquez/Buff-me-up/pull/15), commit `8d69e0f`; review/staging pending. `/exercises` now receives its documented `name` parameter and at most 25 results. Complete equipment metadata, DB/BB/RDL expansion, flexible built-in matches and pagination, timeout, responsive controls, cancellation/cache and clear failure/retry feedback address reproducible code defects. Five regression tests and synthetic component checks pass. Live provider calls returned HTTP 403 in this environment; staging availability and native acceptance remain unverified. No migration required. See EXERCISE_SEARCH.md.
 
 ## BMU-005 — P1: exercise provider and generator verification
 
