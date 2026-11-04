@@ -121,3 +121,7 @@ Implemented on `agent/nutrition-profile` after plan PR #16. Optional setup/skip 
 ## BMU-021 — Usual meals, USDA lookup and food diary
 
 Implemented on `agent/meals-and-logging`, stacked on PR #17. Manual labels/gram recipes, nullable nutrients, private meal CRUD/archive/restore, historical log snapshots and retry tokens, local-day/weekly views, server USDA lookup with manual fallback and owner quotas. Migration 15 required after 14. Adapter/pure and SQL coverage documented in MEALS_AND_LOGGING.md; live USDA key/staging/native acceptance remain pending.
+
+## BMU-022 — Personalized meal plans and nutrition rollout
+
+Implemented on `agent/personalized-meal-plans`, integrating all nutrition stages for main after developer merges into intermediate branches. Reviewed seven-day plans, existing-meal eligibility/variety, explicit USDA source/version/qualitative scope, swaps/servings/review, grocery quantities, immutable snapshots, optional versioned-consent AI with known-choice validation and regular fallback. Migration 16 adds plans, consent scope and retry-safe meal creation. All local checks pass (54 tests, individual/combined SQL paths, new concurrency cases, 20 synthetic layout combinations, five HTTP auth checks). Exact SQL/provider activation/staging limits are in NUTRITION_SUPABASE_SETUP.md and NUTRITION_RELEASE_REPORT_2026-11-04.md. Live provider/native/signed-in acceptance remains pending.

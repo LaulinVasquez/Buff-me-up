@@ -42,7 +42,7 @@ export default async function ProfilePage() {
     <form action={signOut} className="md:col-start-1 md:row-start-2"><button className="min-h-12 w-full rounded-xl border border-slate-700 font-semibold text-slate-200" type="submit">Sign out</button></form>
     </div>
     {gyms ? <GymSettings gyms={gyms} saveAction={saveGymAction} selectAction={selectGymAction} /> : <p className="mt-8 text-sm text-slate-400">Gym setups are temporarily unavailable.</p>}
-    {nutrition.available ? <NutritionPreferencesForm key={nutrition.preferences?.revision ?? "new"} preferences={nutrition.preferences} action={saveNutritionPreferencesAction} /> : <p className="mt-6 text-sm text-slate-400">Nutrition preferences are unavailable. Check the nutrition migration.</p>}
+    {nutrition.available ? <NutritionPreferencesForm key={nutrition.preferences?.revision ?? "new"} preferences={nutrition.preferences} action={saveNutritionPreferencesAction} /> : <p className="mt-6 text-sm text-slate-400">Nutrition preferences are unavailable. Try again later.</p>}
     <GoalSettings key={profile?.weekly_goal ?? 3} goal={profile?.weekly_goal ?? 3} action={saveGoalAction} />
     <AppearanceSettings action={saveAppearanceAction} />
     <DataExport />

@@ -9,7 +9,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ foo
   if (!/^\d+$/.test(foodId) || !Number.isSafeInteger(id) || id <= 0) return NextResponse.json({ error: "Choose a valid food." }, { status: 400, headers });
   if (!usdaConfigured()) return NextResponse.json({ error: "USDA food lookup is not configured. Enter label values." }, { status: 503, headers });
   const { data: allowed, error } = await client.supabase.rpc("gym_consume_nutrition_request", { request_kind: "food" });
-  if (error || !allowed) return NextResponse.json({ error: error ? "Food lookup is unavailable. Check the nutrition migration." : "Food lookup limit reached. Try again later." }, { status: error ? 503 : 429, headers });
+  if (error || !allowed) return NextResponse.json({ error: error ? "Food lookup is unavailable. Try again later." : "Food lookup limit reached. Try again later." }, { status: error ? 503 : 429, headers });
   try { return NextResponse.json(await getFoodDetails(id), { headers }); }
   catch { return NextResponse.json({ error: "Food details couldn’t load. Try another food or enter label values." }, { status: 503, headers }); }
 }

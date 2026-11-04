@@ -17,5 +17,5 @@ export async function saveNutritionPreferencesAction(previous: NutritionActionSt
     if (error || !data || typeof data !== "object" || Array.isArray(data) || typeof data.revision !== "number") throw new Error("Preferences not saved");
     revalidatePath("/app", "layout");
     return { status: "success", message: skip ? "Setup skipped. You can return from Profile whenever you like." : "Nutrition preferences saved. You can update them from Profile.", revision: data.revision };
-  } catch { return { status: "error", message: "Preferences weren’t saved. Reload to check for newer changes, then try again. If nutrition is new, verify its Supabase migration.", revision: previous.revision }; }
+  } catch { return { status: "error", message: "Preferences weren’t saved. Reload to check for newer changes, then try again.", revision: previous.revision }; }
 }

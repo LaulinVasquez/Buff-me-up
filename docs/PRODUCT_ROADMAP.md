@@ -22,3 +22,7 @@ Five of the six original product opportunities have implementations: Gym is pack
 ## Review queue snapshot
 
 The developer merged #8 into main and #9–#13 into feature branches during the session. The agent did not merge PRs. Remaining [integration PR #14](https://github.com/LaulinVasquez/Buff-me-up/pull/14) now targets main and includes the complete batch; prior branch histories are preserved without code changes. GitHub quality run 41547160238 and local npm run check pass for implementation be4d160. See the consolidated report for staging migrations 9–13 and unverified native/live acceptance.
+
+## Nutrition scope authorized 2026-11-04
+
+Structured plan committed first: NUTRITION_IMPLEMENTATION_PLAN.md / PR #16. Implemented profile/setup (PR #17), usual meals/USDA/diary (PR #18) and reviewed personalized meal weeks/optional AI on `agent/personalized-meal-plans`. The final integration targets main and includes the earlier feature-branch merges. Exact SQL: migrations 14–16 or the generated all-pending bundle; report/configuration: NUTRITION_RELEASE_REPORT_2026-11-04.md and NUTRITION_SUPABASE_SETUP.md. Live provider, signed-in staging and device verification remain acceptance steps. This does not change approved CSE grading requirements.

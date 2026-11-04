@@ -28,3 +28,10 @@ export async function getNutritionDashboard() {
   if (meals.error || logs.error) throw new Error("Meals are unavailable. Verify the meals migration, then reload.");
   return { meals: meals.data as unknown as import("./types").SavedMeal[], logs: logs.data as unknown as import("./types").FoodLog[], truncated: logs.data.length === 1000, ...preferences };
 }
+
+export async function getMealPlans() {
+  const { supabase, userId } = await nutritionClient();
+  const { data, error } = await supabase.from("gym_meal_plans").select("*").eq("user_id", userId).order("created_at", { ascending: false }).limit(100);
+  if (error) throw new Error("Saved meal plans couldn’t load.");
+  return data as unknown as import("./planner").SavedMealPlan[];
+}

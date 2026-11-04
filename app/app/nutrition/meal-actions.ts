@@ -8,17 +8,17 @@ const uuid = (value: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4
 const readRevision = (form: FormData) => String(form.get("revision") ?? "") === "" ? null : Number(form.get("revision"));
 const validRevision = (revision: number | null) => revision === null || (Number.isInteger(revision) && revision >= 0);
 export async function saveMealAction(_previous: MealActionState, form: FormData): Promise<MealActionState> {
-  const id = String(form.get("id") ?? ""); const revision = readRevision(form); const archive = form.get("intent") === "archive";
+  const id = String(form.get("id") ?? ""); const revision = readRevision(form); const archive = form.get("intent") === "archive"; const token = String(form.get("requestToken") ?? "");
   let meal: unknown = null;
   try { const raw = String(form.get("meal") ?? "null"); if (raw.length > 60000) throw new Error(); meal = JSON.parse(raw); } catch { return { status: "error", message: "Check the meal details and try again." }; }
-  if ((id && !uuid(id)) || !validRevision(revision) || (!archive && !validateMeal(meal))) return { status: "error", message: "Check the meal name, ingredients, portions and nutrition values." };
+  if ((id && !uuid(id)) || !validRevision(revision) || (!archive && !validateMeal(meal)) || (!id && !uuid(token))) return { status: "error", message: "Check the meal name, ingredients, portions and nutrition values." };
   try {
     const { supabase } = await nutritionClient();
-    const { data, error } = await supabase.rpc("gym_save_meal", { target_meal_id: id || null, expected_revision: revision, meal: archive ? null : meal as Json, archive });
+    const { data, error } = await supabase.rpc("gym_save_meal_with_request", { target_meal_id: id || null, expected_revision: revision, meal: archive ? null : meal as Json, archive, request_token: uuid(token) ? token : "00000000-0000-0000-0000-000000000000" });
     if (error || !data) throw new Error();
     revalidatePath("/app/nutrition");
     return { status: "success", message: archive ? "Meal archived. Past logs are unchanged." : "Meal saved. Past logs are unchanged.", meal: data as unknown as SavedMeal };
-  } catch { return { status: "error", message: "Meal wasn’t saved. Reload to check for newer changes and confirm the meals migration is installed." }; }
+  } catch { return { status: "error", message: "Meal wasn’t saved. Reload to check for newer changes." }; }
 }
 export async function logMealAction(_previous: MealActionState, form: FormData): Promise<MealActionState> {
   const id = String(form.get("mealId") ?? ""); const revision = readRevision(form); const portions = Number(form.get("portions")); const date = String(form.get("date") ?? ""); const slot = String(form.get("slot") ?? ""); const timezone = String(form.get("timezone") ?? ""); const token = String(form.get("requestToken") ?? "");

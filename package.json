@@ -18,9 +18,11 @@
     "test:training": "node scripts/test-training.mjs",
     "test:generator": "node scripts/test-generator.mjs",
     "test": "npm run test:training && npm run test:generator && npm run test:history && npm run test:swaps && npm run test:appearance && npm run test:search && npm run test:nutrition",
-    "check": "npm run lint && npm run build && npm run typecheck && npm test && npm run test:db",
+    "check": "npm run lint && npm run check:sql && npm run build && npm run typecheck && npm test && npm run test:db",
     "test:search": "node scripts/test-exercise-search.mjs",
-    "test:nutrition": "node scripts/test-nutrition.mjs"
+    "test:nutrition": "node scripts/test-nutrition.mjs",
+    "sql:nutrition": "node scripts/build-nutrition-sql.mjs",
+    "check:sql": "node scripts/build-nutrition-sql.mjs --check"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.1",

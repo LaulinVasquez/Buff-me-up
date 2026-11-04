@@ -1,3 +1,4 @@
+import type { SavedMealPlan } from "../lib/nutrition/planner";
 import type { NutritionPreferences, NutritionPreferencesInput, SavedMeal, FoodLog } from "./../lib/nutrition/types";
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 type Relationship = { foreignKeyName: string; columns: string[]; isOneToOne: boolean; referencedRelation: string; referencedColumns: string[] };
@@ -14,7 +15,8 @@ type WorkoutExerciseRow = { deferred: boolean; logged_sets: Json; log_revision: 
 export type Database = {
   public: {
     Tables: {
-      gym_meals: Table<Omit<SavedMeal,"details"|"nutrients"> & {details:Json;nutrients:Json}, {user_id:string;details:Json;id?:string;archived?:boolean}, {details?:Json;archived?:boolean}>;
+      gym_meal_plans: Table<Omit<SavedMealPlan,"draft"|"snapshot"> & {draft:Json;snapshot:Json}, {user_id:string;name:string;draft:Json;request_id:string}, Record<never,never>>;
+      gym_meals: Table<Omit<SavedMeal,"details"|"nutrients"> & {details:Json;nutrients:Json;request_id:string|null}, {user_id:string;details:Json;id?:string;archived?:boolean;request_id?:string|null}, {details?:Json;archived?:boolean}>;
       gym_food_logs: Table<Omit<FoodLog,"snapshot"> & {snapshot:Json}, {user_id:string;meal_id:string;portions:number;log_date:string;meal_slot:string;request_id:string}, Record<never,never>>;
       gym_nutrition_requests: Table<{user_id:string;kind:string;window_start:string;used:number}, Record<never,never>, Record<never,never>>;
       gym_nutrition_preferences: Table<NutritionPreferences, NutritionPreferencesInput & {user_id:string;onboarding_status?:"completed"|"skipped"}, Partial<NutritionPreferencesInput>>;
@@ -35,6 +37,8 @@ export type Database = {
     };
     Views: Record<never, never>;
     Functions: {
+      gym_save_meal_with_request: {Args:{target_meal_id:string|null;expected_revision:number|null;meal:Json|null;archive:boolean;request_token:string};Returns:Json};
+      gym_save_meal_plan: {Args:{plan_name:string;plan:Json;request_token:string};Returns:Json};
       gym_save_meal: {Args:{target_meal_id:string|null;expected_revision:number|null;meal:Json|null;archive?:boolean};Returns:Json};
       gym_log_meal: {Args:{target_meal_id:string;expected_revision:number;servings:number;consumed_on:string;slot:string;client_timezone:string;request_token:string};Returns:Json};
       gym_consume_nutrition_request: {Args:{request_kind:"food"|"ai"};Returns:boolean};

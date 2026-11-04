@@ -1,10 +1,12 @@
-# Meals milestone — 2026-11-04
+# Nutrition release status — 2026-11-04
 
-Phase 2 on `agent/meals-and-logging`, stacked after nutrition profile PR #17 (`72986c9`, 45 tests + SQL passed). Added usual-meal editor, gram recipes/manual labels, USDA lookup, archive/restore, portion-based food diary and copied historical nutrition. Migration 15 adds meals, food logs and operational request counters. User-local dates, nullable nutrient totals and scope labels are explicit. Account export includes the new personal content. Verification and provider limitations: MEALS_AND_LOGGING.md. Next: reviewed seven-day personalized plans and optional consented AI; no live-data/provider/production changes.
+**Implemented; final review/staging pending.** The structured plan was committed first in PR #16. Preferences/onboarding and usual meals/diary were implemented in PR #17/#18; the developer merged those into intermediate branches. Final `agent/personalized-meal-plans` integrates all nutrition work for main. See NUTRITION_RELEASE_REPORT_2026-11-04.md for review references, source boundaries and evidence; NUTRITION_SUPABASE_SETUP.md contains the exact SQL/configuration handoff.
 
-# Nutrition milestone — 2026-11-04
+Completed: skippable setup and editable Profile; optional measurements/preferences/exclusions/consent; reusable manual/USDA meals and gram recipes; portion diary and historical snapshots; reviewed seven-day plans and shopping quantities; optional structured AI connection; owner export; stale-write/idempotent creation/log/plan protection and visible transport failure recovery. Existing gym profile/workout columns are unchanged.
 
-Plan committed first (`27dcf2b`) in draft PR #16. Phase 1 on `agent/nutrition-profile`: optional first-visit setup/skip, editable Profile preferences, optional measurements, food exclusions, explicit AI consent and owner-scoped revision-aware saves. Migration 14 adds `gym_nutrition_preferences`; existing profile/workout data stays intact. Account export includes nutrition preferences. Local preference tests and complete disposable PostgreSQL suite pass; build/lint/typecheck pass. Synthetic UI acceptance will be completed with the final nutrition batch; no deployed/provider/device success claimed. See NUTRITION_IMPLEMENTATION_PLAN.md. Later phases are usual meals/USDA/logging and reviewed personalized plans. No remote SQL, merge or deployment.
+Verification: `npm run check` passes with 54 tests plus disposable migration/RLS/concurrency checks; combined SQL path separately passes; five signed-out HTTP checks and 20 synthetic screen/width combinations pass. Real providers, signed-in PostgREST/staging and physical-phone acceptance remain pending. No real data/provider key, remote SQL, PR merge or production deployment was used/performed by the agent. This nutrition work is user-authorized product scope; no CSE requirement commitments were changed.
+
+---
 
 # Development status
 

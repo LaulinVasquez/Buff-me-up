@@ -1,10 +1,11 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { FoodIngredient } from "@/lib/nutrition/types";
 import type { FoodMatch } from "@/lib/nutrition/usda";
 export function FoodLookup({ onAdd }: { onAdd: (item: FoodIngredient) => void }) {
   const [query, setQuery] = useState(""); const [page, setPage] = useState(1); const [totalPages, setTotalPages] = useState(0);
   const [foods, setFoods] = useState<FoodMatch[]>([]); const [pending, setPending] = useState(false); const [message, setMessage] = useState(""); const controller = useRef<AbortController | null>(null);
+  useEffect(() => () => controller.current?.abort(), []);
   const search = async (next = 1) => {
     controller.current?.abort(); const current = new AbortController(); controller.current = current;
     setPending(true); setMessage(""); setFoods([]);

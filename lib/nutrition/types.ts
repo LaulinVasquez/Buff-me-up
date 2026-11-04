@@ -13,7 +13,7 @@ export type NutritionPreferencesInput = {
   cooking_minutes: number; budget: "flexible" | "moderate" | "low";
   calorie_target: number | null; ai_consent: boolean;
 };
-export type NutritionPreferences = NutritionPreferencesInput & { user_id: string; onboarding_status: "completed" | "skipped"; revision: number; created_at: string; updated_at: string };
+export type NutritionPreferences = NutritionPreferencesInput & { user_id: string; onboarding_status: "completed" | "skipped"; ai_consent_version: string; revision: number; created_at: string; updated_at: string };
 export type NutritionActionState = { status: "idle" | "success" | "error"; message?: string; revision?: number };
 export const DEFAULT_PREFERENCES: NutritionPreferencesInput = { age: null, height_cm: null, weight_kg: null, activity: "moderate", goal: "support_training", diet: "omnivore", allergens: [], avoid_foods: [], usual_foods: "", cooking_minutes: 30, budget: "moderate", calorie_target: null, ai_consent: false };
 export type FoodIngredient = { name: string; grams: number; per100g: Nutrients; source: "manual" | "usda"; fdc_id: number | null; retrieved_at: string | null };
