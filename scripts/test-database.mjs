@@ -61,6 +61,9 @@ try {
   runFile("tests/database/nutrition-preferences.sql");
   console.log("PASS: nutrition setup/preferences, stale saves, bounds and owner isolation");
 
+  runFile("tests/database/nutrition-meals.sql");
+  console.log("PASS: usual meals, immutable nutrition snapshots, idempotent/stale logs, quotas and RLS");
+
   // Hold finalization open while a stale tab tries to save a weight.
   const firstUser = "00000000-0000-0000-0000-000000000001";
   const asUser = `set role authenticated; set request.jwt.claim.sub = '${firstUser}';`;

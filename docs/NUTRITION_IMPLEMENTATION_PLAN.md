@@ -47,6 +47,6 @@ Optional AI: server-only `OPENAI_API_KEY` plus explicit `OPENAI_NUTRITION_MODEL`
 
 - [x] Phase 0: sources/current repository inspected; structured plan written before feature work.
 - [x] Phase 1: nutrition profile and onboarding.
-- [ ] Phase 2: usual meals, USDA lookup and food logs.
+- [x] Phase 2: usual meals, USDA lookup and food logs.
 - [ ] Phase 3: reviewed personalized plans and optional AI.
 - [ ] Phase 4: full verification, review and SQL handoff.
