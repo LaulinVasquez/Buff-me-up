@@ -1,3 +1,13 @@
+# Nutrition release status — 2026-11-04
+
+**Implemented; final review/staging pending.** The structured plan was committed first in PR #16. Preferences/onboarding and usual meals/diary were implemented in PR #17/#18; the developer merged those into intermediate branches. Review [draft PR #19](https://github.com/LaulinVasquez/Buff-me-up/pull/19), `agent/personalized-meal-plans`, for the complete integration into main (implementation `0e3b059`). See NUTRITION_RELEASE_REPORT_2026-11-04.md for review references, source boundaries and evidence; NUTRITION_SUPABASE_SETUP.md contains the exact SQL/configuration handoff.
+
+Completed: skippable setup and editable Profile; optional measurements/preferences/exclusions/consent; reusable manual/USDA meals and gram recipes; portion diary and historical snapshots; reviewed seven-day plans and shopping quantities; optional structured AI connection; owner export; stale-write/idempotent creation/log/plan protection and visible transport failure recovery. Existing gym profile/workout columns are unchanged.
+
+Verification: `npm run check` passes with 54 tests plus disposable migration/RLS/concurrency checks; combined SQL path separately passes; five signed-out HTTP checks and 20 synthetic screen/width combinations pass. Real providers, signed-in PostgREST/staging and physical-phone acceptance remain pending. No real data/provider key, remote SQL, PR merge or production deployment was used/performed by the agent. This nutrition work is user-authorized product scope; no CSE requirement commitments were changed.
+
+---
+
 # Development status
 
 Updated **2026-11-03**. Autonomous batch baseline: `c092c6a` (appearance PR #7 merged). Current branch: `agent/generator-quality-ci`. Laurin authorized continuing the proposed opportunities and pushing branches/PRs for later review. No merge, deployment, production-data access or remote migration was performed. The pre-existing untracked development guide remains preserved.

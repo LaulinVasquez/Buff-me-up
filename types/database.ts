@@ -1,3 +1,5 @@
+import type { SavedMealPlan } from "../lib/nutrition/planner";
+import type { NutritionPreferences, NutritionPreferencesInput, SavedMeal, FoodLog } from "./../lib/nutrition/types";
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 type Relationship = { foreignKeyName: string; columns: string[]; isOneToOne: boolean; referencedRelation: string; referencedColumns: string[] };
 type Table<Row, Insert, Update> = { Row: Row; Insert: Insert; Update: Update; Relationships: Relationship[] };
@@ -13,6 +15,11 @@ type WorkoutExerciseRow = { deferred: boolean; logged_sets: Json; log_revision: 
 export type Database = {
   public: {
     Tables: {
+      gym_meal_plans: Table<Omit<SavedMealPlan,"draft"|"snapshot"> & {draft:Json;snapshot:Json}, {user_id:string;name:string;draft:Json;request_id:string}, Record<never,never>>;
+      gym_meals: Table<Omit<SavedMeal,"details"|"nutrients"> & {details:Json;nutrients:Json;request_id:string|null}, {user_id:string;details:Json;id?:string;archived?:boolean;request_id?:string|null}, {details?:Json;archived?:boolean}>;
+      gym_food_logs: Table<Omit<FoodLog,"snapshot"> & {snapshot:Json}, {user_id:string;meal_id:string;portions:number;log_date:string;meal_slot:string;request_id:string}, Record<never,never>>;
+      gym_nutrition_requests: Table<{user_id:string;kind:string;window_start:string;used:number}, Record<never,never>, Record<never,never>>;
+      gym_nutrition_preferences: Table<NutritionPreferences, NutritionPreferencesInput & {user_id:string;onboarding_status?:"completed"|"skipped"}, Partial<NutritionPreferencesInput>>;
       gym_locations: Table<{id:string;user_id:string;name:string;equipment:string[];is_active:boolean;created_at:string;updated_at:string},{id?:string;user_id:string;name:string;equipment?:string[];is_active?:boolean;created_at?:string;updated_at?:string},{name?:string;equipment?:string[];is_active?:boolean;updated_at?:string}>;
       gym_exercise_notes: Table<{id:string;user_id:string;gym_id:string;exercise_key:string;exercise_name:string;machine_settings:string;notes:string;preferred_exercise_id:string|null;created_at:string;updated_at:string},{id?:string;user_id:string;gym_id:string;exercise_key:string;exercise_name:string;machine_settings?:string;notes?:string;preferred_exercise_id?:string|null;created_at?:string;updated_at?:string},{exercise_name?:string;machine_settings?:string;notes?:string;preferred_exercise_id?:string|null;updated_at?:string}>;
       gym_profiles: Table<ProfileRow, { weekly_goal?: number; accent_theme?: string; id: string; full_name?: string | null; avatar_url?: string | null; created_at?: string; updated_at?: string }, Partial<ProfileRow>>;
@@ -30,6 +37,12 @@ export type Database = {
     };
     Views: Record<never, never>;
     Functions: {
+      gym_save_meal_with_request: {Args:{target_meal_id:string|null;expected_revision:number|null;meal:Json|null;archive:boolean;request_token:string};Returns:Json};
+      gym_save_meal_plan: {Args:{plan_name:string;plan:Json;request_token:string};Returns:Json};
+      gym_save_meal: {Args:{target_meal_id:string|null;expected_revision:number|null;meal:Json|null;archive?:boolean};Returns:Json};
+      gym_log_meal: {Args:{target_meal_id:string;expected_revision:number;servings:number;consumed_on:string;slot:string;client_timezone:string;request_token:string};Returns:Json};
+      gym_consume_nutrition_request: {Args:{request_kind:"food"|"ai"};Returns:boolean};
+      gym_save_nutrition_preferences: {Args:{preferences:Json;expected_revision:number|null;skip_setup?:boolean};Returns:Json};
       gym_save_location: {Args:{target_gym_id:string|null;expected_updated_at:string|null;gym_name:string;available_equipment:string[]};Returns:string};
       gym_select_location: {Args:{target_gym_id:string|null};Returns:undefined};
       gym_save_exercise_note: {Args:{target_gym_id:string;target_key:string;display_name:string;settings:string;note_text:string;preferred_id:string|null;expected_updated_at:string|null};Returns:string};

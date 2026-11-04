@@ -102,6 +102,9 @@ Apply these files in order without modifying already-applied migrations:
 11. 20261102040000_add_weekly_training_goal.sql
 12. 20261102050000_add_personal_gyms.sql
 13. 20261102060000_guard_generated_plan_validation.sql
+14. 20261104000000_add_nutrition_preferences.sql
+15. 20261104010000_add_meals_and_food_logs.sql
+16. 20261104020000_add_personalized_meal_plans.sql
 
 Apply migration 6 to development/staging before running this version's completion/cancellation flows: they now use `gym_set_workout_status`. It adds functions and triggers without rewriting existing rows. Test the same migration in staging before an approved production rollout.
 
@@ -131,4 +134,13 @@ Apply migration 8 in development/staging to enable saved appearance preferences.
 
 ## Current limitations
 
-There is no offline synchronization, per-set tracking, rest timer, personal-record detection or notifications. An internet connection is required during workouts. Gym is packed mode currently offers the bundled catalog only; it does not fetch a larger set of remote alternatives or automatically rewrite the entire remaining session.
+Actual set logging, a page-local rest timer and limited-window progress comparisons are implemented. Durable offline synchronization and notifications remain unimplemented. An internet connection is required during workouts. Gym is packed mode currently offers the bundled catalog only; it does not fetch a larger set of remote alternatives or automatically rewrite the entire remaining session.
+
+
+## Meals and nutrition
+
+Nutrition setup is offered after sign-in and can be skipped. Profile edits the same preferences. Meals supports reusable label/gram recipes, USDA food lookup, a portion diary with historical snapshots and reviewed seven-day plans with shopping quantities. The regular planner uses reviewed saved meals and qualitative food-group prompts from the USDA/HHS 2025–2030 guidance. Nutrition totals are calculated in code/database; optional AI selects from eligible meal IDs.
+
+Apply pending migrations 14–16 before deploying this nutrition version. For an existing SQL Editor workflow where all three are pending, `supabase/deploy/nutrition_2026_11_04.sql` contains the exact three migrations in one transaction plus schema refresh. Choose individual pending files when partially applied; preserve CLI migration history if using the CLI. Detailed SQL/configuration and verification steps: `docs/NUTRITION_SUPABASE_SETUP.md`.
+
+Optional server variables: `USDA_FDC_API_KEY` for USDA search/details; `OPENAI_API_KEY` and an explicit `OPENAI_NUTRITION_MODEL` for AI assistance. Never use a NEXT_PUBLIC_ prefix. Manual meal entry/logging and the regular planner work without external keys. AI requires versioned user consent and an explicit request. No external keys or real user-data calls were used in development tests. Live USDA/OpenAI and signed-in/device acceptance remain pending. See `docs/NUTRITION_RELEASE_REPORT_2026-11-04.md`.

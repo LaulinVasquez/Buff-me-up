@@ -32,8 +32,10 @@ try {
   });
   runFile("tests/database/bootstrap.sql");
   for (const file of readdirSync(join(root, "supabase/migrations")).filter((file) => file.endsWith(".sql")).sort()) {
+    if (process.env.BMU_NUTRITION_BUNDLE === "1" && file.startsWith("20261104")) continue;
     runFile(`supabase/migrations/${file}`);
   }
+  if (process.env.BMU_NUTRITION_BUNDLE === "1") runFile("supabase/deploy/nutrition_2026_11_04.sql");
   runFile("tests/database/workouts.sql");
   console.log("PASS: migrations, start/resume, finalization, snapshots, and two-user RLS");
 
@@ -57,6 +59,15 @@ try {
 
   runFile("tests/database/generator.sql");
   console.log("PASS: generated-plan persistence, invalid edits, atomic rollback and owner isolation");
+
+  runFile("tests/database/nutrition-preferences.sql");
+  console.log("PASS: nutrition setup/preferences, stale saves, bounds and owner isolation");
+
+  runFile("tests/database/nutrition-meals.sql");
+  console.log("PASS: usual meals, immutable nutrition snapshots, idempotent/stale logs, quotas and RLS");
+
+  runFile("tests/database/nutrition-plans.sql");
+  console.log("PASS: reviewed seven-day plans, immutable snapshots, stale/restricted choices, scoped AI consent and RLS");
 
   // Hold finalization open while a stale tab tries to save a weight.
   const firstUser = "00000000-0000-0000-0000-000000000001";
@@ -181,6 +192,60 @@ try {
   if(noteResults[0].code!==0||noteResults[1].code===0||!noteResults[1].output.includes("Notes changed"))throw new Error("Concurrent gym notes overwrote each other");
   sql(`${asUser} select test.assert((select machine_settings='Seat 4' and notes='First saved' from public.gym_exercise_notes where gym_id='${noteGym}' and exercise_key='concurrent-note'),'First saved gym note must survive');`);
   console.log("PASS: concurrent gym note creation rejects stale overwrites");
+
+  // Nutrition writes use the same owner profile lock before checking reviewed rows.
+  const readJson = (query) => JSON.parse(sql(`${asUser} ${query}`).split("\n").find(line => line.trim().startsWith("{")));
+  const sqlJson = (value) => `'${JSON.stringify(value).replaceAll("'", "''")}'`;
+  const lunchState = readJson("select to_jsonb(m) from public.gym_meals m where name='Synthetic planned lunch';");
+  const duplicateToken = "92000000-0000-0000-0000-000000000001";
+  const logCall = `select public.gym_log_meal('${lunchState.id}',${lunchState.revision},1,current_date,'lunch','UTC','${duplicateToken}');`;
+  const logFirst = runAsync(`${asUser} begin; ${logCall} select pg_sleep(1); commit;`);
+  await waitForBarrier();
+  const logRetry = runAsync(`${asUser} ${logCall}`);
+  const loggedResults = await Promise.all([logFirst, logRetry]);
+  if (loggedResults.some(result => result.code !== 0)) throw new Error("Concurrent food-log retry failed");
+  sql(`${asUser} select test.assert((select count(*)=1 from public.gym_food_logs where request_id='${duplicateToken}'),'Concurrent food-log retry must create one snapshot');`);
+
+  const firstMealDetails = { ...lunchState.details, notes: "First nutrition write" };
+  const competingMealDetails = { ...lunchState.details, notes: "Stale nutrition write" };
+  const mealFirst = runAsync(`${asUser} begin; select public.gym_save_meal('${lunchState.id}',${lunchState.revision},${sqlJson(firstMealDetails)},false); select pg_sleep(1); commit;`);
+  await waitForBarrier();
+  const mealSecond = runAsync(`${asUser} select public.gym_save_meal('${lunchState.id}',${lunchState.revision},${sqlJson(competingMealDetails)},false);`);
+  const mealResults = await Promise.all([mealFirst, mealSecond]);
+  if (mealResults[0].code !== 0 || mealResults[1].code === 0 || !mealResults[1].output.includes("Meal changed")) throw new Error("Concurrent meal save lost a reviewed update");
+
+  const preferenceState = readJson("select to_jsonb(p) from public.gym_nutrition_preferences p where user_id=auth.uid();");
+  const preferenceInput = { ...preferenceState };
+  for (const field of ["user_id","revision","created_at","updated_at","onboarding_status","ai_consent_version"]) delete preferenceInput[field];
+  const prefFirst = runAsync(`${asUser} begin; select public.gym_save_nutrition_preferences(${sqlJson({ ...preferenceInput, usual_foods: "First preference write" })},${preferenceState.revision},false); select pg_sleep(1); commit;`);
+  await waitForBarrier();
+  const prefSecond = runAsync(`${asUser} select public.gym_save_nutrition_preferences(${sqlJson({ ...preferenceInput, usual_foods: "Stale preference write" })},${preferenceState.revision},false);`);
+  const prefResults = await Promise.all([prefFirst, prefSecond]);
+  if (prefResults[0].code !== 0 || prefResults[1].code === 0 || !prefResults[1].output.includes("Nutrition preferences changed")) throw new Error("Concurrent nutrition preference save lost an update");
+
+  const breakfastState = readJson("select to_jsonb(m) from public.gym_meals m where name='Synthetic planned breakfast';");
+  sql(`${asUser} select public.gym_save_meal('${breakfastState.id}',${breakfastState.revision},${sqlJson({ ...breakfastState.details, allergens: [] })},false);`);
+  const planMeals = ["breakfast","lunch","dinner"].map(slot => readJson(`select to_jsonb(m) from public.gym_meals m where name='Synthetic planned ${slot}';`));
+  const currentPreferences = readJson("select to_jsonb(p) from public.gym_nutrition_preferences p where user_id=auth.uid();");
+  const reviewedPlan = { start_date: sql("select current_date;").match(/\d{4}-\d{2}-\d{2}/)[0], preference_revision: currentPreferences.revision, guidance_version: "dga-2025-2030-app-v1", entries: Array.from({ length: 7 }, (_, day) => planMeals.map(meal => ({ day, slot: meal.details.slot, meal_id: meal.id, meal_revision: meal.revision, portions: 1 }))).flat() };
+  const planToken = "92000000-0000-0000-0000-000000000002";
+  const planFirst = runAsync(`${asUser} begin; select public.gym_save_meal_plan('Concurrent reviewed week',${sqlJson(reviewedPlan)},'${planToken}'); select pg_sleep(1); commit;`);
+  await waitForBarrier();
+  const updatedLunch = planMeals.find(meal => meal.details.slot === "lunch");
+  const laterMeal = runAsync(`${asUser} select public.gym_save_meal('${updatedLunch.id}',${updatedLunch.revision},${sqlJson({ ...updatedLunch.details, nutrients: { ...updatedLunch.nutrients, calories: 700 } })},false);`);
+  const planResults = await Promise.all([planFirst, laterMeal]);
+  if (planResults.some(result => result.code !== 0)) throw new Error("Plan snapshot and later meal edit did not serialize");
+  sql(`${asUser} select test.assert((select snapshot->'entries'->1->'meal'->'nutrients'->>'calories'='500' from public.gym_meal_plans where request_id='${planToken}'),'Concurrent later edit must preserve the reviewed plan snapshot');`);
+  const creationToken = "94000000-0000-0000-0000-000000000001";
+  const creationDetails = { ...lunchState.details, name: "Concurrent usual-meal creation" };
+  const creationCall = `select public.gym_save_meal_with_request(null,null,${sqlJson(creationDetails)},false,'${creationToken}');`;
+  const firstCreation = runAsync(`${asUser} begin; ${creationCall} select pg_sleep(1); commit;`);
+  await waitForBarrier();
+  const retryCreation = runAsync(`${asUser} ${creationCall}`);
+  const creationResults = await Promise.all([firstCreation, retryCreation]);
+  if (creationResults.some(result => result.code !== 0)) throw new Error("Concurrent usual-meal creation retry failed");
+  sql(`${asUser} select test.assert((select count(*)=1 from public.gym_meals where request_id='${creationToken}'),'Concurrent meal creation retries must return one meal');`);
+  console.log("PASS: concurrent nutrition preference/meal saves, duplicate meal creation/logs and reviewed-plan snapshots");
 
 } catch (error) {
   console.error(error.stderr?.toString() || error.message);

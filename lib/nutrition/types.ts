@@ -1,0 +1,25 @@
+export const DIETS = ["omnivore", "vegetarian", "vegan", "pescatarian"] as const;
+export const GOALS = ["eat_consistently", "support_training", "maintain_energy"] as const;
+export const ALLERGENS = ["milk", "egg", "fish", "shellfish", "tree_nut", "peanut", "wheat", "soy", "sesame"] as const;
+export const FOOD_GROUPS = ["vegetables", "fruit", "whole_grains", "protein", "dairy_or_fortified_alternative"] as const;
+export const SLOTS = ["breakfast", "lunch", "dinner", "snack"] as const;
+export type MealSlot = typeof SLOTS[number];
+export type Diet = typeof DIETS[number];
+export type Nutrients = { calories: number | null; protein: number | null; carbs: number | null; fat: number | null; fiber: number | null; sodium: number | null };
+export type NutritionPreferencesInput = {
+  age: number | null; height_cm: number | null; weight_kg: number | null;
+  activity: "light" | "moderate" | "high"; goal: typeof GOALS[number]; diet: Diet;
+  allergens: string[]; avoid_foods: string[]; usual_foods: string;
+  cooking_minutes: number; budget: "flexible" | "moderate" | "low";
+  calorie_target: number | null; ai_consent: boolean;
+};
+export type NutritionPreferences = NutritionPreferencesInput & { user_id: string; onboarding_status: "completed" | "skipped"; ai_consent_version: string; revision: number; created_at: string; updated_at: string };
+export type NutritionActionState = { status: "idle" | "success" | "error"; message?: string; revision?: number };
+export const DEFAULT_PREFERENCES: NutritionPreferencesInput = { age: null, height_cm: null, weight_kg: null, activity: "moderate", goal: "support_training", diet: "omnivore", allergens: [], avoid_foods: [], usual_foods: "", cooking_minutes: 30, budget: "moderate", calorie_target: null, ai_consent: false };
+export type FoodIngredient = { name: string; grams: number; per100g: Nutrients; source: "manual" | "usda"; fdc_id: number | null; retrieved_at: string | null };
+export type MealInput = { name: string; slot: MealSlot; mode: "label" | "recipe"; recipe_servings: number; ingredients: FoodIngredient[]; nutrients: Nutrients; ingredient_notes: string; food_groups: string[]; diet_tags: Diet[]; allergens: string[]; reviewed: boolean; cooking_minutes: number; budget: "low" | "moderate" | "flexible"; notes: string };
+export type SavedMeal = { id: string; user_id: string; name: string; details: MealInput; nutrients: Nutrients; archived: boolean; revision: number; created_at: string; updated_at: string };
+export type FoodLog = { id: string; user_id: string; meal_id: string; meal_revision: number; portions: number; log_date: string; meal_slot: MealSlot; snapshot: { name: string; details: MealInput; nutrients: Nutrients }; request_id: string; created_at: string };
+export type MealActionState = { status: "idle" | "success" | "error"; message?: string; meal?: SavedMeal; log?: FoodLog };
+export const EMPTY_NUTRIENTS: Nutrients = { calories: null, protein: null, carbs: null, fat: null, fiber: null, sodium: null };
+export const NUTRIENT_LABELS: Record<keyof Nutrients,string> = { calories:"Calories (kcal)", protein:"Protein (g)", carbs:"Carbohydrates (g)", fat:"Fat (g)", fiber:"Fiber (g)", sodium:"Sodium (mg)" };

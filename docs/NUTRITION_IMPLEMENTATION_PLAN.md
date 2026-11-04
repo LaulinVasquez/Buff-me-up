@@ -13,10 +13,10 @@ After sign-in, offer a short nutrition setup that can be skipped without blockin
 | 0 | agent/nutrition-plan | This committed plan, source boundaries and rollout sequence before feature edits. |
 | 1 | agent/nutrition-profile | Owner-scoped nutrition preferences, optional first-visit setup/skip, Profile editing, consistent validation and stale-save detection. Migration 14; two-user/anonymous tests. |
 | 2 | agent/meals-and-logging | Authenticated server USDA food search/details, manual-label fallback, ingredient quantities, reusable meal CRUD/archive, portion logs, historical snapshots, local-day/weekly summaries and nutrition export. Migration 15; no invented nutrients or historical edits. |
-| 3 | agent/personalized-meal-plans | Seven-day saved-meal planner, review/edit/swap/save, grocery quantities, versioned USDA guidance checks, optional opt-in AI selection and rate limits. Migration 16; reject unknown meal IDs/stale reviews/restricted or unreviewed choices and provider failures. |
+| 3 | agent/personalized-meal-plans (final integration targets main) | Seven-day saved-meal planner, review/edit/swap/save, grocery quantities, versioned USDA guidance checks, optional opt-in AI selection and rate limits. Migration 16; reject unknown meal IDs/stale reviews/restricted or unreviewed choices and provider failures. |
 | 4 | same final branch | Aggregate quality checks, synthetic actual-component phone/desktop validation, review report, exact ordered Supabase SQL and configuration guide. |
 
-Branches may be stacked for review; each PR names its base/dependency. Changes to main by the developer must be fetched and preserved. Never force-push or merge a PR on the developer's behalf.
+Phases 1–2 are stacked for focused review; each PR names its base/dependency. The final integration PR targets main and carries all nutrition implementation, including feature work merged by the developer into intermediate branches. Changes to main by the developer must be fetched and preserved. Never force-push or merge a PR on the developer's behalf.
 
 ## Data and calculation design
 
@@ -46,7 +46,13 @@ Optional AI: server-only `OPENAI_API_KEY` plus explicit `OPENAI_NUTRITION_MODEL`
 ## Progress
 
 - [x] Phase 0: sources/current repository inspected; structured plan written before feature work.
-- [ ] Phase 1: nutrition profile and onboarding.
-- [ ] Phase 2: usual meals, USDA lookup and food logs.
-- [ ] Phase 3: reviewed personalized plans and optional AI.
-- [ ] Phase 4: full verification, review and SQL handoff.
+- [x] Phase 1: nutrition profile and onboarding.
+- [x] Phase 2: usual meals, USDA lookup and food logs.
+- [x] Phase 3: reviewed personalized plans and optional AI.
+- [x] Phase 4: full verification, review and SQL handoff.
+
+## Final verification update — 2026-11-04
+
+All four implementation/verification phases are complete in code: 54 tests, individual and combined fresh PostgreSQL migration/RLS/concurrency paths, 20 synthetic screen/width combinations and five signed-out production-server HTTP checks passed. New-meal creation now also has a stable request token and client forms catch rejected transport promises without discarding inputs. Final integration/rollout references: NUTRITION_RELEASE_REPORT_2026-11-04.md and NUTRITION_SUPABASE_SETUP.md. Provider activation, real sign-in/PostgREST and physical-device acceptance remain deployment/staging work; no live migration, merge or deployment was performed by the agent.
+
+Final implementation `0e3b059` is integrated in [draft PR #19](https://github.com/LaulinVasquez/Buff-me-up/pull/19), targeting main. Earlier developer merge histories were preserved without changing tested file contents. Review/deployment acceptance remains with Laurin.

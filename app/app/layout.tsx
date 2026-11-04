@@ -1,3 +1,4 @@
+import { NutritionSetupPrompt } from "@/components/nutrition/setup-prompt";
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { UserMenu } from "@/components/auth/user-menu";
@@ -17,7 +18,10 @@ export default async function ApplicationLayout({ children }: Readonly<{ childre
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/");
 
-  const { data: profile } = await supabase.from("gym_profiles").select("full_name, avatar_url, accent_theme").eq("id", user.id).maybeSingle();
+  const [{ data: profile }, nutrition] = await Promise.all([
+    supabase.from("gym_profiles").select("full_name, avatar_url, accent_theme").eq("id", user.id).maybeSingle(),
+    supabase.from("gym_nutrition_preferences").select("user_id").eq("user_id", user.id).maybeSingle(),
+  ]);
   const metadata = user.user_metadata;
   const metadataName = typeof metadata.full_name === "string" ? metadata.full_name : typeof metadata.name === "string" ? metadata.name : null;
   const metadataAvatar = typeof metadata.avatar_url === "string" ? metadata.avatar_url : typeof metadata.picture === "string" ? metadata.picture : null;
@@ -26,6 +30,7 @@ export default async function ApplicationLayout({ children }: Readonly<{ childre
 
   return <ThemeProvider key={user.id} savedTheme={normalizeAccentTheme(profile?.accent_theme)}><ApplicationShell userMenu={<UserMenu avatarUrl={avatarUrl} name={name} />}>
     <LaunchSplash />
+    <NutritionSetupPrompt needsSetup={!nutrition.error && !nutrition.data} />
     {children}
   </ApplicationShell></ThemeProvider>;
 }
