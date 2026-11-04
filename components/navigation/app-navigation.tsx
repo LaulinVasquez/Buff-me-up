@@ -7,6 +7,7 @@ const items = [
   { label: "Home", href: "/app", path: "m3 10 9-7 9 7v10H3V10Zm6 10v-7h6v7" },
   { label: "Plan", href: "/app/plan", path: "M8 5H5v16h14V5h-3M8 3h8v5H8V3Zm0 10h8m-8 4h5" },
   { label: "Exercises", href: "/app/exercises", path: "m6 8 10 10M4 10l6-6m4 16 6-6M2 8l6-6m8 20 6-6" },
+  { label: "Meals", href: "/app/nutrition", path: "M4 3v7a3 3 0 0 0 6 0V3M7 3v18M17 3v18M17 3c5 3 5 9 0 9" },
   { label: "History", href: "/app/history", path: "M4 11a8 8 0 1 1 2 7M4 4v7h7m1-4v5l3 2" },
   { label: "Profile", href: "/app/profile", path: "M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM4 21v-2a8 8 0 0 1 16 0v2" },
 ] as const;

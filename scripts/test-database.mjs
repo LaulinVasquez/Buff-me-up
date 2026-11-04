@@ -58,6 +58,9 @@ try {
   runFile("tests/database/generator.sql");
   console.log("PASS: generated-plan persistence, invalid edits, atomic rollback and owner isolation");
 
+  runFile("tests/database/nutrition-preferences.sql");
+  console.log("PASS: nutrition setup/preferences, stale saves, bounds and owner isolation");
+
   // Hold finalization open while a stale tab tries to save a weight.
   const firstUser = "00000000-0000-0000-0000-000000000001";
   const asUser = `set role authenticated; set request.jwt.claim.sub = '${firstUser}';`;
