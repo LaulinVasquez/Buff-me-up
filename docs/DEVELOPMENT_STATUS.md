@@ -1,3 +1,7 @@
+# Meals milestone — 2026-11-04
+
+Phase 2 on `agent/meals-and-logging`, stacked after nutrition profile PR #17 (`72986c9`, 45 tests + SQL passed). Added usual-meal editor, gram recipes/manual labels, USDA lookup, archive/restore, portion-based food diary and copied historical nutrition. Migration 15 adds meals, food logs and operational request counters. User-local dates, nullable nutrient totals and scope labels are explicit. Account export includes the new personal content. Verification and provider limitations: MEALS_AND_LOGGING.md. Next: reviewed seven-day personalized plans and optional consented AI; no live-data/provider/production changes.
+
 # Nutrition milestone — 2026-11-04
 
 Plan committed first (`27dcf2b`) in draft PR #16. Phase 1 on `agent/nutrition-profile`: optional first-visit setup/skip, editable Profile preferences, optional measurements, food exclusions, explicit AI consent and owner-scoped revision-aware saves. Migration 14 adds `gym_nutrition_preferences`; existing profile/workout data stays intact. Account export includes nutrition preferences. Local preference tests and complete disposable PostgreSQL suite pass; build/lint/typecheck pass. Synthetic UI acceptance will be completed with the final nutrition batch; no deployed/provider/device success claimed. See NUTRITION_IMPLEMENTATION_PLAN.md. Later phases are usual meals/USDA/logging and reviewed personalized plans. No remote SQL, merge or deployment.

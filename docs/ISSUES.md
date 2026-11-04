@@ -117,3 +117,7 @@ The separate repair updates Next.js/config to 16.4.3, Capacitor core/iOS/CLI and
 ## BMU-020 — Nutrition onboarding and Profile settings
 
 Implemented on `agent/nutrition-profile` after plan PR #16. Optional setup/skip with measurements, goal/activity/diet, allergens/exclusions/usual foods, cooking/budget, optional user-entered target and explicit AI consent. Shared Profile form, schema-unavailable feedback, versioned RPC, owner RLS and export coverage. Local bounds/stale/two-user/anonymous tests pass. Migration 14 required; final browser/staging acceptance remains pending.
+
+## BMU-021 — Usual meals, USDA lookup and food diary
+
+Implemented on `agent/meals-and-logging`, stacked on PR #17. Manual labels/gram recipes, nullable nutrients, private meal CRUD/archive/restore, historical log snapshots and retry tokens, local-day/weekly views, server USDA lookup with manual fallback and owner quotas. Migration 15 required after 14. Adapter/pure and SQL coverage documented in MEALS_AND_LOGGING.md; live USDA key/staging/native acceptance remain pending.
