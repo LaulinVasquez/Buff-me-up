@@ -1,6 +1,6 @@
 # Nutrition release status — 2026-11-04
 
-**Implemented; final review/staging pending.** The structured plan was committed first in PR #16. Preferences/onboarding and usual meals/diary were implemented in PR #17/#18; the developer merged those into intermediate branches. Final `agent/personalized-meal-plans` integrates all nutrition work for main. See NUTRITION_RELEASE_REPORT_2026-11-04.md for review references, source boundaries and evidence; NUTRITION_SUPABASE_SETUP.md contains the exact SQL/configuration handoff.
+**Implemented; final review/staging pending.** The structured plan was committed first in PR #16. Preferences/onboarding and usual meals/diary were implemented in PR #17/#18; the developer merged those into intermediate branches. Review [draft PR #19](https://github.com/LaulinVasquez/Buff-me-up/pull/19), `agent/personalized-meal-plans`, for the complete integration into main (implementation `0e3b059`). See NUTRITION_RELEASE_REPORT_2026-11-04.md for review references, source boundaries and evidence; NUTRITION_SUPABASE_SETUP.md contains the exact SQL/configuration handoff.
 
 Completed: skippable setup and editable Profile; optional measurements/preferences/exclusions/consent; reusable manual/USDA meals and gram recipes; portion diary and historical snapshots; reviewed seven-day plans and shopping quantities; optional structured AI connection; owner export; stale-write/idempotent creation/log/plan protection and visible transport failure recovery. Existing gym profile/workout columns are unchanged.
 

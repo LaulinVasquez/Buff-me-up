@@ -2,7 +2,7 @@
 
 ## Delivered
 
-The implementation plan was committed first (`27dcf2b`, PR #16), followed by focused branches for nutrition preferences (`72986c9`, PR #17), usual meals/diary (`ff551ae`, PR #18) and personalized plans (`agent/personalized-meal-plans`). The final integration targets main so feature work merged into intermediate branches is included. Review references are recorded below/at the end of AGENT_SESSION_LOG.md. No PR was merged, no production deployment occurred, no remote migration was applied and no real user data/provider key was used by the agent.
+The implementation plan was committed first (`27dcf2b`, PR #16), followed by focused branches for nutrition preferences (`72986c9`, PR #17), usual meals/diary (`ff551ae`, PR #18) and personalized plans (`agent/personalized-meal-plans`). The final integration is [draft PR #19](https://github.com/LaulinVasquez/Buff-me-up/pull/19), targeting main so feature work merged into intermediate branches is included. Final implementation commit: `0e3b059`; subsequent history-only merges preserve the same files. No PR was merged, no production deployment occurred, no remote migration was applied and no real user data/provider key was used by the agent.
 
 | Area | User-visible result |
 | --- | --- |
@@ -50,3 +50,7 @@ Exact files, read-only verification queries and configuration: [NUTRITION_SUPABA
 3. Check physical-phone/PWA/native navigation and network failures before an approved release.
 
 Learning note: a saved meal is a reusable template; a food log/meal plan stores a reviewed snapshot. This preserves past nutrition when a recipe changes. Stable request IDs let the server recognize a retried write instead of creating a second meal/log/plan.
+
+## Review reference
+
+Review [PR #19](https://github.com/LaulinVasquez/Buff-me-up/pull/19) for the complete nutrition integration into main. Earlier plan/profile/meals PRs #16–#18 are already merged by the developer into their documented bases; #17/#18 did not by themselves put all nutrition code on main. Their merge histories are retained in #19. All four created PRs are attached to the chat. GitHub CI status is visible on #19; local results above are confirmed.
