@@ -1,3 +1,4 @@
+import { NutritionSetupPrompt } from "@/components/nutrition/setup-prompt";
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { UserMenu } from "@/components/auth/user-menu";
@@ -26,6 +27,7 @@ export default async function ApplicationLayout({ children }: Readonly<{ childre
 
   return <ThemeProvider key={user.id} savedTheme={normalizeAccentTheme(profile?.accent_theme)}><ApplicationShell userMenu={<UserMenu avatarUrl={avatarUrl} name={name} />}>
     <LaunchSplash />
+    <NutritionSetupPrompt />
     {children}
   </ApplicationShell></ThemeProvider>;
 }

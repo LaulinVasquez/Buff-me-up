@@ -1,3 +1,4 @@
+import type { NutritionPreferences, NutritionPreferencesInput } from "./../lib/nutrition/types";
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 type Relationship = { foreignKeyName: string; columns: string[]; isOneToOne: boolean; referencedRelation: string; referencedColumns: string[] };
 type Table<Row, Insert, Update> = { Row: Row; Insert: Insert; Update: Update; Relationships: Relationship[] };
@@ -13,6 +14,7 @@ type WorkoutExerciseRow = { deferred: boolean; logged_sets: Json; log_revision: 
 export type Database = {
   public: {
     Tables: {
+      gym_nutrition_preferences: Table<NutritionPreferences, NutritionPreferencesInput & {user_id:string;onboarding_status?:"completed"|"skipped"}, Partial<NutritionPreferencesInput>>;
       gym_locations: Table<{id:string;user_id:string;name:string;equipment:string[];is_active:boolean;created_at:string;updated_at:string},{id?:string;user_id:string;name:string;equipment?:string[];is_active?:boolean;created_at?:string;updated_at?:string},{name?:string;equipment?:string[];is_active?:boolean;updated_at?:string}>;
       gym_exercise_notes: Table<{id:string;user_id:string;gym_id:string;exercise_key:string;exercise_name:string;machine_settings:string;notes:string;preferred_exercise_id:string|null;created_at:string;updated_at:string},{id?:string;user_id:string;gym_id:string;exercise_key:string;exercise_name:string;machine_settings?:string;notes?:string;preferred_exercise_id?:string|null;created_at?:string;updated_at?:string},{exercise_name?:string;machine_settings?:string;notes?:string;preferred_exercise_id?:string|null;updated_at?:string}>;
       gym_profiles: Table<ProfileRow, { weekly_goal?: number; accent_theme?: string; id: string; full_name?: string | null; avatar_url?: string | null; created_at?: string; updated_at?: string }, Partial<ProfileRow>>;
@@ -30,6 +32,7 @@ export type Database = {
     };
     Views: Record<never, never>;
     Functions: {
+      gym_save_nutrition_preferences: {Args:{preferences:Json;expected_revision:number|null;skip_setup?:boolean};Returns:Json};
       gym_save_location: {Args:{target_gym_id:string|null;expected_updated_at:string|null;gym_name:string;available_equipment:string[]};Returns:string};
       gym_select_location: {Args:{target_gym_id:string|null};Returns:undefined};
       gym_save_exercise_note: {Args:{target_gym_id:string;target_key:string;display_name:string;settings:string;note_text:string;preferred_id:string|null;expected_updated_at:string|null};Returns:string};

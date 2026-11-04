@@ -1,3 +1,7 @@
+# Nutrition milestone — 2026-11-04
+
+Plan committed first (`27dcf2b`) in draft PR #16. Phase 1 on `agent/nutrition-profile`: optional first-visit setup/skip, editable Profile preferences, optional measurements, food exclusions, explicit AI consent and owner-scoped revision-aware saves. Migration 14 adds `gym_nutrition_preferences`; existing profile/workout data stays intact. Account export includes nutrition preferences. Local preference tests and complete disposable PostgreSQL suite pass; build/lint/typecheck pass. Synthetic UI acceptance will be completed with the final nutrition batch; no deployed/provider/device success claimed. See NUTRITION_IMPLEMENTATION_PLAN.md. Later phases are usual meals/USDA/logging and reviewed personalized plans. No remote SQL, merge or deployment.
+
 # Development status
 
 Updated **2026-11-03**. Autonomous batch baseline: `c092c6a` (appearance PR #7 merged). Current branch: `agent/generator-quality-ci`. Laurin authorized continuing the proposed opportunities and pushing branches/PRs for later review. No merge, deployment, production-data access or remote migration was performed. The pre-existing untracked development guide remains preserved.
