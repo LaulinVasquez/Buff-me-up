@@ -1,6 +1,7 @@
 import { EMPTY_NUTRIENTS, type FoodIngredient, type Nutrients } from "./types";
 type Nutrient = { nutrientId?: number; value?: number; unitName?: string; nutrient?: { id?: number; unitName?: string }; amount?: number };
-type Food = { fdcId: number; description: string; brandOwner?: string; dataType?: string; foodNutrients?: Nutrient[]; servingSize?: number; servingSizeUnit?: string; householdServingFullText?: string };
+type Food = { fdcId: number; description: string; brandOwner?: string; dataType?: string; foodNutrients?: Nutrient[]; servingSize?: number; servingSizeUnit?: string; householdServingFullText?: string; ingredients?: string };
+export type UsdaFoodDetails = { ingredient: FoodIngredient; brand: string | null; packageIngredients: string | null; servingGrams: number | null; servingDescription: string | null };
 export type FoodMatch = { id: number; name: string; brand?: string; dataType?: string };
 export function adaptUsdaFood(value: unknown, now = new Date()): FoodIngredient {
   const food=value as Food;
@@ -19,6 +20,15 @@ export function adaptUsdaFood(value: unknown, now = new Date()): FoodIngredient 
   }
   return {name:food.description.slice(0,200),grams:100,per100g,source:"usda",fdc_id:food.fdcId,retrieved_at:now.toISOString()};
 }
+export function adaptUsdaProduct(value: unknown, now = new Date()): UsdaFoodDetails {
+  const ingredient = adaptUsdaFood(value, now);
+  const food = value as Food;
+  const brand = typeof food.brandOwner === "string" && food.brandOwner.trim() ? food.brandOwner.trim().slice(0,100) : null;
+  if (brand) ingredient.name = `${ingredient.name.slice(0,197-brand.length)} · ${brand}`;
+  // FDC composition is per 100 g. A volume/household serving is not a gram weight.
+  const servingGrams = food.servingSizeUnit?.trim().toLowerCase() === "g" && typeof food.servingSize === "number" && Number.isFinite(food.servingSize) && food.servingSize > 0 && food.servingSize <= 10000 ? food.servingSize : null;
+  return { ingredient, brand, packageIngredients: typeof food.ingredients === "string" && food.ingredients.trim() ? food.ingredients.trim() : null, servingGrams, servingDescription: typeof food.householdServingFullText === "string" ? food.householdServingFullText.slice(0,200) : null };
+}
 export function createUsdaClient(key:string,fetcher:typeof fetch=fetch){
   async function request(path:string,params:Record<string,string>={}){
     if(!key)throw new Error("Food lookup is not configured");
@@ -31,5 +41,5 @@ export function createUsdaClient(key:string,fetcher:typeof fetch=fetch){
     const payload=await request("foods/search",{query:query.trim().slice(0,120),pageSize:"12",pageNumber:String(Math.min(50,Math.max(1,Math.floor(page))))});
     if(!payload||!Array.isArray(payload.foods)||!Number.isFinite(payload.totalPages))throw new Error("Invalid food search response");
     return {foods:payload.foods.filter((food:Food)=>Number.isSafeInteger(food.fdcId)&&typeof food.description==="string").map((food:Food)=>({id:food.fdcId,name:food.description.slice(0,200),brand:food.brandOwner?.slice(0,100),dataType:food.dataType})),page,totalPages:Math.min(50,payload.totalPages)};
-  },async details(id:number){if(!Number.isSafeInteger(id)||id<=0)throw new Error("Invalid food ID");return adaptUsdaFood(await request(`food/${id}`));}};
+  },async details(id:number){if(!Number.isSafeInteger(id)||id<=0)throw new Error("Invalid food ID");return adaptUsdaProduct(await request(`food/${id}`));}};
 }

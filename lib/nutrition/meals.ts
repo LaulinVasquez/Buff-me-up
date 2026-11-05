@@ -1,4 +1,4 @@
-import { ALLERGENS, DIETS, FOOD_GROUPS, SLOTS, EMPTY_NUTRIENTS, type FoodLog, type MealInput, type Nutrients } from "./types";
+import { ALLERGENS, DIETS, FOOD_GROUPS, SLOTS, EMPTY_NUTRIENTS, type FoodIngredient, type FoodLog, type MealInput, type Nutrients } from "./types";
 export const NUTRIENT_KEYS = Object.keys(EMPTY_NUTRIENTS) as (keyof Nutrients)[];
 export function validNutrients(value: unknown): value is Nutrients {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
@@ -30,3 +30,13 @@ export function nutrientSummary(logs: Pick<FoodLog,"snapshot"|"portions">[]) {
 }
 export function validLocalDate(value: string) { if(!/^\d{4}-\d{2}-\d{2}$/.test(value))return false; const date=new Date(`${value}T12:00:00Z`);return Number.isFinite(date.getTime()) && date.toISOString().slice(0,10)===value; }
 export function shiftDay(value: string, days: number) { const date=new Date(`${value}T12:00:00Z`); date.setUTCDate(date.getUTCDate()+days);return date.toISOString().slice(0,10); }
+
+// Keep imported package ingredients in the existing saved notes/snapshot field.
+// Never truncate them silently: exclusions also inspect this text when planning.
+export function addFoodIngredient(meal: MealInput, ingredient: FoodIngredient, packageIngredients: string | null = null): MealInput {
+  if (meal.ingredients.length >= 40) throw new Error("This recipe already has 40 ingredients.");
+  const block = packageIngredients?.trim() ? `USDA ${ingredient.fdc_id} · ${ingredient.name}: ${packageIngredients.trim()}` : "";
+  const notes = block && !meal.ingredient_notes.includes(block) ? [meal.ingredient_notes, block].filter(Boolean).join("\n\n") : meal.ingredient_notes;
+  if (notes.length > 2500) throw new Error("The full package ingredients won’t fit in the meal’s 2,500-character notes. Shorten your existing notes or enter this item manually from its label; no ingredients were added.");
+  return { ...meal, mode: "recipe", ingredients: [...meal.ingredients, ingredient], ingredient_notes: notes, reviewed: false };
+}

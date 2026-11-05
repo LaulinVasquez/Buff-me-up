@@ -19,3 +19,11 @@ The adapter accepts documented nutrient IDs and explicit compatible units (kcal,
 ## Verification / handoff
 
 Pure tests cover nullable scaling, recipe math, invalid payloads, date validation, USDA search/detail nutrient formats, key containment, limits and failures. Local SQL tests cover owner/anonymous access, immutable snapshots, stale meal/log requests, archive behavior, duplicate retry protection and counter isolation/caps. Final aggregate/UI results are recorded in the batch report/session log. External provider and signed-in/native acceptance require configured staging; no live credential calls are claimed. Account export now includes preferences, meals and food logs with explicit nutrition-unit notes. Stored content does not include provider keys.
+
+## Search-first meal builder — 2026-11-04
+
+New meals now open with food/product search. Select a result to preview nutrition and any available package ingredient list, enter the grams used in the whole recipe (or use a declared gram serving), then add it. Multiple searched and manual ingredients can be combined; recipe servings determine each portion’s nutrition. Existing saved label meals retain their entry mode. Manual ingredients and whole-meal label entry remain available when the catalog has no match or the provider is unavailable.
+
+Available branded ingredient lists are copied, with source/food identity, into the existing ingredient_notes field and therefore saved with meal/log/plan snapshots and included in avoided-food matching. Import refuses to overflow the 2,500-character field rather than silently truncating ingredient lists. These are editable meal notes: review them after changing/removing ingredients. Allergen/diet tags still require review; API ingredients do not establish cross-contact safety. Brand, food ID and retrieved composition are retained; missing nutrients remain unknown. Food detail cache uses a new version for the preview response. No new database migration is needed beyond nutrition migrations 14–16.
+
+See FOOD_SEARCH_MEAL_BUILDER.md for scope, checks and provider activation.
