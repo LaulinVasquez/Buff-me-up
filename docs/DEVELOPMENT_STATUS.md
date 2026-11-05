@@ -8,7 +8,7 @@ Verification: `npm run check` passes with 54 tests plus disposable migration/RLS
 
 ## Food search follow-up
 
-Implemented on `agent/food-search-meal-builder` from updated main (`c2ea47b`). New meals start with food/product search, product composition/package-ingredient preview and explicit gram quantities; manual fallback remains available. Imported package ingredients persist in existing notes/snapshots and exclusion checks. No new SQL or dependency. Validation and review reference are recorded in FOOD_SEARCH_MEAL_BUILDER.md and AGENT_SESSION_LOG.md. Live provider/account/device acceptance remains pending.
+Implemented in [draft PR #20](https://github.com/LaulinVasquez/Buff-me-up/pull/20) on `agent/food-search-meal-builder` from updated main (`c2ea47b`). New meals start with food/product search, product composition/package-ingredient preview and explicit gram quantities; manual fallback remains available. Imported package ingredients persist in existing notes/snapshots and exclusion checks. No new SQL or dependency. Validation and review reference are recorded in FOOD_SEARCH_MEAL_BUILDER.md and AGENT_SESSION_LOG.md. Live provider/account/device acceptance remains pending.
 
 ---
 
