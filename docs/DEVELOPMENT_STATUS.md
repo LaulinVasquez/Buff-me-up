@@ -6,9 +6,13 @@ Completed: skippable setup and editable Profile; optional measurements/preferenc
 
 Verification: `npm run check` passes with 54 tests plus disposable migration/RLS/concurrency checks; combined SQL path separately passes; five signed-out HTTP checks and 20 synthetic screen/width combinations pass. Real providers, signed-in PostgREST/staging and physical-phone acceptance remain pending. No real data/provider key, remote SQL, PR merge or production deployment was used/performed by the agent. This nutrition work is user-authorized product scope; no CSE requirement commitments were changed.
 
+## Ingredient search layout
+
+Implemented in [draft PR #21](https://github.com/LaulinVasquez/Buff-me-up/pull/21) on `agent/ingredient-search-layout`, based on main `4900843` after developer merge of #20. Responsive search cards, per-100-g nutrient previews, clearer ingredient quantity/macro/package details, loading/empty/error/page states and keyboard focus. USDA search previews use one existing search request; no new SQL/provider/dependency/environment variable. USDA’s documented schema has no product-photo field; decorative icons are used. Scope/source/verification details: INGREDIENT_SEARCH_LAYOUT.md and session log. Live Vercel/provider/device acceptance remains pending.
+
 ## Food search follow-up
 
-Implemented in [draft PR #20](https://github.com/LaulinVasquez/Buff-me-up/pull/20) on `agent/food-search-meal-builder` from updated main (`c2ea47b`). New meals start with food/product search, product composition/package-ingredient preview and explicit gram quantities; manual fallback remains available. Imported package ingredients persist in existing notes/snapshots and exclusion checks. No new SQL or dependency. Validation and review reference are recorded in FOOD_SEARCH_MEAL_BUILDER.md and AGENT_SESSION_LOG.md. Live provider/account/device acceptance remains pending.
+Merged by the developer in [PR #20](https://github.com/LaulinVasquez/Buff-me-up/pull/20); implemented on `agent/food-search-meal-builder` from updated main (`c2ea47b`). New meals start with food/product search, product composition/package-ingredient preview and explicit gram quantities; manual fallback remains available. Imported package ingredients persist in existing notes/snapshots and exclusion checks. No new SQL or dependency. Validation and review reference are recorded in FOOD_SEARCH_MEAL_BUILDER.md and AGENT_SESSION_LOG.md. Live provider/account/device acceptance remains pending.
 
 ---
 
