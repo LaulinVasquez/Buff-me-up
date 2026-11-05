@@ -2,7 +2,7 @@ import { EMPTY_NUTRIENTS, type FoodIngredient, type Nutrients } from "./types";
 type Nutrient = { nutrientId?: number; value?: number; unitName?: string; nutrient?: { id?: number; unitName?: string }; amount?: number };
 type Food = { fdcId: number; description: string; brandOwner?: string; dataType?: string; foodNutrients?: Nutrient[]; servingSize?: number; servingSizeUnit?: string; householdServingFullText?: string; ingredients?: string };
 export type UsdaFoodDetails = { ingredient: FoodIngredient; brand: string | null; packageIngredients: string | null; servingGrams: number | null; servingDescription: string | null };
-export type FoodMatch = { id: number; name: string; brand?: string; dataType?: string };
+export type FoodMatch = { id: number; name: string; brand?: string; dataType?: string; nutrients?: Pick<Nutrients, "calories" | "protein"> };
 export function adaptUsdaFood(value: unknown, now = new Date()): FoodIngredient {
   const food=value as Food;
   if(!food || !Number.isSafeInteger(food.fdcId) || food.fdcId<=0 || typeof food.description!=="string" || !Array.isArray(food.foodNutrients))throw new Error("Invalid food details");
@@ -40,6 +40,9 @@ export function createUsdaClient(key:string,fetcher:typeof fetch=fetch){
   return {async search(query:string,page=1):Promise<{foods:FoodMatch[];page:number;totalPages:number}>{
     const payload=await request("foods/search",{query:query.trim().slice(0,120),pageSize:"12",pageNumber:String(Math.min(50,Math.max(1,Math.floor(page))))});
     if(!payload||!Array.isArray(payload.foods)||!Number.isFinite(payload.totalPages))throw new Error("Invalid food search response");
-    return {foods:payload.foods.filter((food:Food)=>Number.isSafeInteger(food.fdcId)&&typeof food.description==="string").map((food:Food)=>({id:food.fdcId,name:food.description.slice(0,200),brand:food.brandOwner?.slice(0,100),dataType:food.dataType})),page,totalPages:Math.min(50,payload.totalPages)};
+    return {foods:payload.foods.filter((food:Food)=>food && Number.isSafeInteger(food.fdcId) && food.fdcId>0 && typeof food.description==="string").map((food:Food)=>{
+      const values=adaptUsdaFood({...food,foodNutrients:Array.isArray(food.foodNutrients)?food.foodNutrients:[]}).per100g;
+      return {id:food.fdcId,name:food.description.slice(0,200),brand:typeof food.brandOwner==="string"?food.brandOwner.slice(0,100):undefined,dataType:typeof food.dataType==="string"?food.dataType:undefined,nutrients:{calories:values.calories,protein:values.protein}};
+    }),page,totalPages:Math.min(50,payload.totalPages)};
   },async details(id:number){if(!Number.isSafeInteger(id)||id<=0)throw new Error("Invalid food ID");return adaptUsdaProduct(await request(`food/${id}`));}};
 }

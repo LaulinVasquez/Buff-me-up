@@ -110,3 +110,22 @@ test("USDA client details return preview metadata and only saved ingredient fiel
  assert(validateMeal(meal));assert(!JSON.stringify(meal).includes("synthetic-key"));assert.equal(meal.mode,"recipe");
  assert.deepEqual(Object.keys(meal.ingredients[0]).sort(),["name","grams","per100g","source","fdc_id","retrieved_at"].sort());
 });
+
+test("USDA search cards preview valid per-100-g values without extra detail requests or invented zeros", async () => {
+ const requests:URL[]=[];
+ const client=createUsdaClient("synthetic-search-key",async input=>{
+  requests.push(new URL(String(input)));
+  return new Response(JSON.stringify({totalPages:2,foods:[
+   {fdcId:601,description:"Synthetic oats",dataType:"Branded",brandOwner:"Preview brand",foodNutrients:[{nutrientId:1008,unitName:"KCAL",value:380},{nutrientId:1003,unitName:"G",value:10}]},
+   {fdcId:602,description:"Synthetic zero",foodNutrients:[{nutrientId:1008,unitName:"kcal",value:0},{nutrientId:1003,unitName:"g",value:0}]},
+   {fdcId:603,description:"Synthetic unknown",foodNutrients:[{nutrientId:1008,unitName:"kJ",value:400},{nutrientId:1003,unitName:"g",value:-2}]},
+   {fdcId:604,description:"Synthetic missing"},
+   {fdcId:-1,description:"Invalid ID"},null
+  ]}));
+ });
+ const result=await client.search("oats");
+ assert.equal(requests.length,1);assert(requests[0].pathname.endsWith("/foods/search"));
+ assert.equal(result.foods.length,4);assert.equal(result.foods[0].brand,"Preview brand");
+ assert.deepEqual(result.foods.map(food=>food.nutrients),[{calories:380,protein:10},{calories:0,protein:0},{calories:null,protein:null},{calories:null,protein:null}]);
+ assert.equal(JSON.stringify(result).includes("synthetic-search-key"),false);
+});
