@@ -14,8 +14,8 @@ test("preference form leaves blank numbers unknown and normalizes food exclusion
 });
 
 import { EMPTY_NUTRIENTS, type MealInput } from "../lib/nutrition/types";
-import { mealNutrients, nutrientSummary, scaleNutrients, validateMeal, validLocalDate } from "../lib/nutrition/meals";
-import { adaptUsdaFood, createUsdaClient } from "../lib/nutrition/usda";
+import { addFoodIngredient, mealNutrients, nutrientSummary, scaleNutrients, validateMeal, validLocalDate } from "../lib/nutrition/meals";
+import { adaptUsdaFood, adaptUsdaProduct, createUsdaClient } from "../lib/nutrition/usda";
 const sampleMeal = (): MealInput => ({name:"Usual bowl",slot:"lunch",mode:"label",recipe_servings:1,ingredients:[],nutrients:{calories:500,protein:30,carbs:60,fat:15,fiber:null,sodium:null},ingredient_notes:"Rice and beans",food_groups:["protein","whole_grains"],diet_tags:["vegan"],allergens:[],reviewed:true,cooking_minutes:20,budget:"low",notes:""});
 test("meal validation and quantity scaling preserve unknown values instead of inventing zeros",()=>{
  const meal=sampleMeal();assert(validateMeal(meal));assert.deepEqual(scaleNutrients(mealNutrients(meal),1.5),{calories:750,protein:45,carbs:90,fat:22.5,fiber:null,sodium:null});
@@ -70,4 +70,43 @@ test("AI rejects unknown choices, refusals, incomplete output and absent scoped 
  await assert.rejects(run({status:"incomplete",output:[]}),/incomplete/);await assert.rejects(run({status:"completed",output:[{content:[{type:"refusal"}]}]}),/refused/);
  const unknown={entries:baseline.entries.map(entry=>({day:entry.day,slot:entry.slot,meal:"unknown",portions:1}))};await assert.rejects(run({status:"completed",output:[{content:[{type:"output_text",text:JSON.stringify(unknown)}]}]}),/Unknown AI meal/);
  await assert.rejects(run({}, {...preferences,ai_consent:false}),/consent/);await assert.rejects(run({}, {...preferences,ai_consent_version:""}),/consent/);
+});
+
+test("USDA product details retain brand and package ingredients without inventing gram conversions", () => {
+ const food = { fdcId: 321, description: "Synthetic breakfast cereal", brandOwner: "Synthetic brand", ingredients: "WHOLE OATS, MILK, OLIVES.", servingSize: 30, servingSizeUnit: "g", foodNutrients: [{nutrient:{id:1008,unitName:"kcal"},amount:270}] };
+ const product = adaptUsdaProduct(food);
+ assert.equal(product.ingredient.name,"Synthetic breakfast cereal · Synthetic brand");
+ assert.equal(product.packageIngredients,food.ingredients);
+ assert.equal(product.servingGrams,30);
+ assert.equal(product.ingredient.grams,100);
+ assert.equal(product.ingredient.per100g.calories,270);
+ assert.equal(product.ingredient.per100g.protein,null);
+ for (const servingSizeUnit of ["ml","cup","oz",undefined]) assert.equal(adaptUsdaProduct({...food,servingSizeUnit}).servingGrams,null);
+ for (const servingSize of [0,-1,Infinity,10001]) assert.equal(adaptUsdaProduct({...food,servingSize}).servingGrams,null);
+ const generic = adaptUsdaProduct({fdcId:322,description:"Synthetic rice",foodNutrients:[]});
+ assert.equal(generic.brand,null);assert.equal(generic.packageIngredients,null);assert.equal(generic.servingGrams,null);
+});
+test("searched and manual ingredients persist package notes, scale servings and respect food exclusions", () => {
+ const product = adaptUsdaProduct({fdcId:321,description:"Synthetic oats",brandOwner:"Synthetic brand",ingredients:"OATS, OLIVES.",foodNutrients:[{nutrient:{id:1008,unitName:"kcal"},amount:270}]});
+ const initial = {...sampleMeal(),mode:"recipe" as const,recipe_servings:2,ingredients:[]};
+ const imported = addFoodIngredient(initial,{...product.ingredient,grams:50},product.packageIngredients);
+ assert(validateMeal(imported));assert.equal(imported.reviewed,false);assert.equal(initial.ingredients.length,0);
+ assert(imported.ingredient_notes.includes("OATS, OLIVES."));
+ const combined = addFoodIngredient(imported,{name:"Manual ingredient",grams:100,per100g:{...EMPTY_NUTRIENTS,calories:100},source:"manual",fdc_id:null,retrieved_at:null});
+ assert(validateMeal(combined));assert.equal(mealNutrients(combined).calories,117.5);assert.equal(mealNutrients(combined).protein,null);
+ const saved = {...mealsFixture()[0],name:combined.name,details:{...combined,reviewed:true}};
+ assert.equal(mealEligibility(saved,{...preferencesFixture(),avoid_foods:["olives"]}),"Contains a food you avoid");
+ const duplicate = addFoodIngredient(imported,product.ingredient,product.packageIngredients);
+ assert.equal(duplicate.ingredient_notes,imported.ingredient_notes);assert.equal(duplicate.ingredients.length,2);
+ assert.throws(()=>addFoodIngredient({...initial,ingredient_notes:"x".repeat(2500)},product.ingredient,product.packageIngredients),/won’t fit/);
+ assert.throws(()=>addFoodIngredient(initial,product.ingredient,"x".repeat(2501)),/won’t fit/);
+ assert.throws(()=>addFoodIngredient({...initial,ingredients:Array(40).fill(product.ingredient)},product.ingredient),/40 ingredients/);
+ assert.equal(initial.ingredient_notes,"Rice and beans");
+});
+test("USDA client details return preview metadata and only saved ingredient fields are persisted", async () => {
+ const client=createUsdaClient("synthetic-key",async()=>new Response(JSON.stringify({fdcId:321,description:"Synthetic oats",ingredients:"OATS.",servingSize:40,servingSizeUnit:"g",foodNutrients:[{nutrient:{id:1008,unitName:"kcal"},amount:380}]})));
+ const product=await client.details(321);assert.equal(product.servingGrams,40);assert.equal(product.packageIngredients,"OATS.");
+ const meal=addFoodIngredient(sampleMeal(),product.ingredient,product.packageIngredients);
+ assert(validateMeal(meal));assert(!JSON.stringify(meal).includes("synthetic-key"));assert.equal(meal.mode,"recipe");
+ assert.deepEqual(Object.keys(meal.ingredients[0]).sort(),["name","grams","per100g","source","fdc_id","retrieved_at"].sort());
 });

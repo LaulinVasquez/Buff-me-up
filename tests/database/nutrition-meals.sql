@@ -1,3 +1,5 @@
+-- Date inputs below use UTC, so the fixture must use the same day boundary.
+set time zone 'UTC';
 set role authenticated;
 set request.jwt.claim.sub='00000000-0000-0000-0000-000000000001';
 select public.gym_save_meal(null,null,'{"name": "Synthetic usual bowl", "slot": "lunch", "mode": "label", "recipe_servings": 1, "ingredients": [], "nutrients": {"calories": 500, "protein": 30, "carbs": 60, "fat": 15, "fiber": null, "sodium": null}, "ingredient_notes": "Rice and beans", "food_groups": ["protein", "whole_grains"], "diet_tags": ["vegan"], "allergens": [], "reviewed": true, "cooking_minutes": 20, "budget": "low", "notes": ""}',false) as meal \gset
@@ -34,3 +36,4 @@ select test.assert_raises('select * from public.gym_meals','permission denied');
 select test.assert_raises('select * from public.gym_food_logs','permission denied');
 select test.assert_raises($$select public.gym_consume_nutrition_request('food')$$,'permission denied');
 reset role;
+reset time zone;

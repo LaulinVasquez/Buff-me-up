@@ -61,7 +61,9 @@ order by table_name;
 
 Expect `gym_meals.request_id` (uuid) and `gym_nutrition_preferences.ai_consent_version` (text).
 
-## Optional server environment variables
+## Food search and optional AI server configuration
+
+The search-first meal builder uses the USDA key for its primary food catalog. Missing catalog items can still be entered manually. No additional SQL is needed for this follow-up beyond migrations 14–16.
 
 Set these in `.env.local` for development or the hosting project's server environment for the relevant deployment. Do not paste real keys into chat, commit them or prefix them with `NEXT_PUBLIC_`. Restart/redeploy the matching server after configuring variables using your normal release process.
 
