@@ -8,7 +8,7 @@ Verification: `npm run check` passes with 54 tests plus disposable migration/RLS
 
 ## Ingredient search layout
 
-Implemented on `agent/ingredient-search-layout`, based on main `4900843` after developer merge of #20. Responsive search cards, per-100-g nutrient previews, clearer ingredient quantity/macro/package details, loading/empty/error/page states and keyboard focus. USDA search previews use one existing search request; no new SQL/provider/dependency/environment variable. USDA’s documented schema has no product-photo field; decorative icons are used. Scope/source/verification details: INGREDIENT_SEARCH_LAYOUT.md and session log. Live Vercel/provider/device acceptance remains pending.
+Implemented in [draft PR #21](https://github.com/LaulinVasquez/Buff-me-up/pull/21) on `agent/ingredient-search-layout`, based on main `4900843` after developer merge of #20. Responsive search cards, per-100-g nutrient previews, clearer ingredient quantity/macro/package details, loading/empty/error/page states and keyboard focus. USDA search previews use one existing search request; no new SQL/provider/dependency/environment variable. USDA’s documented schema has no product-photo field; decorative icons are used. Scope/source/verification details: INGREDIENT_SEARCH_LAYOUT.md and session log. Live Vercel/provider/device acceptance remains pending.
 
 ## Food search follow-up
 
