@@ -1,6 +1,6 @@
 # Guided meal planning update — 2026-11-06
 
-Implemented on `agent/guided-meal-planning`, based on main `8ea3319` after developer merge of PR #21. Generate now creates a draft immediately when ready, otherwise asks preferences and missing meal choices on a dedicated setup page before automatically creating the draft. Added optional feet/inches and pounds with canonical cm/kg preservation; optional exact-barcode Open Food Facts photos retain USDA nutrient calculations. No new Supabase SQL or dependency. Photos require separate server enablement/provider usage setup. See NUTRITION_FLOW_UPGRADE.md for comparison, configuration, validation and acceptance limits. Review references follow in the session log.
+Implemented on `agent/guided-meal-planning`, based on main `8ea3319` after developer merge of PR #21. Generate now creates a draft immediately when ready, otherwise asks preferences and missing meal choices on a dedicated setup page before automatically creating the draft. Added optional feet/inches and pounds with canonical cm/kg preservation; optional exact-barcode Open Food Facts photos retain USDA nutrient calculations. No new Supabase SQL or dependency. Photos require separate server enablement/provider usage setup. See NUTRITION_FLOW_UPGRADE.md for comparison, configuration, validation and acceptance limits. Review [draft PR #22](https://github.com/LaulinVasquez/Buff-me-up/pull/22), implementation `6a5fdb5`. Full local checks pass (64 tests plus disposable SQL); staging acceptance remains pending.
 
 # Nutrition release status — 2026-11-04
 
