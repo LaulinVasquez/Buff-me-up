@@ -138,3 +138,8 @@ Implemented in [draft PR #21](https://github.com/LaulinVasquez/Buff-me-up/pull/2
 ## BMU-025 — Guided meal generation, imperial units and product photos
 
 **Status:** implemented in `6a5fdb5`, [draft PR #22](https://github.com/LaulinVasquez/Buff-me-up/pull/22), on `agent/guided-meal-planning` from developer-merged #21 (`8ea3319`); review/staging pending. Ready meals produce an immediate draft; otherwise questions and missing eligible meals lead to automatic regular generation. Feet/inches and pounds convert into existing canonical account fields. Optional exact-barcode Open Food Facts images are separately cached/attributed and cannot block food entry or replace USDA nutrient values. No new SQL/dependency; photos require explicit server enablement after provider usage setup. NUTRITION_FLOW_UPGRADE.md records source comparison, checks and capacity limits; session log records final checks/review references.
+
+
+## BMU-026 — Short meal-creation procedure and day-by-day review
+
+**Status:** implemented in `7662925`, [draft PR #23](https://github.com/LaulinVasquez/Buff-me-up/pull/23), on `agent/meal-plan-procedure`; developer review/staging pending. Three preference screens and build/details/review meal screens retain values, validate before advancing and save only at the end. Review shows ingredients/nutrients/preference blockers without automatic approval. Day/week views preserve swaps/portions, show known/unknown weekly totals and update shopping before save. Full check passes (66 tests plus disposable DB); forty synthetic view/width combinations fit. No new SQL/dependency/provider/configuration. The developer merged prerequisite #22 (`0d712b8`); final PR targets main. See MEAL_PLAN_PROCEDURE.md and session log.

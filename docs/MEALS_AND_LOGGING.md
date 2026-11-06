@@ -32,3 +32,8 @@ See FOOD_SEARCH_MEAL_BUILDER.md for scope, checks and provider activation.
 ## November 6 follow-up
 
 Selected USDA products now retain validated barcode identity and retail brand. Optional separately enabled Open Food Facts photo lookup matches only exact normalized barcodes, displays attribution and falls back without blocking entry. USDA nutrition and existing saved ingredient fields are unchanged. Preferences now offer feet/inches and pounds while preserving canonical cm/kg. See NUTRITION_FLOW_UPGRADE.md.
+
+
+## Guided meal setup
+
+The plan setup opts into a three-step meal editor: build ingredients/nutrition; review tags/time/cost; review the full meal before saving. Back retains input, failed saves retain the review, and known exclusions appear before confirmation. Unreviewed/incompatible meals may be saved for logging but do not unlock generation. The regular diary editor remains available. No new persistence fields. See MEAL_PLAN_PROCEDURE.md.
