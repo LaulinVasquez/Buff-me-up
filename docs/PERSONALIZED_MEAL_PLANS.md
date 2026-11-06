@@ -25,3 +25,8 @@ The prior consent flag alone is insufficient after the scope version is introduc
 Pure/contract tests cover deterministic required slots, missing/filtered choices, stale/duplicate plan entries, nullable totals/grocery scaling, minimized AI context, request bounds/store flag, valid responses and invalid/refused/incomplete/consent failures. Disposable PostgreSQL checks validate immutable reviewed snapshots, stale profile/meal rejection, exclusions, request retries, helper permissions and two-user/anonymous RLS. Concurrent writes cover preference/meal conflicts, duplicate creation/logging and meal edits after reviewed snapshot saves.
 
 Synthetic actual-component UI checks cover seven-day/snack generation, visible simulated-AI fallback, invalid portion blocking, swaps clearing review, failed-save retention, explicit save/reload, shopping quantities and no automatic food logging. Setup, recipe editor, diary and review each fit 320/390/768/1024/1440px without page overflow. Test fixtures and server are removed/stopped before final checks. Real provider, signed-in PostgREST and physical-phone acceptance remain pending. Final aggregate results: NUTRITION_RELEASE_REPORT_2026-11-04.md.
+
+
+## November 6 follow-up
+
+Generate now creates a draft immediately for eligible reviewed meal choices. Missing preferences or slots open `/app/nutrition/plan/setup`; saved preferences and the last eligible meal lead to a regular draft automatically, retaining date/snack selections. Explicit plan review/save remains required. See NUTRITION_FLOW_UPGRADE.md.

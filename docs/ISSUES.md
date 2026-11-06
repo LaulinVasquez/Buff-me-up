@@ -133,3 +133,8 @@ Implemented in [draft PR #20](https://github.com/LaulinVasquez/Buff-me-up/pull/2
 ## BMU-024 — Ingredient search readability on phones and larger devices
 
 Implemented in [draft PR #21](https://github.com/LaulinVasquez/Buff-me-up/pull/21) on `agent/ingredient-search-layout` from developer-merged PR #20 (`4900843`). Responsive food cards with brand/source/nutrient previews, explicit unknowns/zero values, improved gram/serving/nutrition/package layout, loading/error/empty/pagination states and focus management. Search previews do not fan out extra food-detail calls. USDA’s documented API has no product-photo field; icons are decorative. No new SQL or environment variable. See INGREDIENT_SEARCH_LAYOUT.md for source boundaries, checks and review references; live deployment/provider/device acceptance remains pending.
+
+
+## BMU-025 — Guided meal generation, imperial units and product photos
+
+**Status:** implemented on `agent/guided-meal-planning` from developer-merged #21 (`8ea3319`); review/staging pending. Ready meals produce an immediate draft; otherwise questions and missing eligible meals lead to automatic regular generation. Feet/inches and pounds convert into existing canonical account fields. Optional exact-barcode Open Food Facts images are separately cached/attributed and cannot block food entry or replace USDA nutrient values. No new SQL/dependency; photos require explicit server enablement after provider usage setup. NUTRITION_FLOW_UPGRADE.md records source comparison, checks and capacity limits; session log records final checks/review references.

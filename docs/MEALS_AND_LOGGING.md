@@ -27,3 +27,8 @@ New meals now open with food/product search. Select a result to preview nutritio
 Available branded ingredient lists are copied, with source/food identity, into the existing ingredient_notes field and therefore saved with meal/log/plan snapshots and included in avoided-food matching. Import refuses to overflow the 2,500-character field rather than silently truncating ingredient lists. These are editable meal notes: review them after changing/removing ingredients. Allergen/diet tags still require review; API ingredients do not establish cross-contact safety. Brand, food ID and retrieved composition are retained; missing nutrients remain unknown. Food detail cache uses a new version for the preview response. No new database migration is needed beyond nutrition migrations 14–16.
 
 See FOOD_SEARCH_MEAL_BUILDER.md for scope, checks and provider activation.
+
+
+## November 6 follow-up
+
+Selected USDA products now retain validated barcode identity and retail brand. Optional separately enabled Open Food Facts photo lookup matches only exact normalized barcodes, displays attribution and falls back without blocking entry. USDA nutrition and existing saved ingredient fields are unchanged. Preferences now offer feet/inches and pounds while preserving canonical cm/kg. See NUTRITION_FLOW_UPGRADE.md.
