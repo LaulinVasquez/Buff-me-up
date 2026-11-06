@@ -9,7 +9,7 @@ export type MealPlanDraft = { start_date: string; preference_revision: number; g
 export type PlanSnapshotEntry = PlanEntry & { meal: Pick<SavedMeal,"id"|"name"|"details"|"nutrients"|"revision"> };
 export type SavedMealPlan = { id: string; user_id: string; name: string; start_date: string; preference_revision: number; guidance_version: string; draft: MealPlanDraft; snapshot: { entries: PlanSnapshotEntry[]; preferences: Pick<NutritionPreferences,"diet"|"allergens"|"avoid_foods"|"calorie_target"|"cooking_minutes"|"budget"> }; request_id: string; created_at: string };
 const costRank = { low:0, moderate:1, flexible:2 };
-export function mealEligibility(meal: SavedMeal, p: NutritionPreferences): string | null {
+export function mealEligibility(meal: Pick<SavedMeal,"archived"|"details"|"name">, p: NutritionPreferences): string | null {
   const d=meal.details;
   if(meal.archived)return "Archived meal";
   if(!d.reviewed)return "Ingredient review needed";

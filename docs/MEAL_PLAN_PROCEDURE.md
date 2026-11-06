@@ -1,6 +1,6 @@
 # Meal-plan procedure — 2026-11-06
 
-Laurin requested a new plan/procedure and implementation after the guided-planning update. Working interpretation: improve the food-plan creation process with shorter questions, guided meal building and a manageable weekly review. Base `0caf7be`, pending PR #22; this follow-up remains separately reviewable and does not merge or deploy either branch.
+Laurin requested a new plan/procedure and implementation after the guided-planning update. Working interpretation: improve the food-plan creation process with shorter questions, guided meal building and a manageable weekly review. Started at `0caf7be` while PR #22 was pending. The developer merged #22 to main (`0d712b8`) during implementation; the final follow-up targets main and preserves that history. The agent does not merge PRs or deploy.
 
 ## User procedure
 
@@ -33,7 +33,21 @@ Check preference navigation/back/Enter/invalid ranges, save failure and imperial
 ## Progress
 
 - [x] Phase 0: bounded procedure recorded before implementation.
-- [ ] Phase 1: guided preferences.
-- [ ] Phase 2: guided meal entry.
-- [ ] Phase 3: day/week review and shopping preview.
+- [x] Phase 1: guided preferences.
+- [x] Phase 2: guided meal entry.
+- [x] Phase 3: day/week review and shopping preview.
 - [ ] Phase 4: verification and review handoff.
+
+## Implementation and verification report
+
+Plan-first commit: `570691f`. Guided forms keep all panels mounted so Back retains values and the final submission contains all answers. Enter advances a screen; native validation reveals/focuses invalid fields, including fields inside optional details. Intermediate steps never invoke a save. Profile/onboarding keep their full-form layout; meal setup opts into the guided screens. An in-progress meal hides the otherwise prominent Create my plan action.
+
+The meal review displays ingredients, per-serving known/unknown nutrition, declared allergens, reviewed eating patterns, time/cost and current preference blockers. It does not set review flags automatically. The day review supports one day or all seven, retains swaps/portions across navigation, shows weekly known totals/unknown counts, and derives shopping quantities from the current draft. Missing saved choices are counted as unknown and block the existing save validation. Existing provider, consent, canonical measurement and authoritative server-save behavior is unchanged.
+
+`npm run check` PASS: lint, generated SQL drift, production build, sequential types, 66 pure/contract tests (23 nutrition), and the complete disposable PostgreSQL migration/RLS/concurrency suite. New regressions cover unknown/unavailable meals, scaled portions, swaps, weekly totals and shopping quantities. No database migration or new dependency/environment variable.
+
+Actual-component synthetic browser checks PASS: Enter/Back/value retention; invalid cooking time and ingredient grams; no preference write before final Save; failed preference/meal/plan saves retaining input; imperial values and exclusions retained in final preferences; searched recipe, manual ingredient and whole-meal label paths; explicit allergen blocker, unreviewed save staying in setup, edits clearing confirmation and final reviewed save causing automatic generation; day-specific changes retained through navigation; 1→1.5 recipe portions updating shopping 700→750 g; invalid 2.3 portions blocking save; explicit reviewed plan save/reload preserving 1.5 portions and leaving zero food logs. Unknown label nutrition appears as a subtotal. Full preferences remain visible outside guided setup. Normal console clear.
+
+Forty view/width combinations fit without horizontal overflow: three preference screens, three meal screens and day/week reviews × 320/390/768/1024/1440px. Phone and desktop screenshots retained as synthetic evidence outside the repository. One initial off-screen pointer action landed on bottom navigation; returned to the draft, verified keyboard navigation and a visible pointer day change, and excluded that interrupted attempt from assertions. Temporary preview files moved outside the checkout; server/tab closed and viewport reset.
+
+No production data, live provider call, AI charge, remote SQL, paid signup, PR merge or deployment by the agent. Signed-in PostgREST/real-account and physical-device acceptance remain staging tasks. Review link/final branch references are recorded in AGENT_SESSION_LOG.md after publishing.

@@ -188,3 +188,25 @@ test("USDA preserves product barcodes and prefers the retail brand without chang
  assert.equal(product.barcode,"078742333939");assert.equal(product.brand,"Great Value");assert.equal(product.ingredient.name,"Jasmine rice · Great Value");
  assert.deepEqual(Object.keys(product.ingredient).sort(),["name","grams","per100g","source","fdc_id","retrieved_at"].sort());
 });
+
+import { mealPlanReview } from "../lib/nutrition/plan-review";
+test("weekly review scales selected portions, retains unknown calories and updates shopping after a swap",()=>{
+ const meals=mealsFixture();
+ const recipe={...meals[0],details:{...meals[0].details,mode:"recipe" as const,recipe_servings:2,ingredients:[{name:"Synthetic oats",grams:100,per100g:{...EMPTY_NUTRIENTS,calories:380},source:"manual" as const,fdc_id:null,retrieved_at:null}]},nutrients:{...EMPTY_NUTRIENTS,calories:190}};
+ const unknown={...meals[1],nutrients:{...EMPTY_NUTRIENTS}};
+ const p=preferencesFixture();const draft=generateMealPlan(meals,p,[],"2026-11-06");
+ draft.entries=[{...draft.entries[0],meal_id:recipe.id,portions:1.5},{...draft.entries[0],day:1,meal_id:unknown.id,portions:2}];
+ const review=mealPlanReview(draft,[recipe,unknown],null);
+ assert.equal(review.nutrition.calories.known,285);assert.equal(review.nutrition.calories.unknown,1);
+ assert.equal(review.uniqueMeals,2);assert.equal(review.mealCount,2);assert.equal(review.unresolved,0);
+ assert.equal(review.shopping.ingredients[0].grams,75);assert.equal(review.shopping.manualMeals[0].servings,2);
+ assert.equal(review.days[0].nutrition.calories.known,285);assert.equal(review.days[1].nutrition.calories.unknown,1);
+ const swapped=mealPlanReview({...draft,entries:draft.entries.map(entry=>({...entry,meal_id:recipe.id}))},[recipe,unknown],null);
+ assert.equal(swapped.uniqueMeals,1);assert.equal(swapped.nutrition.calories.unknown,0);assert.equal(swapped.nutrition.calories.known,665);assert.equal(swapped.shopping.ingredients[0].grams,175);assert.equal(swapped.shopping.manualMeals.length,0);
+});
+test("weekly review reports unresolved meals without inventing nutrition or shopping items",()=>{
+ const p=preferencesFixture(),meals=mealsFixture();const draft=generateMealPlan(meals,p,[],"2026-11-06");
+ const result=mealPlanReview(draft,[],null);
+ assert.equal(result.unresolved,21);assert.equal(result.nutrition.calories.unknown,21);assert.equal(result.days[0].nutrition.calories.unknown,3);assert.equal(result.mealCount,0);assert.equal(result.uniqueMeals,0);assert.equal(result.nutrition.calories.known,0);assert.deepEqual(result.shopping,{ingredients:[],manualMeals:[]});
+ assert.equal(validateMealPlan(draft,[],p),false);
+});

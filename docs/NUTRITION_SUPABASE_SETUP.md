@@ -4,7 +4,7 @@ Prepared 2026-11-04. The agent has not applied these changes to any remote datab
 
 ## November 6 follow-up: no additional SQL
 
-Guided planning, imperial units and product-photo support reuse migrations 14–16. Do not rerun already-applied migrations. Account height/weight remain cm/kg; display units are browser preferences. For optional photos, complete [Open Food Facts usage setup](https://openfoodfacts.github.io/documentation/docs/Product-Opener/api/#before-you-start), set `OPEN_FOOD_FACTS_PHOTOS_ENABLED=true` in Vercel, optionally set `OPEN_FOOD_FACTS_USER_AGENT` to your app/contact identity, and deploy the reviewed branch. No new paid API key or image-storage bucket. USDA nutrients remain the calculation source. See NUTRITION_FLOW_UPGRADE.md for cache/rate-limit and staging acceptance details.
+Guided planning, the short meal-creation procedure, imperial units and product-photo support reuse migrations 14–16. Do not rerun already-applied migrations. Account height/weight remain cm/kg; display units are browser preferences. For optional photos, complete [Open Food Facts usage setup](https://openfoodfacts.github.io/documentation/docs/Product-Opener/api/#before-you-start), set `OPEN_FOOD_FACTS_PHOTOS_ENABLED=true` in Vercel, optionally set `OPEN_FOOD_FACTS_USER_AGENT` to your app/contact identity, and deploy the reviewed branch. No new paid API key or image-storage bucket. USDA nutrients remain the calculation source. See NUTRITION_FLOW_UPGRADE.md for cache/rate-limit and staging acceptance details.
 
 ## Choose one migration path
 

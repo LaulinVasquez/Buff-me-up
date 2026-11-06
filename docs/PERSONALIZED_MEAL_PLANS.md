@@ -30,3 +30,8 @@ Synthetic actual-component UI checks cover seven-day/snack generation, visible s
 ## November 6 follow-up
 
 Generate now creates a draft immediately for eligible reviewed meal choices. Missing preferences or slots open `/app/nutrition/plan/setup`; saved preferences and the last eligible meal lead to a regular draft automatically, retaining date/snack selections. Explicit plan review/save remains required. See NUTRITION_FLOW_UPGRADE.md.
+
+
+## Short creation procedure and weekly review
+
+Guided setup now asks food choices, routine and optional details on separate screens, then guides missing meals through build/details/review. Draft review opens one day at a time with a seven-day comparison option, weekly known/unknown totals and a shopping preview that updates with swaps and portions. Confirmation is still cleared by edits, and saving remains explicit. MEAL_PLAN_PROCEDURE.md contains the current user procedure and verification report.
