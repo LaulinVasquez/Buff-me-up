@@ -129,3 +129,62 @@ test("USDA search cards preview valid per-100-g values without extra detail requ
  assert.deepEqual(result.foods.map(food=>food.nutrients),[{calories:380,protein:10},{calories:0,protein:0},{calories:null,protein:null},{calories:null,protein:null}]);
  assert.equal(JSON.stringify(result).includes("synthetic-search-key"),false);
 });
+
+import {heightFields,imperialHeightCm,KG_PER_LB,weightFields,weightKg} from "../lib/nutrition/measurements";
+import {mealPlanFlowHref,plannerReadiness} from "../lib/nutrition/planner-setup";
+import {adaptProductPhoto,createProductPhotoClient,normalizeBarcode} from "../lib/nutrition/product-photos";
+test("imperial measurements convert to canonical metric values and distinguish blank from invalid input",()=>{
+ assert.equal(imperialHeightCm("5","10"),177.8);assert.equal(imperialHeightCm("6",""),182.88);
+ assert.equal(imperialHeightCm("",""),null);assert(Number.isNaN(imperialHeightCm("","8")));
+ for(const [feet,inches]of [["5.5","0"],["5","12"],["5","-1"],["Infinity","0"]])assert(Number.isNaN(imperialHeightCm(feet,inches)));
+ assert.equal(weightKg("180","lb"),81.646627);assert.equal(weightKg("80","kg"),80);assert.equal(weightKg("","lb"),null);
+ assert.deepEqual(heightFields(177.8),{cm:"177.8",feet:"5",inches:"10"});assert.deepEqual(weightFields(null),{kg:"",lb:""});assert.equal(KG_PER_LB,0.45359237);
+ assert(validatePreferences({...DEFAULT_PREFERENCES,height_cm:imperialHeightCm("5","10"),weight_kg:weightKg("180","lb")}));
+ assert(!validatePreferences({...DEFAULT_PREFERENCES,height_cm:imperialHeightCm("9","0")}));
+ // Metric display retains the full canonical precision.
+ assert.equal(weightFields(81.646627).kg,"81.646627");assert.equal(heightFields(175.123456).cm,"175.123456");
+});
+test("planner setup diagnoses missing preferences and meal slots without relaxing exclusions",()=>{
+ const p=preferencesFixture(),meals=mealsFixture();assert.equal(plannerReadiness(meals,p).ready,true);
+ assert.equal(plannerReadiness(meals,null).needsPreferences,true);assert.equal(plannerReadiness(meals,{...p,onboarding_status:"skipped"}).ready,false);
+ const empty=plannerReadiness([],p);assert.deepEqual(empty.missing,["breakfast","lunch","dinner"]);
+ const withSnack=plannerReadiness(meals,p,true);assert.deepEqual(withSnack.missing,["snack"]);
+ const blocked=meals.map(meal=>meal.details.slot==="breakfast"?{...meal,details:{...meal.details,allergens:["milk"]}}:meal);
+ const status=plannerReadiness(blocked,{...p,allergens:["milk"]});assert.deepEqual(status.missing,["breakfast"]);
+ assert.equal(status.coverage[0].blocked.length,2);assert(status.coverage[0].blocked.every(item=>item.reason==="Contains an excluded allergen"));
+ const unreviewed=meals.map(meal=>({...meal,details:{...meal.details,reviewed:false}}));assert.equal(plannerReadiness(unreviewed,p).ready,false);
+ assert.equal(plannerReadiness(meals.map(meal=>({...meal,archived:true})),p).ready,false);
+});
+test("planner flow links preserve date/snack choices and cannot become external redirects",()=>{
+ assert.equal(mealPlanFlowHref("setup","2026-11-06",true),"/app/nutrition/plan/setup?start=2026-11-06&snack=1");
+ assert.equal(mealPlanFlowHref("plan","2026-11-06",false,true),"/app/nutrition/plan?start=2026-11-06&generate=1");
+ assert.equal(mealPlanFlowHref("setup","https://example.com/?ai=on"),"/app/nutrition/plan/setup");
+ assert(!mealPlanFlowHref("plan","2026-11-06",true,true).includes("ai"));
+});
+const photoFixture=()=>({product:{code:"0078742333939",product_name:"Synthetic jasmine rice",lang:"en",selected_images:{front:{display:{en:"https://images.openfoodfacts.org/images/products/007/874/233/3939/front_en.4.400.jpg"}}},images:{front_en:{imgid:1},"1":{uploader:"Synthetic contributor"}}}});
+test("product photos require normalized exact barcodes, approved image origins and source attribution",()=>{
+ assert.equal(normalizeBarcode("078742333939"),"0078742333939");assert.equal(normalizeBarcode("078742333939".padStart(14,"0")),"0078742333939");
+ for(const code of ["078742333938","123","00000000","https://example.com/078742333939"])assert.equal(normalizeBarcode(code),null);
+ const image=adaptProductPhoto(photoFixture(),"078742333939");assert(image);assert.equal(image.creator,"Synthetic contributor");assert(image.productUrl.endsWith("/0078742333939"));assert(image.licenseUrl.includes("by-sa/3.0"));
+ assert.equal(adaptProductPhoto(photoFixture(),"3017620422003"),null);
+ for(const imageUrl of ["http://images.openfoodfacts.org/images/products/front.jpg","https://evil.example/front.jpg","https://images.openfoodfacts.org.evil.example/images/products/front.jpg","https://images.openfoodfacts.org/images/products/front.jpg?track=1"]){const fake=photoFixture();fake.product.selected_images.front.display.en=imageUrl;assert.equal(adaptProductPhoto(fake,"078742333939"),null);}
+ assert.equal(adaptProductPhoto({product:{code:"0078742333939"}},"078742333939"),null);
+});
+test("optional photo client uses bounded keyless requests and gracefully identifies missing or mismatched records",async context=>{
+ context.mock.method(Date,"now",()=>60000);
+ const seen:{url:string;options:RequestInit|undefined}[]=[];
+ const lookup=createProductPhotoClient(async(url,options)=>{seen.push({url:String(url),options});return new Response(JSON.stringify(photoFixture()));});
+ assert(await lookup("078742333939"));assert.equal(seen.length,1);assert(seen[0].url.includes("/api/v3.6/product/0078742333939.json"));assert(!seen[0].url.includes("api_key"));
+ assert(String((seen[0].options?.headers as Record<string,string>)["User-Agent"]).includes("BuffMeUp"));assert.equal(seen[0].options?.redirect,"error");assert(seen[0].options?.signal);
+ assert.equal(await lookup("invalid"),null);assert.equal(seen.length,1);
+ for(let index=1;index<12;index++)await lookup("078742333939");
+ await assert.rejects(lookup("078742333939"),/busy/);assert.equal(seen.length,12);
+ assert.equal(await createProductPhotoClient(async()=>new Response("",{status:404}))("078742333939"),null);
+ await assert.rejects(createProductPhotoClient(async()=>new Response("",{status:429}))("078742333939"),/unavailable/);
+ const wrong=photoFixture();wrong.product.code="3017620422003";assert.equal(await createProductPhotoClient(async()=>new Response(JSON.stringify(wrong)))("078742333939"),null);
+});
+test("USDA preserves product barcodes and prefers the retail brand without changing saved ingredient fields",()=>{
+ const product=adaptUsdaProduct({fdcId:123,description:"Jasmine rice",brandName:"Great Value",brandOwner:"Walmart",gtinUpc:"078742333939",foodNutrients:[]});
+ assert.equal(product.barcode,"078742333939");assert.equal(product.brand,"Great Value");assert.equal(product.ingredient.name,"Jasmine rice · Great Value");
+ assert.deepEqual(Object.keys(product.ingredient).sort(),["name","grams","per100g","source","fdc_id","retrieved_at"].sort());
+});

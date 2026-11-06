@@ -4,14 +4,16 @@ import type { Json } from "@/types/database";
 import { AI_CONSENT_VERSION, generateMealPlan, type MealPlanDraft, type SavedMealPlan } from "@/lib/nutrition/planner";
 import { assistMealPlan } from "@/lib/nutrition/agent";
 import { getNutritionDashboard, getNutritionPreferences, nutritionClient } from "@/lib/nutrition/service";
+import { plannerReadiness, mealPlanFlowHref } from "@/lib/nutrition/planner-setup";
 import { validLocalDate } from "@/lib/nutrition/meals";
-export type PlanActionState = { status: "idle" | "success" | "error"; message?: string; draft?: MealPlanDraft; engine?: "regular" | "ai"; plan?: SavedMealPlan };
+export type PlanActionState = { status: "idle" | "success" | "error"; message?: string; setupHref?: string; draft?: MealPlanDraft; engine?: "regular" | "ai"; plan?: SavedMealPlan };
 export async function previewMealPlanAction(_previous: PlanActionState, form: FormData): Promise<PlanActionState> {
   const start = String(form.get("start") ?? ""); const snack = form.get("snack") === "on"; const useAI = form.get("ai") === "on"; const seed = Number(form.get("seed") ?? 0);
   if (!validLocalDate(start) || !Number.isSafeInteger(seed) || Math.abs(seed) > 100000) return { status: "error", message: "Choose a valid start date and try again." };
   try {
     const dashboard = await getNutritionDashboard(); const p = dashboard.preferences;
-    if (!p || p.onboarding_status !== "completed") return { status: "error", message: "Complete your food preferences before creating a plan." };
+    if (!dashboard.available) return { status: "error", message: "Food preferences are unavailable. Please reload and try again." };
+    if (!p || !plannerReadiness(dashboard.meals,p,snack).ready) return { status: "idle", setupHref: mealPlanFlowHref("setup",start,snack) };
     const baseline = generateMealPlan(dashboard.meals, p, dashboard.logs, start, snack, seed);
     if (!useAI) return { status: "success", draft: baseline, engine: "regular", message: "A plan based on your familiar meals is ready to review." };
     if (!p.ai_consent || p.ai_consent_version !== AI_CONSENT_VERSION) return { status: "error", message: "Review and enable AI sharing in your food preferences first." };
@@ -25,7 +27,7 @@ export async function previewMealPlanAction(_previous: PlanActionState, form: Fo
       const draft = await assistMealPlan({ meals: dashboard.meals, preferences: p, logs: dashboard.logs, baseline, key, model });
       return { status: "success", draft, engine: "ai", message: "AI-assisted choices are ready. Review meals, portions and food-group coverage before saving." };
     } catch { return { status: "success", draft: baseline, engine: "regular", message: "AI assistance couldn’t complete. A regular plan is ready to review." }; }
-  } catch (error) { return { status: "error", message: error instanceof Error && error.message.startsWith("Save and review") ? error.message : "A plan couldn’t be prepared. Check your saved meals and try again." }; }
+  } catch { return { status: "error", message: "A plan couldn’t be prepared. Check your saved meals and try again." }; }
 }
 export async function saveMealPlanAction(_previous: PlanActionState, form: FormData): Promise<PlanActionState> {
   const name = String(form.get("name") ?? "").trim(); const token = String(form.get("requestToken") ?? "");

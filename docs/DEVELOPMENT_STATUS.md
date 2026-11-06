@@ -1,3 +1,7 @@
+# Guided meal planning update — 2026-11-06
+
+Implemented on `agent/guided-meal-planning`, based on main `8ea3319` after developer merge of PR #21. Generate now creates a draft immediately when ready, otherwise asks preferences and missing meal choices on a dedicated setup page before automatically creating the draft. Added optional feet/inches and pounds with canonical cm/kg preservation; optional exact-barcode Open Food Facts photos retain USDA nutrient calculations. No new Supabase SQL or dependency. Photos require separate server enablement/provider usage setup. See NUTRITION_FLOW_UPGRADE.md for comparison, configuration, validation and acceptance limits. Review [draft PR #22](https://github.com/LaulinVasquez/Buff-me-up/pull/22), implementation `6a5fdb5`. Full local checks pass (64 tests plus disposable SQL); staging acceptance remains pending.
+
 # Nutrition release status — 2026-11-04
 
 **Nutrition integration merged by the developer in PR #19; staging acceptance pending.** The structured plan was committed first in PR #16. Preferences/onboarding and usual meals/diary were implemented in PR #17/#18; the developer merged those into intermediate branches. [PR #19](https://github.com/LaulinVasquez/Buff-me-up/pull/19) integrated the complete nutrition implementation into main (`c2ea47b`; implementation `0e3b059`). See NUTRITION_RELEASE_REPORT_2026-11-04.md for review references, source boundaries and evidence; NUTRITION_SUPABASE_SETUP.md contains the exact SQL/configuration handoff.
@@ -8,7 +12,7 @@ Verification: `npm run check` passes with 54 tests plus disposable migration/RLS
 
 ## Ingredient search layout
 
-Implemented in [draft PR #21](https://github.com/LaulinVasquez/Buff-me-up/pull/21) on `agent/ingredient-search-layout`, based on main `4900843` after developer merge of #20. Responsive search cards, per-100-g nutrient previews, clearer ingredient quantity/macro/package details, loading/empty/error/page states and keyboard focus. USDA search previews use one existing search request; no new SQL/provider/dependency/environment variable. USDA’s documented schema has no product-photo field; decorative icons are used. Scope/source/verification details: INGREDIENT_SEARCH_LAYOUT.md and session log. Live Vercel/provider/device acceptance remains pending.
+Merged by the developer in [PR #21](https://github.com/LaulinVasquez/Buff-me-up/pull/21) on `agent/ingredient-search-layout`, based on main `4900843` after developer merge of #20. Responsive search cards, per-100-g nutrient previews, clearer ingredient quantity/macro/package details, loading/empty/error/page states and keyboard focus. USDA search previews use one existing search request; no new SQL/provider/dependency/environment variable. USDA’s documented schema has no product-photo field; decorative icons are used. Scope/source/verification details: INGREDIENT_SEARCH_LAYOUT.md and session log. Live Vercel/provider/device acceptance remains pending.
 
 ## Food search follow-up
 

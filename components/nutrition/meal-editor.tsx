@@ -6,8 +6,8 @@ import { addFoodIngredient, mealNutrients, NUTRIENT_KEYS, validateMeal } from "@
 export type MealAction = (previous: MealActionState, form: FormData) => Promise<MealActionState>;
 export const nutritionInputClass = "mt-2 min-h-12 w-full min-w-0 rounded-xl border border-slate-700 bg-slate-950 px-3 text-base";
 export const displayTag = (value: string) => value.replaceAll("_", " ");
-export function MealEditor({ meal, action, onSaved, onCancel }: { meal?: SavedMeal; action: MealAction; onSaved: (meal: SavedMeal) => void; onCancel: () => void }) {
-  const [input, setInput] = useState<MealInput>(meal?.details ?? { name: "", slot: "breakfast", mode: "recipe", recipe_servings: 1, ingredients: [], nutrients: { ...EMPTY_NUTRIENTS }, ingredient_notes: "", food_groups: [], diet_tags: ["omnivore"], allergens: [], reviewed: false, cooking_minutes: 15, budget: "moderate", notes: "" });
+export function MealEditor({ meal, action, onSaved, onCancel, initialSlot = "breakfast" }: { meal?: SavedMeal; action: MealAction; onSaved: (meal: SavedMeal) => void; onCancel: () => void; initialSlot?: MealInput["slot"] }) {
+  const [input, setInput] = useState<MealInput>(meal?.details ?? { name: "", slot: initialSlot, mode: "recipe", recipe_servings: 1, ingredients: [], nutrients: { ...EMPTY_NUTRIENTS }, ingredient_notes: "", food_groups: [], diet_tags: ["omnivore"], allergens: [], reviewed: false, cooking_minutes: 15, budget: "moderate", notes: "" });
   const request = useRef<{ fingerprint: string; id: string } | null>(null);
   const [state, submit, pending] = useActionState(async (previous: MealActionState, form: FormData): Promise<MealActionState> => {
     if (!validateMeal(input)) return { status: "error", message: "Check the meal name, recipe quantities and nutrition ranges. Recipe meals need at least one ingredient." };
