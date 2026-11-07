@@ -1,4 +1,5 @@
 "use server";
+import { mealSaveError } from "@/lib/nutrition/save-errors";
 import { revalidatePath } from "next/cache";
 import type { Json } from "@/types/database";
 import { nutritionClient } from "@/lib/nutrition/service";
@@ -15,10 +16,11 @@ export async function saveMealAction(_previous: MealActionState, form: FormData)
   try {
     const { supabase } = await nutritionClient();
     const { data, error } = await supabase.rpc("gym_save_meal_with_request", { target_meal_id: id || null, expected_revision: revision, meal: archive ? null : meal as Json, archive, request_token: uuid(token) ? token : "00000000-0000-0000-0000-000000000000" });
-    if (error || !data) throw new Error();
+    if(error){const failure=mealSaveError(error);let latestMeal:SavedMeal|undefined;if(failure.reason==="conflict"&&id){const latest=await supabase.from("gym_meals").select("*").eq("id",id).maybeSingle();if(latest.data)latestMeal=latest.data as unknown as SavedMeal;}return {status:"error",...failure,latestMeal};}
+    if(!data)throw new Error();
     revalidatePath("/app/nutrition");
     return { status: "success", message: archive ? "Meal archived. Past logs are unchanged." : "Meal saved. Past logs are unchanged.", meal: data as unknown as SavedMeal };
-  } catch { return { status: "error", message: "Meal wasn’t saved. Reload to check for newer changes." }; }
+  } catch { return { status: "error", message: "Meal couldn’t reach the server. Your draft is kept; retry or reload saved data." }; }
 }
 export async function logMealAction(_previous: MealActionState, form: FormData): Promise<MealActionState> {
   const id = String(form.get("mealId") ?? ""); const revision = readRevision(form); const portions = Number(form.get("portions")); const date = String(form.get("date") ?? ""); const slot = String(form.get("slot") ?? ""); const timezone = String(form.get("timezone") ?? ""); const token = String(form.get("requestToken") ?? "");

@@ -11,8 +11,9 @@ function reveal(control: Control) {
   control.reportValidity();
 }
 // Keep every screen mounted and enabled so one final FormData contains all answers.
-export function useFormProcedure(guided: boolean, count: number) {
-  const [step, setStep] = useState(0);
+export function useFormProcedure(guided: boolean, count: number, position?:{step:number;setStep:(step:number)=>void}) {
+  const [localStep, setLocalStep] = useState(0);
+  const step=position?.step??localStep;const setStep=position?.setStep??setLocalStep;
   const form = useRef<HTMLFormElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const invalid = useRef<Control | null>(null);
@@ -34,7 +35,7 @@ export function useFormProcedure(guided: boolean, count: number) {
   };
   return {
     step, form, heading,
-    back: () => setStep(current => Math.max(0, current - 1)),
+    back: () => setStep(Math.max(0, step - 1)),
     onSubmit: (event: FormEvent<HTMLFormElement>) => {
       if (!guided) return;
       const submitter = (event.nativeEvent as SubmitEvent).submitter;

@@ -210,3 +210,47 @@ test("weekly review reports unresolved meals without inventing nutrition or shop
  assert.equal(result.unresolved,21);assert.equal(result.nutrition.calories.unknown,21);assert.equal(result.days[0].nutrition.calories.unknown,3);assert.equal(result.mealCount,0);assert.equal(result.uniqueMeals,0);assert.equal(result.nutrition.calories.known,0);assert.deepEqual(result.shopping,{ingredients:[],manualMeals:[]});
  assert.equal(validateMealPlan(draft,[],p),false);
 });
+
+import {decodeDraft,encodeDraft,draftKey,clearOwnerDrafts,DRAFT_MAX_AGE,mergeSavedRecords} from "../lib/nutrition/drafts";
+import {isMealEditorDraft,isPlannerDraft,type MealEditorDraft} from "../lib/nutrition/draft-models";
+import {preferenceFields,reconcilePreferenceFields,preferenceDraft,isPreferencesDraft} from "../lib/nutrition/preference-drafts";
+import {mealSaveError} from "../lib/nutrition/save-errors";
+import {preferencesInput,preferencesWithCookingTime} from "../lib/nutrition/preferences";
+test("reload drafts are owner/scoped/versioned, expiring and reject corrupt data",()=>{
+ const now=100000,guard=(v:unknown):v is {text:string}=>Boolean(v&&typeof v==="object"&&typeof (v as {text:unknown}).text==="string");
+ const raw=encodeDraft("owner-a","meal/setup",{text:"Unfinished"},now);
+ assert.deepEqual(decodeDraft(raw,"owner-a","meal/setup",guard,now+1),{text:"Unfinished"});
+ for(const [owner,scope,time]of [["owner-b","meal/setup",now],["owner-a","meal/diary",now],["owner-a","meal/setup",now+DRAFT_MAX_AGE]] as const)assert.equal(decodeDraft(raw,owner,scope,guard,time),null);
+ for(const bad of ["not-json",raw.replace('"version":1','"version":2'),encodeDraft("owner-a","meal/setup",{text:42},now)])assert.equal(decodeDraft(bad,"owner-a","meal/setup",guard,now),null);
+ const records=new Map([[draftKey("owner-a","meal/setup"),raw],[draftKey("owner-b","meal/setup"),"other"],["unrelated","keep"]]);
+ const storage={get length(){return records.size;},key:(i:number)=>[...records.keys()][i]??null,getItem:(key:string)=>records.get(key)??null,setItem:(key:string,value:string)=>{records.set(key,value);},removeItem:(key:string)=>{records.delete(key);}};
+ clearOwnerDrafts(storage,"owner-a");assert.equal(records.size,2);assert.equal(records.get("unrelated"),"keep");assert.equal(records.get(draftKey("owner-b","meal/setup")),"other");
+ clearOwnerDrafts(storage);assert.equal(records.size,1);
+});
+test("incomplete meal drafts and retry tokens survive reload without becoming valid saves",()=>{
+ const input={...sampleMeal(),name:"",mode:"recipe" as const,ingredients:[],cooking_minutes:0};
+ const draft:MealEditorDraft={input,step:2,baseRevision:4,reviewPreferenceRevision:8,request:{fingerprint:JSON.stringify(input),id:"12345678-0000-4000-8000-123456789abc"}};
+ assert(isMealEditorDraft(draft));assert.equal(validateMeal(input),false);
+ const restored=decodeDraft(encodeDraft("user","meal",draft),"user","meal",isMealEditorDraft);assert(restored);assert.equal(restored.step,2);assert.deepEqual(restored.request,draft.request);assert.equal(restored.baseRevision,4);
+ assert(!isMealEditorDraft({...draft,step:99}));assert(!isMealEditorDraft({...draft,input:{...input,notes:{invalid:true}}}));
+ const plan=generateMealPlan(mealsFixture(),preferencesFixture(),[],"2026-11-06");plan.entries[0].portions=2.3;
+ assert(isPlannerDraft({start:"2026-11-06",snack:false,seed:0,draft:plan,name:"Unfinished week",reviewed:false,request:null,engine:"regular"}));assert(!validateMealPlan(plan,mealsFixture(),preferencesFixture()));
+});
+test("preference recovery keeps local edits while adopting unrelated saved updates",()=>{
+ const p=preferencesFixture();const base=preferenceFields(p,p.ai_consent_version);const local={...base,usual_foods:"My unfinished meal choices"};const saved=preferenceFields({...p,cooking_minutes:90},p.ai_consent_version);
+ const result=reconcilePreferenceFields(base,local,saved);assert.equal(result.fields.cooking_minutes,"90");assert.equal(result.fields.usual_foods,local.usual_foods);assert.deepEqual(result.conflicts,[]);
+ const draft=preferenceDraft(p);draft.fields={...draft.fields,cooking_minutes:""};assert(isPreferencesDraft(draft));
+ const canonical=preferencesInput({...p,cooking_minutes:90});assert.equal(canonical.cooking_minutes,90);assert.equal(canonical.height_cm,p.height_cm);assert.equal(canonical.weight_kg,p.weight_kg);assert.deepEqual(canonical.allergens,p.allergens);assert(!("user_id"in canonical));assert(!("revision"in canonical));assert.equal(preferencesWithCookingTime({...p,ai_consent_version:"outdated-scope"},90).ai_consent,false);assert.equal(preferencesWithCookingTime(p,90).ai_consent,p.ai_consent);
+});
+test("preference conflicts stay explicit and measurement groups cannot mix different edits",()=>{
+ const p=preferencesFixture();const base=preferenceFields(p,p.ai_consent_version);const local={...base,cooking_minutes:"75",height_cm:"177.8",height_display_cm:"177.8",height_feet:"5",height_inches:"10",ai_consent:"on"};const saved=preferenceFields({...p,height_cm:185,cooking_minutes:90,ai_consent:false},p.ai_consent_version);
+ const result=reconcilePreferenceFields(base,local,saved);assert(result.conflicts.includes("cooking_minutes"));assert(result.conflicts.includes("height_cm"));assert.equal(result.fields.cooking_minutes,"75");assert.equal(result.fields.height_feet,"5");assert.equal(result.fields.height_cm,"177.8");assert.equal(result.fields.ai_consent,"");
+});
+test("meal save errors distinguish conflicts and missing setup without disclosing internals",()=>{
+ assert.equal(mealSaveError({code:"P0001",message:"Meal changed; reload before saving"}).reason,"conflict");assert.equal(mealSaveError({code:"PGRST202",message:"Private SQL internals"}).reason,"setup");assert.equal(mealSaveError({code:"23514",message:"Private SQL internals"}).reason,"validation");assert.equal(mealSaveError({message:"Archive a meal before adding more than 100"}).reason,"limit");
+ const unknown=mealSaveError({code:"XX000",message:"private-user secret SQL"});assert(!JSON.stringify(unknown).includes("private-user"));assert(unknown.message.includes("draft"));
+});
+test("saved record refresh cannot replace newer server revisions with stale local rows",()=>{
+ const saved=[{id:"meal",revision:3,name:"Latest"},{id:"other",revision:0,name:"Other tab"}];
+ assert.equal(mergeSavedRecords(saved,[{id:"meal",revision:1,name:"Old"}]).find(item=>item.id==="meal")?.name,"Latest");assert.equal(mergeSavedRecords(saved,[{id:"new",revision:0,name:"Just saved"}]).length,3);
+});

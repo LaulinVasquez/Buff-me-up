@@ -1,4 +1,5 @@
-import { ALLERGENS, DIETS, GOALS, type NutritionPreferencesInput } from "./types";
+import { AI_CONSENT_VERSION } from "./planner";
+import { ALLERGENS, DIETS, GOALS, type NutritionPreferences, type NutritionPreferencesInput } from "./types";
 const optionalNumber = (value: unknown, min: number, max: number, integer = false) => value === null || (typeof value === "number" && Number.isFinite(value) && value >= min && value <= max && (!integer || Number.isInteger(value)));
 export function validatePreferences(value: unknown): value is NutritionPreferencesInput {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
@@ -16,3 +17,7 @@ export function preferencesFromForm(form: FormData): NutritionPreferencesInput {
   const number = (key: string) => String(form.get(key) ?? "").trim() === "" ? null : Number(form.get(key));
   return { age: number("age"), height_cm: number("height_cm"), weight_kg: number("weight_kg"), activity: String(form.get("activity")) as NutritionPreferencesInput["activity"], goal: String(form.get("goal")) as NutritionPreferencesInput["goal"], diet: String(form.get("diet")) as NutritionPreferencesInput["diet"], allergens: form.getAll("allergens").map(String), avoid_foods: String(form.get("avoid_foods") ?? "").split(",").map(item => item.trim().toLowerCase()).filter(Boolean), usual_foods: String(form.get("usual_foods") ?? "").trim(), cooking_minutes: Number(form.get("cooking_minutes")), budget: String(form.get("budget")) as NutritionPreferencesInput["budget"], calorie_target: number("calorie_target"), ai_consent: form.get("ai_consent") === "on" };
 }
+
+export function preferencesInput(p:NutritionPreferences):NutritionPreferencesInput {return {age:p.age,height_cm:p.height_cm,weight_kg:p.weight_kg,activity:p.activity,goal:p.goal,diet:p.diet,allergens:p.allergens,avoid_foods:p.avoid_foods,usual_foods:p.usual_foods,cooking_minutes:p.cooking_minutes,budget:p.budget,calorie_target:p.calorie_target,ai_consent:p.ai_consent};}
+
+export function preferencesWithCookingTime(p:NutritionPreferences,minutes:number):NutritionPreferencesInput{return {...preferencesInput(p),cooking_minutes:minutes,ai_consent:p.ai_consent&&p.ai_consent_version===AI_CONSENT_VERSION};}

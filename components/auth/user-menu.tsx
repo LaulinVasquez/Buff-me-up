@@ -1,3 +1,4 @@
+import { SignOutButton } from "@/components/nutrition/sign-out-button";
 import Image from "next/image";
 import { signOut } from "@/app/app/actions";
 
@@ -13,7 +14,7 @@ export function UserMenu({ avatarUrl, name }: UserMenuProps) {
     <div className="min-w-0 text-right">
       <p className="max-w-36 truncate text-sm font-semibold text-slate-100">{name}</p>
       <form action={signOut}>
-        <button className="min-h-8 text-sm text-slate-400 underline-offset-4 hover:text-white hover:underline focus-visible:outline-2 focus-visible:outline-accent-400" type="submit">Sign out</button>
+        <SignOutButton className="min-h-8 text-sm text-slate-400 underline-offset-4 hover:text-white hover:underline focus-visible:outline-2 focus-visible:outline-accent-400"/>
       </form>
     </div>
   </div>;
