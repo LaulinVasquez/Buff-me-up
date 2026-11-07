@@ -31,3 +31,8 @@ jobs:
       - run: npm ci
       - name: Check application and isolated database
         run: npm run check
+      - name: Check SQL Editor recovery and nutrition bundle compatibility
+        env:
+          BMU_WORKOUT_RECOVERY: '1'
+          BMU_NUTRITION_BUNDLE: '1'
+        run: npm run test:db

@@ -2,6 +2,10 @@
 
 Prepared 2026-11-04. The agent has not applied these changes to any remote database. Use the Supabase project connected to Buff Me Up. Its existing migrations 1–13 must already be present. New objects use the `gym_` prefix; no FlowDesk/Auth tables, sign-in configuration, API keys or storage buckets are changed by the SQL.
 
+## November 6 database error repair — additional SQL required
+
+Newly reported `42702` is a reproduced recipe calculation bug; `42703` indicates missing workout substitution schema. Follow [the repair procedure](SUPABASE_REPAIR_2026_11_06.md): run [forward migration 17](../supabase/migrations/20261106000000_fix_recipe_nutrient_calculation.sql) after nutrition 14–16, then [workout recovery](../supabase/deploy/workout_recovery_2026_11_06.sql) for the missing workout features if using SQL Editor. The original nutrition bundle is unchanged and must be followed by migration 17 on new installs. Do not rerun existing nutrition migrations. Both scripts preserve existing records and request a schema refresh. No API key/environment change. The earlier no-additional-SQL sections below describe the UI-only updates, not this database repair.
+
 ## November 6 follow-up: no additional SQL
 
 Guided planning, the short meal-creation procedure, imperial units and product-photo support reuse migrations 14–16. Do not rerun already-applied migrations. Account height/weight remain cm/kg; display units are browser preferences. For optional photos, complete [Open Food Facts usage setup](https://openfoodfacts.github.io/documentation/docs/Product-Opener/api/#before-you-start), set `OPEN_FOOD_FACTS_PHOTOS_ENABLED=true` in Vercel, optionally set `OPEN_FOOD_FACTS_USER_AGENT` to your app/contact identity, and deploy the reviewed branch. No new paid API key or image-storage bucket. USDA nutrients remain the calculation source. See NUTRITION_FLOW_UPGRADE.md for cache/rate-limit and staging acceptance details.
@@ -26,7 +30,7 @@ Run only the remaining individual files, once, in this order:
 | 15 | [20261104010000_add_meals_and_food_logs.sql](../supabase/migrations/20261104010000_add_meals_and_food_logs.sql) | New `gym_meals`, `gym_food_logs`, `gym_nutrition_requests`; validated recipes, portion math, immutable historical snapshots, revision/idempotent log RPCs and request quotas. |
 | 16 | [20261104020000_add_personalized_meal_plans.sql](../supabase/migrations/20261104020000_add_personalized_meal_plans.sql) | New `gym_meal_plans`; adds `ai_consent_version` to preferences and `request_id` to meals; reviewed-plan snapshots, stale/restriction checks, idempotent meal creation and scoped helper permissions. |
 
-`gym_profiles` and existing workout tables do not require additional columns. Run the full SQL file, including policies, functions, grants and triggers. Creating tables alone is insufficient. Stop on any error; do not rerun successfully applied migrations blindly.
+The nutrition migrations do not alter `gym_profiles` or workout tables; separately missing workout columns require the recovery procedure above. Run the full SQL file, including policies, functions, grants and triggers. Creating tables alone is insufficient. Stop on any error; do not rerun successfully applied migrations blindly.
 
 After the individual files, refresh API schema:
 

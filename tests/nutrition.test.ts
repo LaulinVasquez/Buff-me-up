@@ -248,6 +248,7 @@ test("preference conflicts stay explicit and measurement groups cannot mix diffe
 });
 test("meal save errors distinguish conflicts and missing setup without disclosing internals",()=>{
  assert.equal(mealSaveError({code:"P0001",message:"Meal changed; reload before saving"}).reason,"conflict");assert.equal(mealSaveError({code:"PGRST202",message:"Private SQL internals"}).reason,"setup");assert.equal(mealSaveError({code:"23514",message:"Private SQL internals"}).reason,"validation");assert.equal(mealSaveError({message:"Archive a meal before adding more than 100"}).reason,"limit");
+ const recipeRepair=mealSaveError({code:"42702",message:"private SQL details"});assert.equal(recipeRepair.reason,"setup");assert(recipeRepair.message.includes("server update"));assert(recipeRepair.message.includes("42702"));assert(!recipeRepair.message.includes("private SQL"));assert.equal(mealSaveError({code:"42703"}).reason,"setup");
  const unknown=mealSaveError({code:"XX000",message:"private-user secret SQL"});assert(!JSON.stringify(unknown).includes("private-user"));assert(unknown.message.includes("draft"));
 });
 test("saved record refresh cannot replace newer server revisions with stale local rows",()=>{
