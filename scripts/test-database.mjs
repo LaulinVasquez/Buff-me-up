@@ -31,12 +31,53 @@ try {
     env: databaseEnv, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"],
   });
   runFile("tests/database/bootstrap.sql");
-  for (const file of readdirSync(join(root, "supabase/migrations")).filter((file) => file.endsWith(".sql")).sort()) {
-    if (process.env.BMU_NUTRITION_BUNDLE === "1" && file.startsWith("20261104")) continue;
+  const workoutRecovery = process.env.BMU_WORKOUT_RECOVERY === "1";
+  const recoveredFiles = new Set([
+    "20261102000000_add_workout_substitutions.sql",
+    "20261102020000_add_workout_set_logging.sql",
+    "20261102030000_add_session_adaptations.sql",
+  ]);
+  const nutritionFiles = new Set([
+    "20261104000000_add_nutrition_preferences.sql",
+    "20261104010000_add_meals_and_food_logs.sql",
+    "20261104020000_add_personalized_meal_plans.sql",
+  ]);
+  for (const file of readdirSync(join(root, "supabase/migrations")).filter(file => file.endsWith(".sql")).sort()) {
+    if (workoutRecovery && recoveredFiles.has(file)) continue;
+    if (process.env.BMU_NUTRITION_BUNDLE === "1" && nutritionFiles.has(file)) {
+      if (file === "20261104020000_add_personalized_meal_plans.sql") runFile("supabase/deploy/nutrition_2026_11_04.sql");
+      continue;
+    }
+    if (file === "20261106000000_fix_recipe_nutrient_calculation.sql") {
+      runFile("tests/database/nutrition-recipe-before-repair.sql");
+      console.log("PASS: original recipe ambiguity reproduced before forward repair");
+    }
     runFile(`supabase/migrations/${file}`);
+    if (workoutRecovery && file === "20260818000000_add_gym_exercise_catalog.sql") {
+      let rejected = false;
+      try { runFile("supabase/deploy/workout_recovery_2026_11_06.sql"); }
+      catch (error) { rejected = error.stderr?.toString().includes("Workout recovery requires"); }
+      if (!rejected) throw new Error("Recovery must reject a missing finalization prerequisite");
+      sql("select test.assert(not exists(select 1 from information_schema.columns where table_schema='public' and table_name='gym_workout_exercises' and column_name='substitution_details'),'Rejected recovery must not add columns');");
+    }
+    if (workoutRecovery && file === "20261101000000_guard_gym_workout_finalization.sql") {
+      // Exercise and retain real synthetic completed snapshots from before migrations 7/9/10.
+      runFile("tests/database/workouts.sql");
+      sql("select test.assert_raises('select substitution_details from public.gym_workout_exercises','does not exist');");
+      sql("alter table public.gym_workout_exercises add column substitution_details text;");
+      let incompatibleRejected = false;
+      try { runFile("supabase/deploy/workout_recovery_2026_11_06.sql"); }
+      catch (error) { incompatibleRejected = error.stderr?.toString().includes("Unexpected definition"); }
+      if (!incompatibleRejected) throw new Error("Recovery must reject incompatible existing columns");
+      sql("select test.assert(not exists(select 1 from information_schema.columns where table_schema='public' and table_name='gym_workout_exercises' and column_name='substitution_version'),'Incompatible schema rejection must be atomic'); alter table public.gym_workout_exercises drop column substitution_details;");
+      const originals = sql("select jsonb_agg(to_jsonb(e) order by id) from public.gym_workout_exercises e;");
+      runFile("supabase/deploy/workout_recovery_2026_11_06.sql");
+      const restored = sql("select jsonb_agg(to_jsonb(e)-'substitution_version'-'substitution_details'-'substitution_history'-'logged_sets'-'log_revision'-'deferred' order by id) from public.gym_workout_exercises e;");
+      if (originals !== restored) throw new Error("Recovery changed an existing exercise snapshot");
+      console.log("PASS: missing workout column reproduced; recovery retains preexisting completed snapshots");
+    }
   }
-  if (process.env.BMU_NUTRITION_BUNDLE === "1") runFile("supabase/deploy/nutrition_2026_11_04.sql");
-  runFile("tests/database/workouts.sql");
+  if (!workoutRecovery) runFile("tests/database/workouts.sql");
   console.log("PASS: migrations, start/resume, finalization, snapshots, and two-user RLS");
 
   runFile("tests/database/substitutions.sql");
@@ -71,6 +112,20 @@ try {
 
   runFile("tests/database/nutrition-recovery.sql");
   console.log("PASS: preference changes preserve independent meal saves and reload retries");
+
+  // A repeated forward repair must retain its ACLs and remain callable.
+  runFile("supabase/migrations/20261106000000_fix_recipe_nutrient_calculation.sql");
+  runFile("tests/database/nutrition-recipes.sql");
+  runFile("supabase/verify/supabase_repair_2026_11_06.sql");
+  console.log("PASS: nonempty USDA/manual recipes, portion math, unknown nutrients, retries, historical snapshots and RLS");
+
+  // Reapplication must preserve actual saved sets, replacements, deferred work and history.
+  const snapshotRows = () => sql("select jsonb_build_object('workouts',(select jsonb_agg(to_jsonb(w) order by id) from public.gym_workouts w),'exercises',(select jsonb_agg(to_jsonb(e) order by id) from public.gym_workout_exercises e));");
+  const beforeRecovery = snapshotRows();
+  runFile("supabase/deploy/workout_recovery_2026_11_06.sql");
+  runFile("supabase/deploy/workout_recovery_2026_11_06.sql");
+  if (beforeRecovery !== snapshotRows()) throw new Error("Reapplying workout recovery changed stored sessions/history");
+  console.log("PASS: workout recovery reapplication retains sessions, sets, substitutions and adaptations");
 
   // Hold finalization open while a stale tab tries to save a weight.
   const firstUser = "00000000-0000-0000-0000-000000000001";

@@ -22,7 +22,8 @@
     "test:search": "node scripts/test-exercise-search.mjs",
     "test:nutrition": "node scripts/test-nutrition.mjs",
     "sql:nutrition": "node scripts/build-nutrition-sql.mjs",
-    "check:sql": "node scripts/build-nutrition-sql.mjs --check"
+    "check:sql": "node scripts/build-nutrition-sql.mjs --check && node scripts/build-workout-recovery-sql.mjs --check",
+    "sql:workout-recovery": "node scripts/build-workout-recovery-sql.mjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.1",
