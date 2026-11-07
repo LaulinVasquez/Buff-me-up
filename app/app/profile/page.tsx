@@ -1,3 +1,4 @@
+import { SignOutButton } from "@/components/nutrition/sign-out-button";
 import { NutritionPreferencesForm } from "@/components/nutrition/preferences-form";
 import { getNutritionPreferences } from "@/lib/nutrition/service";
 import { saveNutritionPreferencesAction } from "@/app/app/nutrition/actions";
@@ -39,10 +40,10 @@ export default async function ProfilePage() {
       <div className="min-w-0"><h1 className="truncate text-xl font-bold">{name}</h1><p className="truncate text-sm text-slate-400">{user.email}</p><p className="mt-1 text-xs text-slate-500">Member since {profile?.created_at ? <LocalDateTime mode="date" value={profile.created_at} /> : "recently"}</p></div>
     </section>
     <section className="space-y-3 md:col-start-2 md:row-span-2"><div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4"><p className="text-xs font-bold uppercase text-slate-500">Total workouts</p><p className="mt-2 text-xl font-black">{stats.totalWorkouts}</p></div><ConsistencySummary timestamps={stats.attendanceTimestamps} /></section>
-    <form action={signOut} className="md:col-start-1 md:row-start-2"><button className="min-h-12 w-full rounded-xl border border-slate-700 font-semibold text-slate-200" type="submit">Sign out</button></form>
+    <form action={signOut} className="md:col-start-1 md:row-start-2"><SignOutButton className="min-h-12 w-full rounded-xl border border-slate-700 font-semibold text-slate-200"/></form>
     </div>
     {gyms ? <GymSettings gyms={gyms} saveAction={saveGymAction} selectAction={selectGymAction} /> : <p className="mt-8 text-sm text-slate-400">Gym setups are temporarily unavailable.</p>}
-    {nutrition.available ? <NutritionPreferencesForm key={nutrition.preferences?.revision ?? "new"} preferences={nutrition.preferences} action={saveNutritionPreferencesAction} /> : <p className="mt-6 text-sm text-slate-400">Nutrition preferences are unavailable. Try again later.</p>}
+    {nutrition.available ? <NutritionPreferencesForm preferences={nutrition.preferences} action={saveNutritionPreferencesAction} /> : <p className="mt-6 text-sm text-slate-400">Nutrition preferences are unavailable. Try again later.</p>}
     <GoalSettings key={profile?.weekly_goal ?? 3} goal={profile?.weekly_goal ?? 3} action={saveGoalAction} />
     <AppearanceSettings action={saveAppearanceAction} />
     <DataExport />

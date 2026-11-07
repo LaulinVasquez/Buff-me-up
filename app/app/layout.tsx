@@ -1,3 +1,4 @@
+import { NutritionDraftSession } from "@/components/nutrition/draft-session";
 import { NutritionSetupPrompt } from "@/components/nutrition/setup-prompt";
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
@@ -28,9 +29,9 @@ export default async function ApplicationLayout({ children }: Readonly<{ childre
   const name = profile?.full_name ?? metadataName ?? user.email?.split("@")[0] ?? "Gym member";
   const avatarUrl = profile?.avatar_url ?? metadataAvatar;
 
-  return <ThemeProvider key={user.id} savedTheme={normalizeAccentTheme(profile?.accent_theme)}><ApplicationShell userMenu={<UserMenu avatarUrl={avatarUrl} name={name} />}>
+  return <ThemeProvider key={user.id} savedTheme={normalizeAccentTheme(profile?.accent_theme)}><NutritionDraftSession key={user.id} owner={user.id}><ApplicationShell userMenu={<UserMenu avatarUrl={avatarUrl} name={name} />}>
     <LaunchSplash />
     <NutritionSetupPrompt needsSetup={!nutrition.error && !nutrition.data} />
     {children}
-  </ApplicationShell></ThemeProvider>;
+  </ApplicationShell></NutritionDraftSession></ThemeProvider>;
 }

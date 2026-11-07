@@ -37,3 +37,8 @@ Selected USDA products now retain validated barcode identity and retail brand. O
 ## Guided meal setup
 
 The plan setup opts into a three-step meal editor: build ingredients/nutrition; review tags/time/cost; review the full meal before saving. Back retains input, failed saves retain the review, and known exclusions appear before confirmation. Unreviewed/incompatible meals may be saved for logging but do not unlock generation. The regular diary editor remains available. No new persistence fields. See MEAL_PLAN_PROCEDURE.md.
+
+
+## Reload and tab recovery
+
+Unfinished nutrition work now uses validated owner-scoped per-tab session drafts. Reload preserves inputs/selections/position; saved changes refresh without replacing local edits. Changed meal/preference/plan revisions require explicit reconciliation and a new review. Cooking-time warnings can update the saved limit in place through the existing RPC. Drafts are separate from database saves and AI requests remain explicit. See NUTRITION_DRAFT_RECOVERY.md for scope, cleanup, failure handling and verification.

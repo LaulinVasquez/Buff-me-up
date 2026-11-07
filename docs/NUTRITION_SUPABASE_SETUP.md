@@ -6,6 +6,10 @@ Prepared 2026-11-04. The agent has not applied these changes to any remote datab
 
 Guided planning, the short meal-creation procedure, imperial units and product-photo support reuse migrations 14–16. Do not rerun already-applied migrations. Account height/weight remain cm/kg; display units are browser preferences. For optional photos, complete [Open Food Facts usage setup](https://openfoodfacts.github.io/documentation/docs/Product-Opener/api/#before-you-start), set `OPEN_FOOD_FACTS_PHOTOS_ENABLED=true` in Vercel, optionally set `OPEN_FOOD_FACTS_USER_AGENT` to your app/contact identity, and deploy the reviewed branch. No new paid API key or image-storage bucket. USDA nutrients remain the calculation source. See NUTRITION_FLOW_UPGRADE.md for cache/rate-limit and staging acceptance details.
 
+## Reload-recovery repair: no additional SQL
+
+Draft recovery, cross-tab refresh, explicit conflict reconciliation and inline cooking-limit updates reuse existing tables/RPCs. No new SQL or environment variables. The inline action uses the current owner's revision to preserve unrelated preferences; stale updates still fail safely. If a meal error reports missing setup (`PGRST202`/`42883`), verify migration 16's `gym_save_meal_with_request` and the existing migration sequence below. Do not rerun already-applied migrations. The screenshot's generic old error did not identify its live database cause; NUTRITION_DRAFT_RECOVERY.md distinguishes tested behavior from pending live acceptance.
+
 ## Choose one migration path
 
 ### Existing SQL Editor workflow: all three nutrition migrations are pending

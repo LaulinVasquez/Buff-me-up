@@ -69,6 +69,9 @@ try {
   runFile("tests/database/nutrition-plans.sql");
   console.log("PASS: reviewed seven-day plans, immutable snapshots, stale/restricted choices, scoped AI consent and RLS");
 
+  runFile("tests/database/nutrition-recovery.sql");
+  console.log("PASS: preference changes preserve independent meal saves and reload retries");
+
   // Hold finalization open while a stale tab tries to save a weight.
   const firstUser = "00000000-0000-0000-0000-000000000001";
   const asUser = `set role authenticated; set request.jwt.claim.sub = '${firstUser}';`;

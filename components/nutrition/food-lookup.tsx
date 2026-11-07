@@ -1,17 +1,21 @@
 "use client";
+import { useNutritionDraft } from "./draft-session";
+import { isLookupDraft, type LookupDraft } from "@/lib/nutrition/draft-models";
 import { ProductPhoto } from "./product-photo";
 import { useEffect, useRef, useState } from "react";
 import type { FoodIngredient } from "@/lib/nutrition/types";
 import type { FoodMatch, UsdaFoodDetails } from "@/lib/nutrition/usda";
 import { scaleNutrients, validNutrients } from "@/lib/nutrition/meals";
 
-export function FoodLookup({ onAdd }: { onAdd: (item: FoodIngredient, packageIngredients: string | null) => string | null }) {
-  const [query, setQuery] = useState("");
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [foods, setFoods] = useState<FoodMatch[]>([]);
-  const [selected, setSelected] = useState<UsdaFoodDetails | null>(null);
-  const [grams, setGrams] = useState("100");
+export function FoodLookup({ onAdd, draftScope="food-lookup" }: { onAdd: (item: FoodIngredient, packageIngredients: string | null) => string | null; draftScope?:string }) {
+  const [lookup,setLookup,,lookupMeta]=useNutritionDraft<LookupDraft>(draftScope,{query:"",page:1,totalPages:0,foods:[],selected:null,grams:"100"},isLookupDraft);
+  const {query,page,totalPages,foods,selected,grams}=lookup;
+  const setQuery=(query:string)=>setLookup(current=>({...current,query}));
+  const setPage=(page:number)=>setLookup(current=>({...current,page}));
+  const setTotalPages=(totalPages:number)=>setLookup(current=>({...current,totalPages}));
+  const setFoods=(foods:FoodMatch[])=>setLookup(current=>({...current,foods}));
+  const setSelected=(selected:UsdaFoodDetails|null)=>setLookup(current=>({...current,selected}));
+  const setGrams=(grams:string)=>setLookup(current=>({...current,grams}));
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState("");
   const controller = useRef<AbortController | null>(null);
@@ -72,7 +76,7 @@ export function FoodLookup({ onAdd }: { onAdd: (item: FoodIngredient, packageIng
           onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); if (!pending && query.trim().length >= 2) void search(); } }} />
         {query ? <button type="button" aria-label="Clear food search" className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-xl text-slate-400 hover:text-white focus-visible:outline-2 focus-visible:outline-accent-400" onClick={() => { changeQuery(""); searchInput.current?.focus(); }}><FoodIcon kind="clear" /></button> : null}
       </div>
-      <button type="button" aria-label="Search foods" className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-accent-400 px-3 font-bold text-slate-950 hover:bg-accent-300 disabled:opacity-40 sm:px-4" disabled={pending || query.trim().length < 2} onClick={() => void search()}><FoodIcon kind="search" /><span className="hidden sm:inline">Search</span></button>
+      <button type="button" aria-label="Search foods" className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-accent-400 px-3 font-bold text-slate-950 hover:bg-accent-300 disabled:opacity-40 sm:px-4" disabled={!lookupMeta.ready || pending || query.trim().length < 2} onClick={() => void search()}><FoodIcon kind="search" /><span className="hidden sm:inline">Search</span></button>
     </div>
     <p id="usda-food-help" className="mt-3 text-xs leading-5 text-slate-400">Match the brand and cooked/raw form. Nutrition previews are per 100 g.</p>
     {message ? <p role="status" className="mt-4 rounded-xl border border-slate-700 bg-slate-900 p-3 text-sm leading-6 text-slate-200">{message}</p> : null}

@@ -35,3 +35,8 @@ Generate now creates a draft immediately for eligible reviewed meal choices. Mis
 ## Short creation procedure and weekly review
 
 Guided setup now asks food choices, routine and optional details on separate screens, then guides missing meals through build/details/review. Draft review opens one day at a time with a seven-day comparison option, weekly known/unknown totals and a shopping preview that updates with swaps and portions. Confirmation is still cleared by edits, and saving remains explicit. MEAL_PLAN_PROCEDURE.md contains the current user procedure and verification report.
+
+
+## Reload and tab recovery
+
+Unfinished nutrition work now uses validated owner-scoped per-tab session drafts. Reload preserves inputs/selections/position; saved changes refresh without replacing local edits. Changed meal/preference/plan revisions require explicit reconciliation and a new review. Cooking-time warnings can update the saved limit in place through the existing RPC. Drafts are separate from database saves and AI requests remain explicit. See NUTRITION_DRAFT_RECOVERY.md for scope, cleanup, failure handling and verification.
