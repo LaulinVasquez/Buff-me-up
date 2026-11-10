@@ -53,3 +53,12 @@ Forty view/width combinations fit without horizontal overflow: three preference 
 No production data, live provider call, AI charge, remote SQL, paid signup, PR merge or deployment by the agent. Signed-in PostgREST/real-account and physical-device acceptance remain staging tasks. Review link/final branch references are recorded in AGENT_SESSION_LOG.md after publishing.
 
 Review: [draft PR #23](https://github.com/LaulinVasquez/Buff-me-up/pull/23), targeting main. Implementation `7662925`; preserved main history in `0334288` with identical tested file contents. Branch `agent/meal-plan-procedure`. GitHub CI is reported separately from the passing local checks; live-account/device acceptance remains pending.
+
+
+## November 10 procedure update
+
+1. Open Plan my meals and choose a style, new/familiar meal source and variety or meal-prep rhythm. Generate asks only missing profile questions for discovery; a saved library is no longer required.
+2. Review the week and swap choices/servings. Read each selected new recipe’s ingredients and preparation, adapt products/quantities if needed, and confirm its review. Unmatched nutrition stays unknown.
+3. Read the preparation guide, confirm the week and save. New reviewed recipes and the plan commit together; food is logged separately when eaten. Inputs/reviews/retry tokens persist through reload, with explicit revision reconciliation when saved preferences change.
+
+Saved-only planning still uses the earlier meal-setup procedure if slots are missing. Migration 18 required; see MEAL_DISCOVERY_VARIETY.md for the full report and exact SQL.

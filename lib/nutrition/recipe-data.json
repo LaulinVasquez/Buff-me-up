@@ -1,0 +1,2021 @@
+{
+  "version": "bmu-recipes-v1",
+  "foods": {
+    "oats": {
+      "name": "Rolled oats, dry",
+      "query": "oats dry",
+      "match": [
+        "oat",
+        "dry"
+      ],
+      "reject": []
+    },
+    "banana": {
+      "name": "Banana, raw",
+      "query": "bananas raw",
+      "match": [
+        "banana",
+        "raw"
+      ],
+      "reject": []
+    },
+    "berries": {
+      "name": "Strawberries, raw",
+      "query": "strawberries raw",
+      "match": [
+        "strawberr",
+        "raw"
+      ],
+      "reject": []
+    },
+    "apple": {
+      "name": "Apple, raw, with skin",
+      "query": "apples raw with skin",
+      "match": [
+        "apple",
+        "raw"
+      ],
+      "reject": [
+        "without skin",
+        "peeled"
+      ]
+    },
+    "chia": {
+      "name": "Chia seeds, dried",
+      "query": "seeds chia dried",
+      "match": [
+        "chia"
+      ],
+      "reject": []
+    },
+    "soy": {
+      "name": "Unsweetened plain soy drink (check label)",
+      "query": "soymilk unsweetened plain",
+      "match": [
+        "soy",
+        "unsweetened"
+      ],
+      "reject": []
+    },
+    "yogurt": {
+      "name": "Plain low-fat yogurt",
+      "query": "yogurt plain low fat",
+      "match": [
+        "yogurt",
+        "plain",
+        "low"
+      ],
+      "reject": []
+    },
+    "egg": {
+      "name": "Whole egg, raw",
+      "query": "egg whole raw fresh",
+      "match": [
+        "egg",
+        "whole",
+        "raw"
+      ],
+      "reject": []
+    },
+    "spinach": {
+      "name": "Spinach, raw",
+      "query": "spinach raw",
+      "match": [
+        "spinach",
+        "raw"
+      ],
+      "reject": []
+    },
+    "tomato": {
+      "name": "Tomato, raw",
+      "query": "tomatoes red ripe raw",
+      "match": [
+        "tomato",
+        "raw"
+      ],
+      "reject": []
+    },
+    "beans": {
+      "name": "Black beans, canned, drained",
+      "query": "beans black canned drained solids",
+      "match": [
+        "bean",
+        "black",
+        "canned",
+        "drained"
+      ],
+      "reject": []
+    },
+    "chickpea": {
+      "name": "Chickpeas, canned, drained",
+      "query": "chickpeas canned drained solids",
+      "match": [
+        "chickpea",
+        "canned",
+        "drained"
+      ],
+      "reject": []
+    },
+    "lentils": {
+      "name": "Lentils, cooked, drained",
+      "query": "lentils cooked boiled without salt",
+      "match": [
+        "lentil",
+        "cooked"
+      ],
+      "reject": []
+    },
+    "rice": {
+      "name": "Brown rice, cooked",
+      "query": "rice brown long grain cooked",
+      "match": [
+        "rice",
+        "brown",
+        "cooked"
+      ],
+      "reject": []
+    },
+    "quinoa": {
+      "name": "Quinoa, cooked",
+      "query": "quinoa cooked",
+      "match": [
+        "quinoa",
+        "cooked"
+      ],
+      "reject": []
+    },
+    "pasta": {
+      "name": "Whole-wheat pasta, cooked",
+      "query": "pasta whole wheat cooked",
+      "match": [
+        "pasta",
+        "whole",
+        "wheat",
+        "cooked"
+      ],
+      "reject": []
+    },
+    "tofu": {
+      "name": "Firm tofu (check label)",
+      "query": "tofu firm prepared calcium",
+      "match": [
+        "tofu",
+        "firm"
+      ],
+      "reject": []
+    },
+    "broccoli": {
+      "name": "Broccoli, raw",
+      "query": "broccoli raw",
+      "match": [
+        "broccoli",
+        "raw"
+      ],
+      "reject": []
+    },
+    "carrot": {
+      "name": "Carrot, raw",
+      "query": "carrots raw",
+      "match": [
+        "carrot",
+        "raw"
+      ],
+      "reject": []
+    },
+    "sweet_potato": {
+      "name": "Sweet potato, raw",
+      "query": "sweet potato raw",
+      "match": [
+        "sweet",
+        "potato",
+        "raw"
+      ],
+      "reject": []
+    },
+    "pepper": {
+      "name": "Sweet bell pepper, raw",
+      "query": "peppers sweet red raw",
+      "match": [
+        "pepper",
+        "sweet",
+        "raw"
+      ],
+      "reject": []
+    },
+    "onion": {
+      "name": "Onion, raw",
+      "query": "onions raw",
+      "match": [
+        "onion",
+        "raw"
+      ],
+      "reject": []
+    },
+    "oil": {
+      "name": "Olive oil",
+      "query": "oil olive salad cooking",
+      "match": [
+        "oil",
+        "olive"
+      ],
+      "reject": []
+    },
+    "lemon": {
+      "name": "Lemon juice, raw",
+      "query": "lemon juice raw",
+      "match": [
+        "lemon",
+        "juice"
+      ],
+      "reject": []
+    },
+    "avocado": {
+      "name": "Avocado, raw",
+      "query": "avocados raw all commercial varieties",
+      "match": [
+        "avocado",
+        "raw"
+      ],
+      "reject": []
+    },
+    "tortilla": {
+      "name": "Corn tortillas (check label)",
+      "query": "tortillas corn",
+      "match": [
+        "tortilla",
+        "corn"
+      ],
+      "reject": []
+    },
+    "chicken": {
+      "name": "Chicken breast, boneless, skinless, raw",
+      "query": "chicken breast boneless skinless raw",
+      "match": [
+        "chicken",
+        "breast",
+        "boneless",
+        "skinless",
+        "raw"
+      ],
+      "reject": []
+    },
+    "turkey": {
+      "name": "Ground turkey, raw",
+      "query": "turkey ground raw",
+      "match": [
+        "turkey",
+        "ground",
+        "raw"
+      ],
+      "reject": []
+    },
+    "beef": {
+      "name": "Ground beef, 90% lean, raw",
+      "query": "beef ground 90 lean raw",
+      "match": [
+        "beef",
+        "ground",
+        "90",
+        "raw"
+      ],
+      "reject": []
+    },
+    "salmon": {
+      "name": "Salmon, raw",
+      "query": "fish salmon atlantic raw",
+      "match": [
+        "salmon",
+        "raw"
+      ],
+      "reject": []
+    },
+    "tuna": {
+      "name": "Light tuna, canned in water, drained",
+      "query": "fish tuna light canned water drained solids",
+      "match": [
+        "tuna",
+        "light",
+        "water",
+        "canned",
+        "drained"
+      ],
+      "reject": []
+    },
+    "cottage": {
+      "name": "Low-fat cottage cheese",
+      "query": "cheese cottage lowfat",
+      "match": [
+        "cheese",
+        "cottage",
+        "low"
+      ],
+      "reject": []
+    },
+    "peanut": {
+      "name": "Peanut butter, smooth (check label)",
+      "query": "peanut butter smooth without salt",
+      "match": [
+        "peanut",
+        "butter"
+      ],
+      "reject": []
+    },
+    "seeds": {
+      "name": "Pumpkin seeds, unsalted",
+      "query": "seeds pumpkin squash kernels dried",
+      "match": [
+        "pumpkin",
+        "seed"
+      ],
+      "reject": [
+        "salt added",
+        "salted"
+      ]
+    },
+    "cucumber": {
+      "name": "Cucumber, raw",
+      "query": "cucumber with peel raw",
+      "match": [
+        "cucumber",
+        "raw"
+      ],
+      "reject": []
+    },
+    "corn": {
+      "name": "Sweet corn, canned, drained",
+      "query": "corn sweet canned drained solids",
+      "match": [
+        "corn",
+        "canned",
+        "drained"
+      ],
+      "reject": []
+    },
+    "orange": {
+      "name": "Orange, raw",
+      "query": "oranges raw",
+      "match": [
+        "orange",
+        "raw"
+      ],
+      "reject": []
+    }
+  },
+  "recipes": [
+    {
+      "id": "banana-oats",
+      "name": "Banana & chia oats",
+      "slot": "breakfast",
+      "ingredients": [
+        {
+          "food": "oats",
+          "grams": 50
+        },
+        {
+          "food": "banana",
+          "grams": 100
+        },
+        {
+          "food": "chia",
+          "grams": 10
+        },
+        {
+          "food": "soy",
+          "grams": 180
+        }
+      ],
+      "minutes": 8,
+      "diet": "vegan",
+      "groups": [
+        "whole_grains",
+        "fruit",
+        "protein"
+      ],
+      "allergens": [
+        "soy"
+      ],
+      "budget": "low",
+      "steps": [
+        "Simmer oats with the soy drink and a splash of water until tender.",
+        "Stir in chia; slice the banana over the bowl."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "apple-oats",
+      "name": "Apple & pumpkin seed porridge",
+      "slot": "breakfast",
+      "ingredients": [
+        {
+          "food": "oats",
+          "grams": 50
+        },
+        {
+          "food": "apple",
+          "grams": 130
+        },
+        {
+          "food": "seeds",
+          "grams": 15
+        }
+      ],
+      "minutes": 10,
+      "diet": "vegan",
+      "groups": [
+        "whole_grains",
+        "fruit",
+        "protein"
+      ],
+      "allergens": [],
+      "budget": "low",
+      "steps": [
+        "Dice the apple and simmer with oats and water until soft.",
+        "Scatter pumpkin seeds over the bowl before serving."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "berry-chia",
+      "name": "Berry chia breakfast pot",
+      "slot": "breakfast",
+      "ingredients": [
+        {
+          "food": "chia",
+          "grams": 25
+        },
+        {
+          "food": "soy",
+          "grams": 200
+        },
+        {
+          "food": "berries",
+          "grams": 120
+        },
+        {
+          "food": "oats",
+          "grams": 30
+        }
+      ],
+      "minutes": 5,
+      "diet": "vegan",
+      "groups": [
+        "fruit",
+        "whole_grains",
+        "protein"
+      ],
+      "allergens": [
+        "soy"
+      ],
+      "budget": "low",
+      "steps": [
+        "Mix chia, oats and soy drink in a covered container.",
+        "Refrigerate overnight; add washed berries when ready to eat."
+      ],
+      "ready": "5 minutes active + overnight chilling"
+    },
+    {
+      "id": "bean-breakfast",
+      "name": "Black bean breakfast tacos",
+      "slot": "breakfast",
+      "ingredients": [
+        {
+          "food": "beans",
+          "grams": 100
+        },
+        {
+          "food": "tortilla",
+          "grams": 60
+        },
+        {
+          "food": "tomato",
+          "grams": 80
+        },
+        {
+          "food": "avocado",
+          "grams": 40
+        }
+      ],
+      "minutes": 10,
+      "diet": "vegan",
+      "groups": [
+        "protein",
+        "vegetables"
+      ],
+      "allergens": [],
+      "budget": "low",
+      "steps": [
+        "Warm drained beans until steaming and heat the corn tortillas.",
+        "Fill with beans, chopped tomato and avocado; check tortilla labels."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "tofu-breakfast",
+      "name": "Tofu & spinach scramble",
+      "slot": "breakfast",
+      "ingredients": [
+        {
+          "food": "tofu",
+          "grams": 140
+        },
+        {
+          "food": "spinach",
+          "grams": 70
+        },
+        {
+          "food": "tomato",
+          "grams": 100
+        },
+        {
+          "food": "oil",
+          "grams": 5
+        }
+      ],
+      "minutes": 12,
+      "diet": "vegan",
+      "groups": [
+        "protein",
+        "vegetables"
+      ],
+      "allergens": [
+        "soy"
+      ],
+      "budget": "low",
+      "steps": [
+        "Crumble tofu into a pan with olive oil and heat through.",
+        "Fold in chopped tomato and spinach; cook until the greens wilt."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "fruit-seed-bowl",
+      "name": "Fruit, oats & seed bowl",
+      "slot": "breakfast",
+      "ingredients": [
+        {
+          "food": "oats",
+          "grams": 45
+        },
+        {
+          "food": "banana",
+          "grams": 80
+        },
+        {
+          "food": "berries",
+          "grams": 100
+        },
+        {
+          "food": "seeds",
+          "grams": 20
+        }
+      ],
+      "minutes": 7,
+      "diet": "vegan",
+      "groups": [
+        "whole_grains",
+        "fruit",
+        "protein"
+      ],
+      "allergens": [],
+      "budget": "low",
+      "steps": [
+        "Cook oats with water until tender, then let cool slightly.",
+        "Top with washed berries, banana slices and pumpkin seeds."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "quinoa-breakfast",
+      "name": "Warm apple quinoa bowl",
+      "slot": "breakfast",
+      "ingredients": [
+        {
+          "food": "quinoa",
+          "grams": 160
+        },
+        {
+          "food": "apple",
+          "grams": 100
+        },
+        {
+          "food": "seeds",
+          "grams": 20
+        }
+      ],
+      "minutes": 8,
+      "diet": "vegan",
+      "groups": [
+        "whole_grains",
+        "fruit",
+        "protein"
+      ],
+      "allergens": [],
+      "budget": "low",
+      "steps": [
+        "Warm the cooked quinoa with diced apple and a little water.",
+        "Finish with pumpkin seeds. Use freshly cooked or safely stored quinoa."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "yogurt-oats",
+      "name": "Yogurt, berries & oats",
+      "slot": "breakfast",
+      "ingredients": [
+        {
+          "food": "yogurt",
+          "grams": 180
+        },
+        {
+          "food": "berries",
+          "grams": 120
+        },
+        {
+          "food": "oats",
+          "grams": 35
+        }
+      ],
+      "minutes": 5,
+      "diet": "vegetarian",
+      "groups": [
+        "protein",
+        "fruit",
+        "whole_grains",
+        "dairy_or_fortified_alternative"
+      ],
+      "allergens": [
+        "milk"
+      ],
+      "budget": "low",
+      "steps": [
+        "Spoon yogurt into a bowl and fold in oats.",
+        "Top with washed berries; keep chilled until serving."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "egg-spinach",
+      "name": "Egg & spinach corn tacos",
+      "slot": "breakfast",
+      "ingredients": [
+        {
+          "food": "egg",
+          "grams": 100
+        },
+        {
+          "food": "spinach",
+          "grams": 60
+        },
+        {
+          "food": "tortilla",
+          "grams": 60
+        },
+        {
+          "food": "tomato",
+          "grams": 80
+        },
+        {
+          "food": "oil",
+          "grams": 5
+        }
+      ],
+      "minutes": 12,
+      "diet": "vegetarian",
+      "groups": [
+        "protein",
+        "vegetables"
+      ],
+      "allergens": [
+        "egg"
+      ],
+      "budget": "low",
+      "steps": [
+        "Scramble eggs with spinach in olive oil until firm, not runny.",
+        "Warm the tortillas and fill with cooked eggs and chopped tomato."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "cottage-apple",
+      "name": "Cottage cheese apple bowl",
+      "slot": "breakfast",
+      "ingredients": [
+        {
+          "food": "cottage",
+          "grams": 180
+        },
+        {
+          "food": "apple",
+          "grams": 130
+        },
+        {
+          "food": "seeds",
+          "grams": 15
+        }
+      ],
+      "minutes": 5,
+      "diet": "vegetarian",
+      "groups": [
+        "protein",
+        "fruit",
+        "dairy_or_fortified_alternative"
+      ],
+      "allergens": [
+        "milk"
+      ],
+      "budget": "low",
+      "steps": [
+        "Dice washed apple and place over cottage cheese.",
+        "Add pumpkin seeds and keep chilled until serving."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "turkey-breakfast",
+      "name": "Turkey & pepper breakfast skillet",
+      "slot": "breakfast",
+      "ingredients": [
+        {
+          "food": "turkey",
+          "grams": 120
+        },
+        {
+          "food": "pepper",
+          "grams": 100
+        },
+        {
+          "food": "onion",
+          "grams": 50
+        },
+        {
+          "food": "rice",
+          "grams": 130
+        },
+        {
+          "food": "oil",
+          "grams": 5
+        }
+      ],
+      "minutes": 20,
+      "diet": "omnivore",
+      "groups": [
+        "protein",
+        "vegetables",
+        "whole_grains"
+      ],
+      "allergens": [],
+      "budget": "low",
+      "steps": [
+        "Brown ground turkey with oil and diced onion; cook turkey to 165\u00b0F / 74\u00b0C.",
+        "Add peppers and cook until tender, then stir in cooked rice and heat through."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "chicken-breakfast",
+      "name": "Chicken & spinach morning rice",
+      "slot": "breakfast",
+      "ingredients": [
+        {
+          "food": "chicken",
+          "grams": 120
+        },
+        {
+          "food": "spinach",
+          "grams": 70
+        },
+        {
+          "food": "rice",
+          "grams": 150
+        },
+        {
+          "food": "oil",
+          "grams": 5
+        }
+      ],
+      "minutes": 20,
+      "diet": "omnivore",
+      "groups": [
+        "protein",
+        "vegetables",
+        "whole_grains"
+      ],
+      "allergens": [],
+      "budget": "low",
+      "steps": [
+        "Cut chicken on a separate board; saut\u00e9 in oil to 165\u00b0F / 74\u00b0C.",
+        "Add spinach and cooked rice and heat through. Clean surfaces that touched raw chicken."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "beef-breakfast",
+      "name": "Beef & tomato breakfast tacos",
+      "slot": "breakfast",
+      "ingredients": [
+        {
+          "food": "beef",
+          "grams": 100
+        },
+        {
+          "food": "tomato",
+          "grams": 100
+        },
+        {
+          "food": "tortilla",
+          "grams": 60
+        },
+        {
+          "food": "spinach",
+          "grams": 40
+        }
+      ],
+      "minutes": 18,
+      "diet": "omnivore",
+      "groups": [
+        "protein",
+        "vegetables"
+      ],
+      "allergens": [],
+      "budget": "low",
+      "steps": [
+        "Brown the ground beef and cook to 160\u00b0F / 71\u00b0C.",
+        "Warm tortillas, add cooked beef, tomato and spinach; keep raw-meat tools separate."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "chickpea-quinoa",
+      "name": "Lemon chickpea quinoa bowl",
+      "slot": "lunch",
+      "ingredients": [
+        {
+          "food": "chickpea",
+          "grams": 130
+        },
+        {
+          "food": "quinoa",
+          "grams": 150
+        },
+        {
+          "food": "cucumber",
+          "grams": 100
+        },
+        {
+          "food": "tomato",
+          "grams": 80
+        },
+        {
+          "food": "lemon",
+          "grams": 15
+        },
+        {
+          "food": "oil",
+          "grams": 5
+        }
+      ],
+      "minutes": 10,
+      "diet": "vegan",
+      "groups": [
+        "protein",
+        "vegetables",
+        "whole_grains"
+      ],
+      "allergens": [],
+      "budget": "low",
+      "steps": [
+        "Combine cooked quinoa with drained chickpeas, diced cucumber and tomato.",
+        "Dress with lemon and oil; keep chilled or serve immediately."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "bean-rice",
+      "name": "Black bean & corn rice bowl",
+      "slot": "lunch",
+      "ingredients": [
+        {
+          "food": "beans",
+          "grams": 140
+        },
+        {
+          "food": "rice",
+          "grams": 160
+        },
+        {
+          "food": "corn",
+          "grams": 70
+        },
+        {
+          "food": "pepper",
+          "grams": 80
+        },
+        {
+          "food": "oil",
+          "grams": 5
+        }
+      ],
+      "minutes": 12,
+      "diet": "vegan",
+      "groups": [
+        "protein",
+        "vegetables",
+        "whole_grains"
+      ],
+      "allergens": [],
+      "budget": "low",
+      "steps": [
+        "Warm drained black beans, corn and chopped pepper in oil.",
+        "Fold into cooked brown rice and heat through."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "lentil-salad",
+      "name": "Lentil & cucumber grain salad",
+      "slot": "lunch",
+      "ingredients": [
+        {
+          "food": "lentils",
+          "grams": 150
+        },
+        {
+          "food": "quinoa",
+          "grams": 130
+        },
+        {
+          "food": "cucumber",
+          "grams": 100
+        },
+        {
+          "food": "tomato",
+          "grams": 80
+        },
+        {
+          "food": "lemon",
+          "grams": 15
+        }
+      ],
+      "minutes": 10,
+      "diet": "vegan",
+      "groups": [
+        "protein",
+        "vegetables",
+        "whole_grains"
+      ],
+      "allergens": [],
+      "budget": "low",
+      "steps": [
+        "Combine cooked lentils and quinoa with diced cucumber and tomato.",
+        "Add lemon juice and chill promptly if preparing ahead."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "tofu-rice",
+      "name": "Tofu & broccoli rice bowl",
+      "slot": "lunch",
+      "ingredients": [
+        {
+          "food": "tofu",
+          "grams": 150
+        },
+        {
+          "food": "broccoli",
+          "grams": 120
+        },
+        {
+          "food": "rice",
+          "grams": 160
+        },
+        {
+          "food": "oil",
+          "grams": 7
+        }
+      ],
+      "minutes": 18,
+      "diet": "vegan",
+      "groups": [
+        "protein",
+        "vegetables",
+        "whole_grains"
+      ],
+      "allergens": [
+        "soy"
+      ],
+      "budget": "low",
+      "steps": [
+        "Cube tofu and pan-sear in olive oil until heated through.",
+        "Steam broccoli and combine with cooked brown rice."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "chickpea-tacos",
+      "name": "Chickpea & avocado tacos",
+      "slot": "lunch",
+      "ingredients": [
+        {
+          "food": "chickpea",
+          "grams": 140
+        },
+        {
+          "food": "tortilla",
+          "grams": 70
+        },
+        {
+          "food": "avocado",
+          "grams": 50
+        },
+        {
+          "food": "tomato",
+          "grams": 100
+        },
+        {
+          "food": "lemon",
+          "grams": 10
+        }
+      ],
+      "minutes": 10,
+      "diet": "vegan",
+      "groups": [
+        "protein",
+        "vegetables"
+      ],
+      "allergens": [],
+      "budget": "low",
+      "steps": [
+        "Mash drained chickpeas with lemon and warm through.",
+        "Fill warmed corn tortillas with chickpeas, tomato and avocado."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "white-lentil-pasta",
+      "name": "Lentil & tomato whole-wheat pasta",
+      "slot": "lunch",
+      "ingredients": [
+        {
+          "food": "lentils",
+          "grams": 140
+        },
+        {
+          "food": "pasta",
+          "grams": 170
+        },
+        {
+          "food": "tomato",
+          "grams": 150
+        },
+        {
+          "food": "spinach",
+          "grams": 70
+        },
+        {
+          "food": "oil",
+          "grams": 5
+        }
+      ],
+      "minutes": 15,
+      "diet": "vegan",
+      "groups": [
+        "protein",
+        "vegetables",
+        "whole_grains"
+      ],
+      "allergens": [
+        "wheat"
+      ],
+      "budget": "low",
+      "steps": [
+        "Soften chopped tomato in oil, then add cooked lentils and spinach.",
+        "Fold in cooked whole-wheat pasta and heat through."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "egg-rice",
+      "name": "Egg & vegetable rice bowl",
+      "slot": "lunch",
+      "ingredients": [
+        {
+          "food": "egg",
+          "grams": 100
+        },
+        {
+          "food": "rice",
+          "grams": 170
+        },
+        {
+          "food": "carrot",
+          "grams": 80
+        },
+        {
+          "food": "spinach",
+          "grams": 60
+        },
+        {
+          "food": "oil",
+          "grams": 5
+        }
+      ],
+      "minutes": 15,
+      "diet": "vegetarian",
+      "groups": [
+        "protein",
+        "vegetables",
+        "whole_grains"
+      ],
+      "allergens": [
+        "egg"
+      ],
+      "budget": "low",
+      "steps": [
+        "Cook diced carrot in oil until tender, then add spinach.",
+        "Scramble in eggs to 160\u00b0F / 71\u00b0C, add cooked rice and heat through."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "chicken-quinoa",
+      "name": "Chicken, quinoa & pepper bowl",
+      "slot": "lunch",
+      "ingredients": [
+        {
+          "food": "chicken",
+          "grams": 150
+        },
+        {
+          "food": "quinoa",
+          "grams": 160
+        },
+        {
+          "food": "pepper",
+          "grams": 100
+        },
+        {
+          "food": "oil",
+          "grams": 5
+        },
+        {
+          "food": "lemon",
+          "grams": 15
+        }
+      ],
+      "minutes": 22,
+      "diet": "omnivore",
+      "groups": [
+        "protein",
+        "vegetables",
+        "whole_grains"
+      ],
+      "allergens": [],
+      "budget": "low",
+      "steps": [
+        "Saut\u00e9 chicken pieces in oil to 165\u00b0F / 74\u00b0C; cook peppers until tender.",
+        "Serve with cooked quinoa and lemon. Keep raw chicken tools separate."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "turkey-bean",
+      "name": "Turkey & black bean skillet",
+      "slot": "lunch",
+      "ingredients": [
+        {
+          "food": "turkey",
+          "grams": 140
+        },
+        {
+          "food": "beans",
+          "grams": 100
+        },
+        {
+          "food": "rice",
+          "grams": 130
+        },
+        {
+          "food": "tomato",
+          "grams": 120
+        }
+      ],
+      "minutes": 22,
+      "diet": "omnivore",
+      "groups": [
+        "protein",
+        "vegetables",
+        "whole_grains"
+      ],
+      "allergens": [],
+      "budget": "low",
+      "steps": [
+        "Brown ground turkey to 165\u00b0F / 74\u00b0C.",
+        "Add drained black beans and tomato; simmer and serve with cooked rice."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "beef-rice",
+      "name": "Beef & pepper rice bowl",
+      "slot": "lunch",
+      "ingredients": [
+        {
+          "food": "beef",
+          "grams": 140
+        },
+        {
+          "food": "rice",
+          "grams": 160
+        },
+        {
+          "food": "pepper",
+          "grams": 100
+        },
+        {
+          "food": "onion",
+          "grams": 50
+        }
+      ],
+      "minutes": 22,
+      "diet": "omnivore",
+      "groups": [
+        "protein",
+        "vegetables",
+        "whole_grains"
+      ],
+      "allergens": [],
+      "budget": "low",
+      "steps": [
+        "Brown ground beef with onion to 160\u00b0F / 71\u00b0C.",
+        "Add pepper, cook until tender and serve over cooked brown rice."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "tuna-chickpea",
+      "name": "Tuna & chickpea quinoa salad",
+      "slot": "lunch",
+      "ingredients": [
+        {
+          "food": "tuna",
+          "grams": 100
+        },
+        {
+          "food": "chickpea",
+          "grams": 100
+        },
+        {
+          "food": "quinoa",
+          "grams": 130
+        },
+        {
+          "food": "cucumber",
+          "grams": 100
+        },
+        {
+          "food": "lemon",
+          "grams": 15
+        }
+      ],
+      "minutes": 10,
+      "diet": "pescatarian",
+      "groups": [
+        "protein",
+        "vegetables",
+        "whole_grains"
+      ],
+      "allergens": [
+        "fish"
+      ],
+      "budget": "moderate",
+      "steps": [
+        "Drain canned light tuna and chickpeas.",
+        "Combine with cooked quinoa, cucumber and lemon; keep chilled until serving."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "salmon-rice",
+      "name": "Lemon salmon rice bowl",
+      "slot": "lunch",
+      "ingredients": [
+        {
+          "food": "salmon",
+          "grams": 140
+        },
+        {
+          "food": "rice",
+          "grams": 160
+        },
+        {
+          "food": "broccoli",
+          "grams": 130
+        },
+        {
+          "food": "lemon",
+          "grams": 15
+        }
+      ],
+      "minutes": 25,
+      "diet": "pescatarian",
+      "groups": [
+        "protein",
+        "vegetables",
+        "whole_grains"
+      ],
+      "allergens": [
+        "fish"
+      ],
+      "budget": "moderate",
+      "steps": [
+        "Cook salmon to 145\u00b0F / 63\u00b0C, measured at the thickest part.",
+        "Steam broccoli and serve with cooked rice and lemon."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "lentil-sweet-potato",
+      "name": "Lentil stuffed sweet potato",
+      "slot": "dinner",
+      "ingredients": [
+        {
+          "food": "lentils",
+          "grams": 170
+        },
+        {
+          "food": "sweet_potato",
+          "grams": 220
+        },
+        {
+          "food": "spinach",
+          "grams": 80
+        },
+        {
+          "food": "tomato",
+          "grams": 100
+        },
+        {
+          "food": "oil",
+          "grams": 5
+        }
+      ],
+      "minutes": 25,
+      "diet": "vegan",
+      "groups": [
+        "protein",
+        "vegetables",
+        "whole_grains"
+      ],
+      "allergens": [],
+      "budget": "low",
+      "steps": [
+        "Dice or microwave sweet potato until fully tender.",
+        "Warm cooked lentils with tomato, oil and spinach; spoon over the potato."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "tofu-quinoa",
+      "name": "Crispy tofu quinoa plate",
+      "slot": "dinner",
+      "ingredients": [
+        {
+          "food": "tofu",
+          "grams": 170
+        },
+        {
+          "food": "quinoa",
+          "grams": 170
+        },
+        {
+          "food": "broccoli",
+          "grams": 150
+        },
+        {
+          "food": "oil",
+          "grams": 7
+        }
+      ],
+      "minutes": 25,
+      "diet": "vegan",
+      "groups": [
+        "protein",
+        "vegetables",
+        "whole_grains"
+      ],
+      "allergens": [
+        "soy"
+      ],
+      "budget": "low",
+      "steps": [
+        "Pan-sear drained tofu cubes in oil until golden and hot through.",
+        "Steam broccoli and serve with cooked quinoa."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "bean-chili",
+      "name": "Black bean & lentil chili rice",
+      "slot": "dinner",
+      "ingredients": [
+        {
+          "food": "beans",
+          "grams": 140
+        },
+        {
+          "food": "lentils",
+          "grams": 100
+        },
+        {
+          "food": "tomato",
+          "grams": 170
+        },
+        {
+          "food": "pepper",
+          "grams": 100
+        },
+        {
+          "food": "rice",
+          "grams": 140
+        }
+      ],
+      "minutes": 25,
+      "diet": "vegan",
+      "groups": [
+        "protein",
+        "vegetables",
+        "whole_grains"
+      ],
+      "allergens": [],
+      "budget": "low",
+      "steps": [
+        "Simmer drained black beans, cooked lentils, tomato and pepper with a little water.",
+        "Cook until vegetables are tender; serve over hot cooked brown rice."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "chickpea-pasta",
+      "name": "Chickpea & spinach pasta",
+      "slot": "dinner",
+      "ingredients": [
+        {
+          "food": "chickpea",
+          "grams": 150
+        },
+        {
+          "food": "pasta",
+          "grams": 180
+        },
+        {
+          "food": "spinach",
+          "grams": 90
+        },
+        {
+          "food": "tomato",
+          "grams": 130
+        },
+        {
+          "food": "oil",
+          "grams": 5
+        }
+      ],
+      "minutes": 20,
+      "diet": "vegan",
+      "groups": [
+        "protein",
+        "vegetables",
+        "whole_grains"
+      ],
+      "allergens": [
+        "wheat"
+      ],
+      "budget": "low",
+      "steps": [
+        "Warm chickpeas and chopped tomato in olive oil, then wilt spinach.",
+        "Stir in cooked whole-wheat pasta and heat through."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "quinoa-bean-skillet",
+      "name": "Quinoa & black bean vegetable skillet",
+      "slot": "dinner",
+      "ingredients": [
+        {
+          "food": "quinoa",
+          "grams": 170
+        },
+        {
+          "food": "beans",
+          "grams": 140
+        },
+        {
+          "food": "pepper",
+          "grams": 100
+        },
+        {
+          "food": "corn",
+          "grams": 70
+        },
+        {
+          "food": "oil",
+          "grams": 5
+        }
+      ],
+      "minutes": 20,
+      "diet": "vegan",
+      "groups": [
+        "protein",
+        "vegetables",
+        "whole_grains"
+      ],
+      "allergens": [],
+      "budget": "low",
+      "steps": [
+        "Soften diced pepper in oil, then add drained beans and corn.",
+        "Fold in cooked quinoa and heat through."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "lentil-tacos",
+      "name": "Lentil & avocado dinner tacos",
+      "slot": "dinner",
+      "ingredients": [
+        {
+          "food": "lentils",
+          "grams": 170
+        },
+        {
+          "food": "tortilla",
+          "grams": 80
+        },
+        {
+          "food": "tomato",
+          "grams": 120
+        },
+        {
+          "food": "avocado",
+          "grams": 50
+        }
+      ],
+      "minutes": 15,
+      "diet": "vegan",
+      "groups": [
+        "protein",
+        "vegetables"
+      ],
+      "allergens": [],
+      "budget": "low",
+      "steps": [
+        "Heat cooked lentils until steaming and warm the corn tortillas.",
+        "Fill with lentils, tomato and sliced avocado."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "egg-quinoa",
+      "name": "Vegetable egg & quinoa skillet",
+      "slot": "dinner",
+      "ingredients": [
+        {
+          "food": "egg",
+          "grams": 120
+        },
+        {
+          "food": "quinoa",
+          "grams": 170
+        },
+        {
+          "food": "broccoli",
+          "grams": 100
+        },
+        {
+          "food": "spinach",
+          "grams": 70
+        },
+        {
+          "food": "oil",
+          "grams": 5
+        }
+      ],
+      "minutes": 20,
+      "diet": "vegetarian",
+      "groups": [
+        "protein",
+        "vegetables",
+        "whole_grains"
+      ],
+      "allergens": [
+        "egg"
+      ],
+      "budget": "low",
+      "steps": [
+        "Steam chopped broccoli, then add to a pan with oil, spinach and cooked quinoa.",
+        "Stir in eggs and cook to 160\u00b0F / 71\u00b0C throughout."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "chicken-sweet-potato",
+      "name": "Lemon chicken & sweet potato",
+      "slot": "dinner",
+      "ingredients": [
+        {
+          "food": "chicken",
+          "grams": 160
+        },
+        {
+          "food": "sweet_potato",
+          "grams": 220
+        },
+        {
+          "food": "broccoli",
+          "grams": 140
+        },
+        {
+          "food": "oil",
+          "grams": 7
+        },
+        {
+          "food": "lemon",
+          "grams": 15
+        }
+      ],
+      "minutes": 30,
+      "diet": "omnivore",
+      "groups": [
+        "protein",
+        "vegetables",
+        "whole_grains"
+      ],
+      "allergens": [],
+      "budget": "low",
+      "steps": [
+        "Cut sweet potato into small pieces and microwave or steam until tender.",
+        "Saut\u00e9 chicken in oil to 165\u00b0F / 74\u00b0C; steam broccoli and serve with lemon."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "turkey-pasta",
+      "name": "Turkey & tomato whole-wheat pasta",
+      "slot": "dinner",
+      "ingredients": [
+        {
+          "food": "turkey",
+          "grams": 150
+        },
+        {
+          "food": "pasta",
+          "grams": 180
+        },
+        {
+          "food": "tomato",
+          "grams": 180
+        },
+        {
+          "food": "spinach",
+          "grams": 70
+        },
+        {
+          "food": "oil",
+          "grams": 5
+        }
+      ],
+      "minutes": 25,
+      "diet": "omnivore",
+      "groups": [
+        "protein",
+        "vegetables",
+        "whole_grains"
+      ],
+      "allergens": [
+        "wheat"
+      ],
+      "budget": "low",
+      "steps": [
+        "Brown ground turkey in oil to 165\u00b0F / 74\u00b0C.",
+        "Simmer with tomato, add spinach and fold in cooked whole-wheat pasta."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "beef-quinoa",
+      "name": "Beef & broccoli quinoa skillet",
+      "slot": "dinner",
+      "ingredients": [
+        {
+          "food": "beef",
+          "grams": 150
+        },
+        {
+          "food": "quinoa",
+          "grams": 170
+        },
+        {
+          "food": "broccoli",
+          "grams": 150
+        },
+        {
+          "food": "onion",
+          "grams": 60
+        }
+      ],
+      "minutes": 25,
+      "diet": "omnivore",
+      "groups": [
+        "protein",
+        "vegetables",
+        "whole_grains"
+      ],
+      "allergens": [],
+      "budget": "low",
+      "steps": [
+        "Brown ground beef with onion to 160\u00b0F / 71\u00b0C.",
+        "Steam broccoli; combine with beef and cooked quinoa and heat through."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "chicken-beans",
+      "name": "Chicken, black beans & rice",
+      "slot": "dinner",
+      "ingredients": [
+        {
+          "food": "chicken",
+          "grams": 150
+        },
+        {
+          "food": "beans",
+          "grams": 110
+        },
+        {
+          "food": "rice",
+          "grams": 150
+        },
+        {
+          "food": "pepper",
+          "grams": 100
+        },
+        {
+          "food": "oil",
+          "grams": 5
+        }
+      ],
+      "minutes": 25,
+      "diet": "omnivore",
+      "groups": [
+        "protein",
+        "vegetables",
+        "whole_grains"
+      ],
+      "allergens": [],
+      "budget": "low",
+      "steps": [
+        "Cook chicken pieces in oil to 165\u00b0F / 74\u00b0C.",
+        "Add drained beans and diced pepper, heat through and serve with cooked rice."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "salmon-quinoa",
+      "name": "Salmon & lemon quinoa plate",
+      "slot": "dinner",
+      "ingredients": [
+        {
+          "food": "salmon",
+          "grams": 160
+        },
+        {
+          "food": "quinoa",
+          "grams": 180
+        },
+        {
+          "food": "broccoli",
+          "grams": 160
+        },
+        {
+          "food": "lemon",
+          "grams": 15
+        }
+      ],
+      "minutes": 25,
+      "diet": "pescatarian",
+      "groups": [
+        "protein",
+        "vegetables",
+        "whole_grains"
+      ],
+      "allergens": [
+        "fish"
+      ],
+      "budget": "moderate",
+      "steps": [
+        "Cook salmon to 145\u00b0F / 63\u00b0C in its thickest part.",
+        "Steam broccoli and serve with cooked quinoa and lemon."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "tuna-pasta",
+      "name": "Tuna, tomato & spinach pasta",
+      "slot": "dinner",
+      "ingredients": [
+        {
+          "food": "tuna",
+          "grams": 120
+        },
+        {
+          "food": "pasta",
+          "grams": 180
+        },
+        {
+          "food": "tomato",
+          "grams": 160
+        },
+        {
+          "food": "spinach",
+          "grams": 80
+        },
+        {
+          "food": "oil",
+          "grams": 5
+        }
+      ],
+      "minutes": 18,
+      "diet": "pescatarian",
+      "groups": [
+        "protein",
+        "vegetables",
+        "whole_grains"
+      ],
+      "allergens": [
+        "fish",
+        "wheat"
+      ],
+      "budget": "moderate",
+      "steps": [
+        "Warm tomato and spinach in oil, then add drained canned light tuna.",
+        "Fold in cooked whole-wheat pasta and heat through."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "apple-seeds",
+      "name": "Apple & pumpkin seeds",
+      "slot": "snack",
+      "ingredients": [
+        {
+          "food": "apple",
+          "grams": 150
+        },
+        {
+          "food": "seeds",
+          "grams": 25
+        }
+      ],
+      "minutes": 5,
+      "diet": "vegan",
+      "groups": [
+        "fruit",
+        "protein"
+      ],
+      "allergens": [],
+      "budget": "low",
+      "steps": [
+        "Wash and slice the apple.",
+        "Portion unsalted pumpkin seeds alongside."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "banana-peanut",
+      "name": "Banana & peanut butter",
+      "slot": "snack",
+      "ingredients": [
+        {
+          "food": "banana",
+          "grams": 110
+        },
+        {
+          "food": "peanut",
+          "grams": 25
+        }
+      ],
+      "minutes": 5,
+      "diet": "vegan",
+      "groups": [
+        "fruit",
+        "protein"
+      ],
+      "allergens": [
+        "peanut"
+      ],
+      "budget": "low",
+      "steps": [
+        "Slice the banana and portion peanut butter alongside.",
+        "Check the peanut butter package for any additional ingredients."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "chickpea-cucumber",
+      "name": "Lemony chickpea cucumber cup",
+      "slot": "snack",
+      "ingredients": [
+        {
+          "food": "chickpea",
+          "grams": 100
+        },
+        {
+          "food": "cucumber",
+          "grams": 100
+        },
+        {
+          "food": "lemon",
+          "grams": 10
+        }
+      ],
+      "minutes": 5,
+      "diet": "vegan",
+      "groups": [
+        "protein",
+        "vegetables"
+      ],
+      "allergens": [],
+      "budget": "low",
+      "steps": [
+        "Rinse and drain chickpeas, then dice the cucumber.",
+        "Combine with lemon juice and keep chilled."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "berries-soy",
+      "name": "Berries & soy breakfast drink",
+      "slot": "snack",
+      "ingredients": [
+        {
+          "food": "berries",
+          "grams": 130
+        },
+        {
+          "food": "soy",
+          "grams": 200
+        },
+        {
+          "food": "seeds",
+          "grams": 15
+        }
+      ],
+      "minutes": 5,
+      "diet": "vegan",
+      "groups": [
+        "fruit",
+        "protein"
+      ],
+      "allergens": [
+        "soy"
+      ],
+      "budget": "low",
+      "steps": [
+        "Wash berries and serve with a chilled unsweetened soy drink.",
+        "Portion pumpkin seeds alongside. Check that the soy drink is fortified if counting it in that food group."
+      ],
+      "ready": ""
+    },
+    {
+      "id": "yogurt-banana",
+      "name": "Yogurt & banana snack",
+      "slot": "snack",
+      "ingredients": [
+        {
+          "food": "yogurt",
+          "grams": 160
+        },
+        {
+          "food": "banana",
+          "grams": 90
+        }
+      ],
+      "minutes": 5,
+      "diet": "vegetarian",
+      "groups": [
+        "fruit",
+        "protein",
+        "dairy_or_fortified_alternative"
+      ],
+      "allergens": [
+        "milk"
+      ],
+      "budget": "low",
+      "steps": [
+        "Slice banana over plain yogurt.",
+        "Keep the yogurt chilled until serving."
+      ],
+      "ready": ""
+    }
+  ]
+}

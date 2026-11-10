@@ -13,9 +13,10 @@ export function plannerReadiness(meals: SavedMeal[], preferences: NutritionPrefe
   const missing = coverage.filter(item => !item.eligible.length).map(item => item.slot);
   return {needsPreferences,coverage,missing,ready:!needsPreferences && missing.length===0};
 }
-export function mealPlanFlowHref(page:"setup"|"plan", start:string, snack=false, generate=false) {
+export function mealPlanFlowHref(page:"setup"|"plan", start:string, snack=false, generate=false,discover=false) {
   const query=new URLSearchParams();
   if(validLocalDate(start))query.set("start",start);
+  if(discover)query.set("discover","1");
   if(snack)query.set("snack","1");
   if(page==="plan"&&generate)query.set("generate","1");
   const suffix=query.toString();
