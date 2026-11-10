@@ -38,6 +38,7 @@ export type Database = {
     Views: Record<never, never>;
     Functions: {
       gym_save_meal_with_request: {Args:{target_meal_id:string|null;expected_revision:number|null;meal:Json|null;archive:boolean;request_token:string};Returns:Json};
+      gym_save_discovery_meal_plan: {Args:{plan_name:string;plan:Json;proposed_meals:Json;options:Json;preparation:Json;request_token:string};Returns:Json};
       gym_save_meal_plan: {Args:{plan_name:string;plan:Json;request_token:string};Returns:Json};
       gym_save_meal: {Args:{target_meal_id:string|null;expected_revision:number|null;meal:Json|null;archive?:boolean};Returns:Json};
       gym_log_meal: {Args:{target_meal_id:string;expected_revision:number;servings:number;consumed_on:string;slot:string;client_timezone:string;request_token:string};Returns:Json};

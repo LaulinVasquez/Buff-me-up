@@ -2,6 +2,10 @@
 
 Prepared 2026-11-04. The agent has not applied these changes to any remote database. Use the Supabase project connected to Buff Me Up. Its existing migrations 1–13 must already be present. New objects use the `gym_` prefix; no FlowDesk/Auth tables, sign-in configuration, API keys or storage buckets are changed by the SQL.
 
+## November 10 meal discovery — migration 18 required
+
+Run [20261110000000_add_meal_discovery_plans.sql](../supabase/migrations/20261110000000_add_meal_discovery_plans.sql) once **after existing migrations 1–17**, using your existing SQL Editor or CLI workflow. It adds three `gym_meal_plans` metadata columns and the atomic reviewed recipe/week save RPC; no new table or Auth/FlowDesk change. Run the [read-only checks](../supabase/verify/meal_discovery_2026_11_10.sql) afterward. Existing migrations/bundles remain unchanged: the original nutrition bundle supplies 14–16, then apply 17 and 18. No new key or environment variable. USDA generic estimates reuse the existing key; unmatched values stay unknown. Optional AI reuses the existing explicit key/model/consent configuration. See [meal discovery report](MEAL_DISCOVERY_VARIETY.md) for exact procedure, tested behavior and live acceptance boundaries. No live SQL has been applied by the agent.
+
 ## November 6 database error repair — additional SQL required
 
 Newly reported `42702` is a reproduced recipe calculation bug; `42703` indicates missing workout substitution schema. Follow [the repair procedure](SUPABASE_REPAIR_2026_11_06.md): run [forward migration 17](../supabase/migrations/20261106000000_fix_recipe_nutrient_calculation.sql) after nutrition 14–16, then [workout recovery](../supabase/deploy/workout_recovery_2026_11_06.sql) for the missing workout features if using SQL Editor. The original nutrition bundle is unchanged and must be followed by migration 17 on new installs. Do not rerun existing nutrition migrations. Both scripts preserve existing records and request a schema refresh. No API key/environment change. The earlier no-additional-SQL sections below describe the UI-only updates, not this database repair.

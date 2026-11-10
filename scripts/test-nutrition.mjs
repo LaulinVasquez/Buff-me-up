@@ -12,7 +12,7 @@ try {
   const program = ts.createProgram([join(root, "tests/nutrition.test.ts")], {
     target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.NodeNext,
     moduleResolution: ts.ModuleResolutionKind.NodeNext, strict: true,
-    esModuleInterop: true, skipLibCheck: true, noEmitOnError: true,
+    resolveJsonModule: true, esModuleInterop: true, skipLibCheck: true, noEmitOnError: true,
     rootDir: root, outDir: output, types: ["node"], paths: { "@/*": [join(root, "*")] },
   });
   const emitted = program.emit();

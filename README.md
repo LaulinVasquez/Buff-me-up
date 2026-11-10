@@ -106,6 +106,7 @@ Apply these files in order without modifying already-applied migrations:
 15. 20261104010000_add_meals_and_food_logs.sql
 16. 20261104020000_add_personalized_meal_plans.sql
 17. 20261106000000_fix_recipe_nutrient_calculation.sql
+18. 20261110000000_add_meal_discovery_plans.sql
 
 For reported `42702` recipe calculations and missing workout `substitution_details` (`42703`), see `docs/SUPABASE_REPAIR_2026_11_06.md` for the exact forward repair, guarded SQL Editor workout recovery and read-only checks. Original pending migrations remain the CLI path.
 
@@ -144,6 +145,8 @@ Actual set logging, a page-local rest timer and limited-window progress comparis
 
 Nutrition setup is offered after sign-in and can be skipped. Profile edits the same preferences. Meals supports reusable label/gram recipes, USDA food lookup, a portion diary with historical snapshots and reviewed seven-day plans with shopping quantities. The regular planner uses reviewed saved meals and qualitative food-group prompts from the USDA/HHS 2025–2030 guidance. Nutrition totals are calculated in code/database; optional AI selects from eligible meal IDs.
 
-Apply pending migrations 14–17 before deploying this nutrition version. For an existing SQL Editor workflow where all three are pending, `supabase/deploy/nutrition_2026_11_04.sql` contains the original migrations 14–16 in one transaction plus schema refresh; run forward repair 17 afterward. Choose individual pending files when partially applied; preserve CLI migration history if using the CLI. Detailed SQL/configuration and verification steps: `docs/NUTRITION_SUPABASE_SETUP.md`.
+Apply pending migrations 14–18 before deploying this nutrition version. For an existing SQL Editor workflow where all three are pending, `supabase/deploy/nutrition_2026_11_04.sql` contains the original migrations 14–16 in one transaction plus schema refresh; run forward repair 17 and meal-discovery migration 18 afterward. Choose individual pending files when partially applied; preserve CLI migration history if using the CLI. Detailed SQL/configuration and verification steps: `docs/NUTRITION_SUPABASE_SETUP.md`.
 
 Optional server variables: `USDA_FDC_API_KEY` for USDA search/details; `OPENAI_API_KEY` and an explicit `OPENAI_NUTRITION_MODEL` for AI assistance. Never use a NEXT_PUBLIC_ prefix. Manual meal entry/logging and the regular planner work without external keys. AI requires versioned user consent and an explicit request. No external keys or real user-data calls were used in development tests. Live USDA/OpenAI and signed-in/device acceptance remain pending. See `docs/NUTRITION_RELEASE_REPORT_2026-11-04.md`.
+
+Meal discovery adds five styles, 43 app-authored recipe ideas, distinct-choice and paired-day rhythms, review/edit/preparation flows and an atomic new-recipe/week save. Migration 18 is required; no new provider variable. Exact SQL, source/AI boundaries, validation and staging handoff: `docs/MEAL_DISCOVERY_VARIETY.md`.

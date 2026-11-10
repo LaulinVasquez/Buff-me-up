@@ -12,7 +12,7 @@ import type { MealSlot, NutritionActionState, NutritionPreferences, SavedMeal } 
 import { NutritionPreferencesForm } from "./preferences-form";
 import { MealEditor, type MealAction } from "./meal-editor";
 type PreferencesAction=(previous:NutritionActionState,form:FormData)=>Promise<NutritionActionState>;
-export function MealPlanSetup({initialMeals,preferences,start,snack,editPreferences=false,preferencesAction,mealAction,cookingAction}:{initialMeals:SavedMeal[];preferences:NutritionPreferences|null;start:string;snack:boolean;editPreferences?:boolean;preferencesAction:PreferencesAction;mealAction:MealAction;cookingAction?:CookingTimeAction}) {
+export function MealPlanSetup({initialMeals,preferences,start,snack,editPreferences=false,discover=false,preferencesAction,mealAction,cookingAction}:{initialMeals:SavedMeal[];preferences:NutritionPreferences|null;start:string;snack:boolean;editPreferences?:boolean;discover?:boolean;preferencesAction:PreferencesAction;mealAction:MealAction;cookingAction?:CookingTimeAction}) {
   const router=useRouter();const [localMeals,setLocalMeals]=useState<SavedMeal[]>([]);const meals=mergeSavedRecords(initialMeals,localMeals);
   const [changedPreferences,setChangedPreferences]=useState<NutritionPreferences|null>(null);const currentPreferences=latestPreferences(preferences,changedPreferences);
   const readiness=plannerReadiness(meals,currentPreferences,snack);
@@ -25,7 +25,7 @@ export function MealPlanSetup({initialMeals,preferences,start,snack,editPreferen
   if(readiness.needsPreferences||editPreferences)return <>
     <p className="mt-4 text-sm leading-6 text-slate-400">First, what foods fit your preferences, schedule and budget? Measurements are optional.</p>
     <p className="mt-5 text-xs font-semibold text-accent-300">Step 1 of 2 · Your preferences</p>
-    <NutritionPreferencesForm guided preferences={currentPreferences} action={async(previous,form)=>{const result=await preferencesAction(previous,form);if(result.status==="success"){router.replace(setupHref);router.refresh();}return result;}}/>
+    <NutritionPreferencesForm guided preferences={currentPreferences} action={async(previous,form)=>{const result=await preferencesAction(previous,form);if(result.status==="success"){router.replace(discover?mealPlanFlowHref("plan",start,snack,true):setupHref);router.refresh();}return result;}}/>
   </>;
   const active=meals.filter(meal=>!meal.archived&&meal.details.slot===slot);
   const onSaved=(meal:SavedMeal)=>{

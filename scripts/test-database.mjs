@@ -119,6 +119,10 @@ try {
   runFile("supabase/verify/supabase_repair_2026_11_06.sql");
   console.log("PASS: nonempty USDA/manual recipes, portion math, unknown nutrients, retries, historical snapshots and RLS");
 
+  runFile("supabase/verify/meal_discovery_2026_11_10.sql");
+  runFile("tests/database/nutrition-discovery.sql");
+  console.log("PASS: atomic discovered recipes/plans, review/style/stale guards, snapshots, retries, capacity rollback and RLS");
+
   // Reapplication must preserve actual saved sets, replacements, deferred work and history.
   const snapshotRows = () => sql("select jsonb_build_object('workouts',(select jsonb_agg(to_jsonb(w) order by id) from public.gym_workouts w),'exercises',(select jsonb_agg(to_jsonb(e) order by id) from public.gym_workout_exercises e));");
   const beforeRecovery = snapshotRows();
@@ -304,6 +308,20 @@ try {
   if (creationResults.some(result => result.code !== 0)) throw new Error("Concurrent usual-meal creation retry failed");
   sql(`${asUser} select test.assert((select count(*)=1 from public.gym_meals where request_id='${creationToken}'),'Concurrent meal creation retries must return one meal');`);
   console.log("PASS: concurrent nutrition preference/meal saves, duplicate meal creation/logs and reviewed-plan snapshots");
+  const discoveryPreferences=readJson("select to_jsonb(p) from public.gym_nutrition_preferences p where user_id=auth.uid();");
+  const discoveryProposals=planMeals.map(meal=>({key:`suggestion:concurrent-${meal.details.slot}`,details:{...meal.details,name:`Concurrent discovered ${meal.details.slot}`,allergens:[]}}));
+  const discoveryDraft={...reviewedPlan,preference_revision:discoveryPreferences.revision,entries:reviewedPlan.entries.map(e=>({...e,meal_id:`suggestion:concurrent-${e.slot}`,meal_revision:0}))};
+  const discoveryOptions={style:"vegan",mode:"variety",source:"mixed",use_target:false};
+  const discoveryToken="97000000-0000-0000-0000-000000000001";
+  const discoveryCall=`select public.gym_save_discovery_meal_plan('Concurrent discovery week',${sqlJson(discoveryDraft)},${sqlJson(discoveryProposals)},${sqlJson(discoveryOptions)},'[]','${discoveryToken}');`;
+  const firstDiscovery=runAsync(`${asUser} begin; ${discoveryCall} select pg_sleep(1); commit;`);
+  await waitForBarrier();
+  const secondDiscovery=runAsync(`${asUser} ${discoveryCall}`);
+  const discoveryResults=await Promise.all([firstDiscovery,secondDiscovery]);
+  if(discoveryResults.some(r=>r.code!==0))throw new Error(`Concurrent discovery retry failed: ${JSON.stringify(discoveryResults)}`);
+  sql(`${asUser} select test.assert((select count(*)=1 from public.gym_meal_plans where request_id='${discoveryToken}'),'Concurrent discovery requests return one plan'); select test.assert((select count(*)=3 from public.gym_meals where name like 'Concurrent discovered %'),'Concurrent discovery requests create each recipe once');`);
+  console.log("PASS: concurrent discovery retries atomically create one week and three recipes");
+
 
 } catch (error) {
   console.error(error.stderr?.toString() || error.message);

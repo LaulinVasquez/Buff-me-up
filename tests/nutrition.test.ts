@@ -255,3 +255,72 @@ test("saved record refresh cannot replace newer server revisions with stale loca
  const saved=[{id:"meal",revision:3,name:"Latest"},{id:"other",revision:0,name:"Other tab"}];
  assert.equal(mergeSavedRecords(saved,[{id:"meal",revision:1,name:"Old"}]).find(item=>item.id==="meal")?.name,"Latest");assert.equal(mergeSavedRecords(saved,[{id:"new",revision:0,name:"Just saved"}]).length,3);
 });
+
+import {catalogMeals,planningMeals,recipeDetails,recipeSteps,RECIPES,RECIPE_FOODS} from "../lib/nutrition/recipe-catalog";
+import {DEFAULT_PLANNING_OPTIONS,styleConflict,matchesPlanStyle,isSuggestion,validPlanningOptions,containsMeat} from "../lib/nutrition/plan-options";
+import {planVariety,fitUserTarget,planningEligibility} from "../lib/nutrition/planner";
+import {lookupRecipeFood} from "../lib/nutrition/recipe-nutrition";
+import {assistMealWeek} from "../lib/nutrition/agent";
+test("recipe ideas include complete editable preparation and never invent nutrition",()=>{
+ const p=preferencesFixture(),ideas=catalogMeals(p);assert(RECIPES.length>=40);assert(ideas.length>20);
+ for(const r of RECIPES){const d=recipeDetails(r.id);assert(validateMeal(d),r.id);assert.equal(d.reviewed,false);assert.equal(d.recipe_servings,2);assert(d.ingredients.length>=2);assert(d.ingredients.every(i=>Object.values(i.per100g).every(v=>v===null)&&i.source==="manual"));assert(recipeSteps({...ideas[0],details:d}).length>=2);}
+ assert(ideas.every(m=>Object.values(m.nutrients).every(v=>v===null)));assert.equal(new Set(RECIPES.map(r=>r.id)).size,RECIPES.length);
+});
+test("new users get a varied week without saving meals and saved-only scarcity stays honest",()=>{
+ const p=preferencesFixture(),options={...DEFAULT_PLANNING_OPTIONS},pool=planningMeals([],p,options);const before=JSON.stringify(pool);
+ const plan=generateMealPlan(pool,p,[],"2026-11-10",false,0,options);assert(validateMealPlan(plan,pool,p,true));assert.equal(validateMealPlan(plan,pool,p),false);assert.equal(plan.entries.length,21);assert.equal(planVariety(plan).unique,21);assert.equal(planVariety(plan).adjacent,0);assert.equal(JSON.stringify(pool),before);
+ const second=generateMealPlan(pool,p,[],"2026-11-10",false,1,options);assert.notDeepEqual(plan.entries,second.entries);
+ assert.deepEqual(planningMeals([],p,{...options,source:"saved"}),[]);assert.throws(()=>generateMealPlan([],p,[],"2026-11-10",false,0,{...options,source:"saved"}),/compatible/);
+});
+test("style choices intersect profile restrictions, time and budget rather than overriding them",()=>{
+ const p={...preferencesFixture(),diet:"vegan" as const,allergens:["soy","wheat","peanut"],avoid_foods:["banana"],cooking_minutes:15,budget:"low" as const};
+ const o={...DEFAULT_PLANNING_OPTIONS,style:"vegan" as const};const pool=planningMeals([],p,o);assert(pool.length>5);assert(pool.every(m=>!planningEligibility(m,p,true)&&matchesPlanStyle(m,"vegan")));assert(pool.every(m=>m.details.cooking_minutes<=15&&m.details.budget==="low"));assert(pool.every(m=>!m.details.ingredients.some(i=>/banana/i.test(i.name))));
+ assert(styleConflict(p,"meat_lovers"));assert(styleConflict(p,"pescatarian"));assert.equal(planningMeals([],p,{...o,style:"meat_lovers"}).length,0);
+ const omni=preferencesFixture(),meat={...DEFAULT_PLANNING_OPTIONS,style:"meat_lovers" as const};const candidates=planningMeals([],omni,meat),week=generateMealPlan(candidates,omni,[],"2026-11-10",false,0,meat);assert(week.entries.filter(e=>e.day===0).every(e=>containsMeat(candidates.find(m=>m.id===e.meal_id)!)));
+ for(const style of ["vegan","vegetarian","pescatarian"] as const){const options={...DEFAULT_PLANNING_OPTIONS,style};const pool=planningMeals([],omni,options);assert(pool.every(m=>matchesPlanStyle(m,style)));assert(validateMealPlan(generateMealPlan(pool,omni,[],"2026-11-10",true,0,options),pool,omni,true));}
+});
+test("meal-prep mode deliberately pairs days but changes recipes between batches",()=>{
+ const p=preferencesFixture(),o={...DEFAULT_PLANNING_OPTIONS,mode:"meal_prep" as const},pool=planningMeals([],p,o),week=generateMealPlan(pool,p,[],"2026-11-10",false,0,o);
+ for(const slot of ["breakfast","lunch","dinner"]){const selected=week.entries.filter(e=>e.slot===slot);assert.equal(selected[0].meal_id,selected[1].meal_id);assert.equal(selected[2].meal_id,selected[3].meal_id);assert.equal(selected[4].meal_id,selected[5].meal_id);assert.notEqual(selected[0].meal_id,selected[2].meal_id);}
+ assert.equal(planVariety(week).unique,12);assert.equal(planVariety(week).adjacent,9);
+});
+test("reviewed saved recipe ideas are reused without duplicate virtual copies",()=>{
+ const p=preferencesFixture(),o=DEFAULT_PLANNING_OPTIONS,idea=catalogMeals(p)[0];const saved={...idea,id:"10000000-0000-0000-0000-000000000099",details:{...idea.details,reviewed:true}};
+ const pool=planningMeals([saved],p,o);assert(pool.some(m=>m.id===saved.id));assert(!pool.some(m=>m.id===idea.id));
+ const retryPool=planningMeals([saved],p,o,[idea],new Set([idea.id]));assert(retryPool.some(m=>m.id===idea.id),"An in-flight proposal remains resolvable after its saved record arrives");
+ assert(planningMeals([saved],p,{...o,source:"suggestions"}).some(m=>m.id===saved.id));
+ const hidden={...saved,details:{...saved.details,reviewed:false}};assert(!planningMeals([hidden],p,o).some(m=>m.id===hidden.id));
+});
+test("optional user target guides bounded portions only when every daily calorie value is known",()=>{
+ const p=preferencesFixture(),meals=mealsFixture(),week=generateMealPlan(meals,p,[],"2026-11-10");const fitted=fitUserTarget(week,meals,2250);
+ assert(fitted.entries.every(e=>e.portions>=0.5&&e.portions<=3&&Number.isInteger(e.portions*2)));assert.equal(planDayReview(fitted.entries.filter(e=>e.day===0),meals,2250).nutrition.calories.known,2250);
+ const unknown=meals.map(m=>({...m,nutrients:{...m.nutrients,calories:null}}));assert.deepEqual(fitUserTarget(week,unknown,2250),week);
+ assert.equal(week.entries[0].portions,1);assert.equal(p.calorie_target,null);
+});
+test("USDA recipe estimates reject branded or wrong-form matches and keep unavailable values unknown",async()=>{
+ const requests:{url:string;body:Record<string,unknown>}[]=[];
+ const fetcher:typeof fetch=async(url,init)=>{requests.push({url:String(url),body:JSON.parse(String(init?.body))});return new Response(JSON.stringify({foods:[
+  {fdcId:801,description:"CHICKEN BREAST RAW",dataType:"Branded",foodNutrients:[{nutrientId:1008,unitName:"kcal",value:999}]},
+  {fdcId:802,description:"Chicken breast cooked",dataType:"Foundation",foodNutrients:[{nutrientId:1008,unitName:"kcal",value:165}]},
+  {fdcId:804,description:"Chicken breast meat with skin raw",dataType:"SR Legacy",foodNutrients:[{nutrientId:1008,unitName:"kcal",value:200}]},
+  {fdcId:803,description:"Chicken breast boneless skinless raw",dataType:"SR Legacy",foodNutrients:[{nutrientId:1008,unitName:"kcal",value:120},{nutrientId:1003,unitName:"g",value:22}]}
+ ]}));};
+ const food=await lookupRecipeFood("chicken","synthetic-key",fetcher);assert(food);assert.equal(food.fdc_id,803);assert.equal(food.per100g.calories,120);assert.equal(food.per100g.sodium,null);assert.equal(requests.length,1);assert.deepEqual(requests[0].body.dataType,["Foundation","SR Legacy"]);assert.equal(requests[0].body.query,RECIPE_FOODS.chicken.query);assert(!JSON.stringify(food).includes("synthetic-key"));
+ assert.equal(await lookupRecipeFood("chicken","",fetcher),null);assert.equal(requests.length,1);
+ for(const fetcher of [async()=>new Response("{}",{status:429}),async()=>{throw new Error("timeout");},async()=>new Response(JSON.stringify({foods:[]}))])assert.equal(await lookupRecipeFood("chicken","synthetic-key",fetcher),null);
+ const d=recipeDetails("chicken-quinoa",{chicken:food});assert.equal(d.ingredients[0].source,"usda");assert.equal(d.ingredients[0].grams,300);assert.equal(mealNutrients(d).calories,null);
+});
+test("discovery drafts retain options, edited recipes and reviews while rejecting invalid settings",()=>{
+ const p=preferencesFixture(),o={...DEFAULT_PLANNING_OPTIONS,style:"vegan" as const},suggestions=catalogMeals(p,o);const draft={start:"2026-11-10",snack:false,seed:1,draft:generateMealPlan(suggestions,p,[],"2026-11-10",false,0,o),name:"My vegan week",reviewed:false,request:null,engine:"regular",options:o,suggestions,reviewedRecipes:[suggestions[0].id],reviewBaseRevision:p.revision,preparation:["wash_produce"],editing:suggestions[0].id};
+ assert(isPlannerDraft(draft));assert(isPlannerDraft(JSON.parse(JSON.stringify(draft))));assert(!isPlannerDraft({...draft,options:{...o,style:"magic"}}));assert(!isPlannerDraft({...draft,preparation:["unsafe instruction"]}));assert(!validPlanningOptions({...o,owner:"another-user"}));assert(suggestions.every(isSuggestion));
+});
+test("agent chooses varied recipe aliases and supported preparation priorities without private measurements",async()=>{
+ const p=preferencesFixture(),o=DEFAULT_PLANNING_OPTIONS,meals=planningMeals([],p,o),baseline=generateMealPlan(meals,p,[],"2026-11-10",false,0,o),{context,aliases}=agentContext(meals,p,[],baseline,o);
+ const serialized=JSON.stringify(context);for(const text of ["private-user","height_cm","weight_kg","ingredient_notes","avoid_foods","calorie_target"])assert(!serialized.includes(text));
+ const entryOutput=baseline.entries.map(e=>({day:e.day,slot:e.slot,meal:[...aliases].find(([,m])=>m.id===e.meal_id)![0],portions:1}));
+ const payload=(output:unknown)=>({status:"completed",output:[{content:[{type:"output_text",text:JSON.stringify(output)}]}]});
+ const run=(output:unknown)=>assistMealWeek({meals,preferences:p,logs:[],baseline,key:"synthetic-key",model:"configured-test-model",options:o,fetcher:async()=>new Response(JSON.stringify(payload(output)))});
+ const result=await run({entries:entryOutput,prep_priorities:["batch_grains","midweek_refresh"]});assert.equal(planVariety(result.draft).unique,21);assert.deepEqual(result.preparation,["batch_grains","midweek_refresh"]);
+ await assert.rejects(run({entries:entryOutput,prep_priorities:["invent cooking temperatures"]}),/preparation/);
+ const repeated=entryOutput.map(e=>({...e,meal:entryOutput.find(v=>v.slot===e.slot)!.meal}));await assert.rejects(run({entries:repeated,prep_priorities:["wash_produce"]}),/repeated/);
+});

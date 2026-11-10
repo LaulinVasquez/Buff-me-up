@@ -1,5 +1,6 @@
+import { validPlanningOptions, PREP_PRIORITIES, type PlanningOptions, type PrepPriority } from "./plan-options";
 import { object, shortString, draftStep, validRetryToken, type RetryToken } from "./drafts";
-import { ALLERGENS, DIETS, FOOD_GROUPS, SLOTS, EMPTY_NUTRIENTS, type MealInput, type NutritionPreferences } from "./types";
+import { ALLERGENS, DIETS, FOOD_GROUPS, SLOTS, EMPTY_NUTRIENTS, type MealInput, type NutritionPreferences, type SavedMeal } from "./types";
 import { validLocalDate } from "./meals";
 import type { MealPlanDraft } from "./planner";
 import type { FoodMatch, UsdaFoodDetails } from "./usda";
@@ -21,8 +22,14 @@ export function isLookupDraft(v:unknown):v is LookupDraft {
 export type SetupDraft={slot:MealInput["slot"]|null;editor:string|null};
 export function isSetupDraft(v:unknown):v is SetupDraft{return object(v)&&(v.slot===null||SLOTS.includes(v.slot as never))&&(v.editor===null||shortString(v.editor,64));}
 export function latestPreferences(a:NutritionPreferences|null,b:NutritionPreferences|null){return !a?b:!b?a:a.revision>=b.revision?a:b;}
-export type PlannerDraft={start:string;snack:boolean;seed:number;draft:MealPlanDraft|null;name:string;reviewed:boolean;request:RetryToken;engine:"regular"|"ai"};
+export type PlannerDraft={start:string;snack:boolean;seed:number;draft:MealPlanDraft|null;name:string;reviewed:boolean;request:RetryToken;engine:"regular"|"ai";options?:PlanningOptions;suggestions?:SavedMeal[];reviewedRecipes?:string[];reviewBaseRevision?:number|null;preparation?:PrepPriority[];editing?:string|null};
 export function isPlannerDraft(v:unknown):v is PlannerDraft {
  if(!object(v)||!shortString(v.start,10)||(v.start!==""&&!validLocalDate(v.start))||typeof v.snack!=="boolean"||!Number.isSafeInteger(v.seed)||!shortString(v.name,120)||typeof v.reviewed!=="boolean"||!validRetryToken(v.request)||!["regular","ai"].includes(String(v.engine)))return false;
+ if(v.options!==undefined&&!validPlanningOptions(v.options))return false;
+ if(v.suggestions!==undefined&&(!Array.isArray(v.suggestions)||v.suggestions.length>50||!v.suggestions.every(m=>object(m)&&shortString(m.id,64)&&String(m.id).startsWith("suggestion:")&&shortString(m.name,120)&&isDraftMealInput(m.details)&&nutrients(m.nutrients)&&m.revision===0&&m.archived===false)))return false;
+ if(v.reviewedRecipes!==undefined&&(!Array.isArray(v.reviewedRecipes)||v.reviewedRecipes.length>50||!v.reviewedRecipes.every(id=>shortString(id,64))))return false;
+ if(v.reviewBaseRevision!==undefined&&!revision(v.reviewBaseRevision))return false;
+ if(v.preparation!==undefined&&(!Array.isArray(v.preparation)||v.preparation.length>5||!v.preparation.every(t=>PREP_PRIORITIES.includes(t))))return false;
+ if(v.editing!==undefined&&v.editing!==null&&!shortString(v.editing,64))return false;
  const d=v.draft;return d===null||(object(d)&&typeof d.start_date==="string"&&validLocalDate(d.start_date)&&revision(d.preference_revision)&&shortString(d.guidance_version,100)&&Array.isArray(d.entries)&&d.entries.length>=21&&d.entries.length<=28&&d.entries.every(e=>object(e)&&Number.isInteger(e.day)&&Number(e.day)>=0&&Number(e.day)<=6&&SLOTS.includes(e.slot as never)&&shortString(e.meal_id,64)&&revision(e.meal_revision)&&finite(e.portions)));
 }

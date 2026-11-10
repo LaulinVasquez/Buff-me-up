@@ -40,3 +40,8 @@ Guided setup now asks food choices, routine and optional details on separate scr
 ## Reload and tab recovery
 
 Unfinished nutrition work now uses validated owner-scoped per-tab session drafts. Reload preserves inputs/selections/position; saved changes refresh without replacing local edits. Changed meal/preference/plan revisions require explicit reconciliation and a new review. Cooking-time warnings can update the saved limit in place through the existing RPC. Drafts are separate from database saves and AI requests remain explicit. See NUTRITION_DRAFT_RECOVERY.md for scope, cleanup, failure handling and verification.
+
+
+## November 10 — Discovery replaces the saved-only default
+
+The default now mixes compatible saved favorites with new app-authored recipe ideas. Five styles and distinct-choice/preparation rhythms produce a week even with no saved meals. New recipes show ingredients, preparation and generic USDA estimates/unknowns; users can adapt them and review each before an atomic recipe/week save. Optional AI chooses compatible aliases and supported preparation priorities, not unrestricted recipes/nutrients. Original saved-only selection remains an option. Migration 18 required; full behavior, 81-test/database/browser evidence, exact SQL and boundaries: MEAL_DISCOVERY_VARIETY.md. The earlier phase-3 description above documents the previous saved-only behavior.
