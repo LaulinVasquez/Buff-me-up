@@ -73,7 +73,7 @@ export function generateMealPlan(meals: SavedMeal[], p: NutritionPreferences, lo
 export function fitUserTarget(draft:MealPlanDraft,meals:SavedMeal[],target:number):MealPlanDraft {
  const entries=draft.entries.map(e=>({...e}));
  for(let day=0;day<7;day++){
-  const selected=entries.filter(e=>e.day===day);const calories=selected.map(e=>meals.find(m=>m.id===e.meal_id)?.nutrients.calories);
+  const selected=entries.filter(e=>e.day===day);if(selected.some(e=>meals.find(m=>m.id===e.meal_id)?.details.photo_estimate))continue;const calories=selected.map(e=>meals.find(m=>m.id===e.meal_id)?.nutrients.calories);
   if(calories.some(c=>typeof c!=="number"||!Number.isFinite(c)||c<=0))continue;
   let best=selected.map(e=>e.portions);let score=Infinity;
   const search=(values:number[])=>{if(values.length===selected.length){const sum=values.reduce((n,p,i)=>n+p*calories[i]!,0);const value=Math.abs(sum-target)+values.reduce((n,p)=>n+Math.abs(p-1)*8,0);if(value<score){score=value;best=[...values];}return;}for(const p of [0.5,1,1.5,2,2.5,3])search([...values,p]);};search([]);
@@ -102,7 +102,8 @@ export function planDayReview(entries: PlanEntry[], meals: SavedMeal[], target: 
  const missing=FOOD_GROUPS.filter(group=>!groups.has(group));const nutrition=nutrientSummary(selected);const notes:string[]=[];
  if(missing.length)notes.push(`Review food-group coverage: ${missing.map(group=>group.replaceAll("_"," ")).join(", ")}.`);
  if(nutrition.calories.unknown)notes.push("Some calorie values are unknown; the total is a known subtotal.");
- if(target&&!nutrition.calories.unknown&&(nutrition.calories.known<target*0.8||nutrition.calories.known>target*1.2))notes.push("The planned total differs from your own calorie target. Review meals and portions.");
+ const photoEstimates=selected.some(item=>item.snapshot.details.photo_estimate);if(photoEstimates)notes.push("This day includes a photo-based estimate. Hidden ingredients and portions can change its calories; it is not used for automatic target-based serving adjustments.");
+ if(target&&!photoEstimates&&!nutrition.calories.unknown&&(nutrition.calories.known<target*0.8||nutrition.calories.known>target*1.2))notes.push("The planned total differs from your own calorie target. Review meals and portions.");
  return {nutrition,missing,notes};
 }
 export function groceryList(entries: PlanSnapshotEntry[]) {

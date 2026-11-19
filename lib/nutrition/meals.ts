@@ -1,3 +1,4 @@
+import { validPhotoMetadata } from "./photo-estimates";
 import { ALLERGENS, DIETS, FOOD_GROUPS, SLOTS, EMPTY_NUTRIENTS, type FoodIngredient, type FoodLog, type MealInput, type Nutrients } from "./types";
 export const NUTRIENT_KEYS = Object.keys(EMPTY_NUTRIENTS) as (keyof Nutrients)[];
 export function validNutrients(value: unknown): value is Nutrients {
@@ -10,6 +11,7 @@ export function validateMeal(value: unknown): value is MealInput {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const meal = value as MealInput;
   const keys = ["name","slot","mode","recipe_servings","ingredients","nutrients","ingredient_notes","food_groups","diet_tags","allergens","reviewed","cooking_minutes","budget","notes"];
+  if(Object.hasOwn(meal,"photo_estimate")){if(meal.mode!=="label"||meal.recipe_servings!==1||!validPhotoMetadata(meal.photo_estimate))return false;keys.push("photo_estimate");}
   return Object.keys(meal).sort().join() === keys.sort().join()
     && typeof meal.name === "string" && meal.name.trim().length >= 1 && meal.name.length <= 120 && SLOTS.includes(meal.slot)
     && ["label","recipe"].includes(meal.mode) && Number.isInteger(meal.recipe_servings) && meal.recipe_servings >= 1 && meal.recipe_servings <= 100
