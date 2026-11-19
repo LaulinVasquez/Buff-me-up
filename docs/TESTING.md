@@ -77,3 +77,8 @@ Run this checklist against staging from a phone:
 - [ ] Check all bottom navigation at a narrow phone width.
 - [ ] Add the app to the phone home screen and launch it standalone.
 - [ ] Confirm production Google OAuth uses the deployed callback URL.
+
+
+## Meal-photo estimates (2026-11-18)
+
+`npm run test:nutrition` includes photo schema/range/null-macro/portion/provenance/draft checks, real Sharp metadata/orientation/size validation, bounded mocked provider contracts and HTTP auth/origin/consent/body/quota/failure cases. No paid model or real photo is used. `npm run test:db` applies migration 19, read-only verification, synthetic photo snapshot/review/RLS/quota coverage and eight concurrent attempts capped at five. Full check totals 91 tests (48 nutrition). The alternate `BMU_WORKOUT_RECOVERY=1 BMU_NUTRITION_BUNDLE=1 npm run test:db` path passes too. See MEAL_PHOTO_ESTIMATES.md for fifteen responsive/browser checks, automation limitations and physical-device/live-provider acceptance still required.

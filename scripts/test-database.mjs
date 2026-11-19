@@ -120,6 +120,9 @@ try {
   console.log("PASS: nonempty USDA/manual recipes, portion math, unknown nutrients, retries, historical snapshots and RLS");
 
   runFile("supabase/verify/meal_discovery_2026_11_10.sql");
+  runFile("supabase/verify/meal_photos_2026_11_18.sql");
+  runFile("tests/database/nutrition-photos.sql");
+  console.log("PASS: photo provenance/ranges, legacy meal compatibility, explicit review, immutable snapshots and private five-attempt quota");
   runFile("tests/database/nutrition-discovery.sql");
   console.log("PASS: atomic discovered recipes/plans, review/style/stale guards, snapshots, retries, capacity rollback and RLS");
 
@@ -321,6 +324,11 @@ try {
   if(discoveryResults.some(r=>r.code!==0))throw new Error(`Concurrent discovery retry failed: ${JSON.stringify(discoveryResults)}`);
   sql(`${asUser} select test.assert((select count(*)=1 from public.gym_meal_plans where request_id='${discoveryToken}'),'Concurrent discovery requests return one plan'); select test.assert((select count(*)=3 from public.gym_meals where name like 'Concurrent discovered %'),'Concurrent discovery requests create each recipe once');`);
   console.log("PASS: concurrent discovery retries atomically create one week and three recipes");
+  const photoAttempts=await Promise.all(Array.from({length:8},()=>runAsync(`${asUser} select to_json(public.gym_consume_nutrition_request('photo'));`)));
+  if(photoAttempts.some(r=>r.code!==0)||photoAttempts.filter(r=>/\btrue\b/.test(r.output)).length!==5)throw new Error("Concurrent photo analysis quota did not stop at five");
+  sql(`${asUser} select test.assert((select used=5 from public.gym_nutrition_requests where kind='photo'),'Concurrent photo calls retain five accepted attempts');`);
+  console.log("PASS: concurrent photo attempts cannot exceed the owner daily cap");
+
 
 
 } catch (error) {

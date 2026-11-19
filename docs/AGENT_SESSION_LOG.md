@@ -1,5 +1,18 @@
 # Agent session log
 
+## 2026-11-18 — phone meal-photo estimates (BMU-030)
+
+**Branch:** `agent/meal-photo-estimates`, based on developer-merged PR #26 (`f4f66de`). Plan first: `22a1c66`. No applicable AGENTS.md or original development-guide file was present in the canonical checkout/ancestors at task start; continued the established plan → implementation/checks → report → push/draft-PR workflow. No delegation was requested or used.
+
+Implemented phone camera/library controls in the existing meal flow, explicit separate sharing consent, locally/server-normalized metadata-free JPEG input, authenticated bounded image analysis with safe schema/error handling, editable approximate range/portion/calories, unreviewed acceptance and persistent estimate provenance. Text drafts recover without images, consent or automatic paid retries. Existing diary/plan snapshots show the source, and photo days are excluded from target fitting. Migration 19 extends optional meal JSON validation and adds a separate five-attempt daily owner quota with existing RLS/snapshots intact; no new image bucket/table. Exact SQL and server model/key setup: MEAL_PHOTO_ESTIMATES.md and NUTRITION_SUPABASE_SETUP.md.
+
+Verification: full `npm run check` passes (91 tests including 48 nutrition, lint, drift, production build, sequential types and full disposable PostgreSQL/RLS/concurrency). Recovery + nutrition-bundle path passes through migration 19 and read-only verification. Legacy validator body exactly matches migration 15. Actual components with synthetic image/provider/actions verified selection/consent, half-portion and correction, reload with text/no-image/unchecked consent, owner separation, explicit review/save/log, unknown nutrients and source labels. Fifteen 320/390/768/1024/1440px measurements fit. Screenshot/measurement JSON saved as chat artifacts. An incorrect region-role wait and dev-origin warning were resolved by observed DOM/matching localhost. Later repeated picker uploads stalled/reset automation; not recorded as camera/repeat/error-UI passes. Physical phone permissions/capture/HEIC, live model quality/cost and signed-in PostgREST remain staging work. Preview stopped/moved out, tab closed/viewport reset before final checks. No fixture route/auth bypass ships.
+
+Dependency maintenance: existing Next 16.4.3 emitted a build security notice. Verified audit/vendor advisories GHSA-mfr8-8qww-v76h and GHSA-vc7v-qv4w-wrv8, applied compatible Next/eslint-config-next 16.4.6 and reran checks; no evidence of live compromise. Sharp's already-installed 0.35.5 is now explicit for server normalization. Audit reports zero vulnerabilities in the audited installed set; package script policy was not relaxed. No remote SQL, model charge, real image/account test, merge or deployment performed. Review references follow after push.
+
+Learning: a photograph can suggest foods and a rough energy range but cannot supply measured grams, hidden oil or allergen safety. Keeping uncertainty/source in the saved snapshot prevents an editable estimate from later appearing to be an exact USDA calculation.
+
+
 
 ## 2026-11-02 — account appearance themes (BMU-011)
 

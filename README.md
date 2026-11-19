@@ -14,6 +14,7 @@ Buff Me Up is a mobile-first gym tracking SaaS with authentication, plan managem
 - Interactive day/month/year history graphs for completed workouts and time logged
 - Installable home-screen manifest for supported phone browsers
 - Searchable ExerciseDB library and editable 3–6 day smart plan generator
+- Reviewed meal-photo calorie ranges with phone camera/library input, editable portions and calories, and persistent estimate labels
 
 ## Technology stack
 
@@ -107,6 +108,9 @@ Apply these files in order without modifying already-applied migrations:
 16. 20261104020000_add_personalized_meal_plans.sql
 17. 20261106000000_fix_recipe_nutrient_calculation.sql
 18. 20261110000000_add_meal_discovery_plans.sql
+19. 20261118000000_add_meal_photo_estimates.sql
+
+Photo estimates require migration 19 after 1–18 and server-only `OPENAI_API_KEY` plus `OPENAI_NUTRITION_PHOTO_MODEL` (image input + structured output support). The feature stays unavailable without both variables; existing food entry remains available. See [meal photo setup and report](docs/MEAL_PHOTO_ESTIMATES.md). No image storage bucket is needed.
 
 For reported `42702` recipe calculations and missing workout `substitution_details` (`42703`), see `docs/SUPABASE_REPAIR_2026_11_06.md` for the exact forward repair, guarded SQL Editor workout recovery and read-only checks. Original pending migrations remain the CLI path.
 

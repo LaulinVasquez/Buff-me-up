@@ -324,3 +324,64 @@ test("agent chooses varied recipe aliases and supported preparation priorities w
  await assert.rejects(run({entries:entryOutput,prep_priorities:["invent cooking temperatures"]}),/preparation/);
  const repeated=entryOutput.map(e=>({...e,meal:entryOutput.find(v=>v.slot===e.slot)!.meal}));await assert.rejects(run({entries:repeated,prep_priorities:["wash_produce"]}),/repeated/);
 });
+
+import sharp from "sharp";
+import {PHOTO_CONSENT_VERSION,PHOTO_MAX_BODY_BYTES,parsePhotoOutput,validPhotoAnalysis,validPhotoMetadata,scalePhotoAnalysis,mealFromPhotoEstimate,withoutPhotoEstimate,validPhotoEstimateDraft} from "../lib/nutrition/photo-estimates";
+import {estimateMealPhoto} from "../lib/nutrition/photo-agent";
+import {normalizeMealPhoto} from "../lib/nutrition/photo-image";
+import {photoRequest,type PhotoDependencies} from "../lib/nutrition/photo-http";
+const photoOutput=()=>({kind:"estimated",name:"Rice and beans bowl",foods:["Rice","Beans"],portion_description:"One pictured bowl",calories_low:400,calories_high:650,protein:25,carbs:80,fat:12,fiber:null,sodium:null,confidence:"low",uncertainty:["Amount of oil is not visible","Depth of the bowl is uncertain"],message:"Rough estimate"});
+const photoResult=()=>parsePhotoOutput(photoOutput(),new Date("2026-11-18T00:00:00.000Z"));
+test("photo analysis preserves broad ranges and unknown macros without claiming ingredient suitability",()=>{
+ const result=photoResult();assert.equal(result.kind,"estimated");if(result.kind!=="estimated")throw new Error();assert(validPhotoAnalysis(result));assert(validPhotoMetadata(result.photo_estimate));assert.equal(result.nutrients.calories,530);assert.equal(result.nutrients.fiber,null);assert.equal(result.nutrients.sodium,null);assert.deepEqual([result.photo_estimate.calories_low,result.photo_estimate.calories_high],[400,650]);
+ for(const patch of [{confidence:"high"},{calories_low:700},{calories_high:400},{protein:-0.1},{sodium:100001},{photo:"private image"},{uncertainty:[]},{calories_low:NaN}])assert.throws(()=>parsePhotoOutput({...photoOutput(),...patch}));
+ for(const kind of ["not_food","needs_details"]){const result=parsePhotoOutput({...photoOutput(),kind,message:"private image/person details"});assert.equal(result.kind,kind);assert(!JSON.stringify(result).includes("private image"));assert(!JSON.stringify(result).includes("calories"));}
+});
+test("photo portions scale estimates, clear automatic diet/allergen claims and allow manual correction",()=>{
+ const result=photoResult();if(result.kind!=="estimated")throw new Error();const half=scalePhotoAnalysis(result,0.5);assert.equal(half.photo_estimate.calories_low,200);assert.equal(half.photo_estimate.calories_high,330);assert.equal(half.nutrients.calories,270);assert.equal(half.nutrients.sodium,null);
+ const original={...sampleMeal(),mode:"recipe" as const,ingredients:[{name:"Old food",grams:100,per100g:{...EMPTY_NUTRIENTS},source:"manual" as const,fdc_id:null,retrieved_at:null}],allergens:["milk"],diet_tags:["vegan" as const]};const meal=mealFromPhotoEstimate(original,half);
+ assert(validateMeal(meal));assert.equal(meal.mode,"label");assert.equal(meal.recipe_servings,1);assert.equal(meal.reviewed,false);assert.deepEqual(meal.ingredients,[]);assert.deepEqual(meal.allergens,[]);assert.deepEqual(meal.diet_tags,[]);assert.deepEqual(meal.food_groups,[]);assert(original.ingredients.length===1);
+ assert(validateMeal({...meal,nutrients:{...meal.nutrients,calories:700}}),"A corrected count need not match the original image range");assert(!validateMeal({...meal,mode:"recipe"}));assert(!validateMeal({...meal,photo_estimate:{...meal.photo_estimate,image:"private bytes"}}));
+ assert(validateMeal({...withoutPhotoEstimate(meal),nutrients:{...EMPTY_NUTRIENTS}}));assert(!Object.hasOwn(withoutPhotoEstimate(meal),"photo_estimate"));assert.throws(()=>scalePhotoAnalysis(result,0.25));
+});
+test("photo drafts retain only text results and cannot persist raw images or sharing consent",()=>{
+ const draft={context:"About one cup of rice",analysis:photoResult(),factor:1,calories:""};assert(validPhotoEstimateDraft(draft));assert(validPhotoEstimateDraft(JSON.parse(JSON.stringify(draft))));assert(!validPhotoEstimateDraft({...draft,image:"data:image/jpeg;base64,private"}));assert(!validPhotoEstimateDraft({...draft,consent:true}));assert(!validPhotoEstimateDraft({...draft,factor:"1"}));assert(!validPhotoEstimateDraft({...draft,analysis:{...photoResult(),image:"private"}}));
+ const result=photoResult();if(result.kind!=="estimated")throw new Error();const input=mealFromPhotoEstimate(sampleMeal(),result);assert(isMealEditorDraft({input,baseRevision:null,reviewPreferenceRevision:0,step:2,request:null,photoOpen:false}));
+});
+test("photo-derived days are excluded from automatic target-fitting and target-deviation warnings",()=>{
+ const result=photoResult();if(result.kind!=="estimated")throw new Error();const meals=mealsFixture().map(m=>({...m,details:{...m.details,photo_estimate:result.photo_estimate}}));const week=generateMealPlan(meals,preferencesFixture(),[],"2026-11-18");assert.deepEqual(fitUserTarget(week,meals,2250),week);const notes=planDayReview(week.entries.filter(e=>e.day===0),meals,2250).notes;assert(notes.some(n=>n.includes("photo-based")));assert(!notes.some(n=>n.includes("differs from your own calorie target")));
+});
+test("server photo normalization rotates and strips EXIF without accepting oversized or non-JPEG input",async()=>{
+ const original=await sharp({create:{width:80,height:50,channels:3,background:{r:100,g:130,b:80}}}).withMetadata({orientation:6}).withExif({IFD0:{Artist:"Synthetic photographer",ImageDescription:"Synthetic private metadata"}}).jpeg().toBuffer();assert((await sharp(original).metadata()).exif);
+ const normalized=Buffer.from(await normalizeMealPhoto(original),"base64"),meta=await sharp(normalized).metadata();assert.equal(meta.format,"jpeg");assert.equal(meta.width,50);assert.equal(meta.height,80);assert.equal(meta.exif,undefined);assert.equal(meta.icc,undefined);assert.equal(meta.orientation,undefined);assert(!normalized.toString().includes("Synthetic photographer"));
+ await assert.rejects(normalizeMealPhoto(Buffer.from("not an image")));await assert.rejects(normalizeMealPhoto(Buffer.alloc(1_000_001)));
+ const tooWide=await sharp({create:{width:4097,height:1,channels:3,background:"white"}}).jpeg().toBuffer();await assert.rejects(normalizeMealPhoto(tooWide));
+});
+test("photo provider receives only normalized inline image/portion context with bounded structured output",async()=>{
+ let body:Record<string,unknown>={};const result=await estimateMealPhoto({image:"synthetic-image",context:"One bowl",key:"synthetic-secret-key",model:"configured-vision-model",fetcher:async(url,init)=>{assert.equal(String(url),"https://api.openai.com/v1/responses");body=JSON.parse(String(init?.body));return new Response(JSON.stringify({status:"completed",output:[{content:[{type:"output_text",text:JSON.stringify(photoOutput())}]}]}));}});
+ assert(validPhotoAnalysis(result));assert.equal(body.store,false);assert.equal(body.model,"configured-vision-model");assert.equal(body.max_output_tokens,1800);const serialized=JSON.stringify(body);assert(serialized.includes("data:image/jpeg;base64,synthetic-image"));for(const key of ["synthetic-secret-key","height_cm","weight_kg","user_id","allergens"])assert(!serialized.includes(`\"${key}\"`));
+});
+test("photo provider rejects refusal, incomplete/malformed/oversized output and unavailable configuration",async()=>{
+ const run=(payload:unknown)=>estimateMealPhoto({image:"synthetic-image",context:"",key:"synthetic",model:"vision",fetcher:async()=>new Response(JSON.stringify(payload))});
+ await assert.rejects(run({status:"incomplete",output:[]}));await assert.rejects(run({status:"completed",output:[{content:[{type:"refusal"}]}]}));await assert.rejects(run({status:"completed",output:[{content:[{type:"output_text",text:JSON.stringify({...photoOutput(),calories_high:1})}]}]}));
+ await assert.rejects(estimateMealPhoto({image:"",context:"",key:"",model:"vision"}));await assert.rejects(estimateMealPhoto({image:"synthetic",context:"",key:"synthetic",model:"vision",fetcher:async()=>new Response("x".repeat(60001))}));
+});
+const photoBody=()=>({image:Buffer.from([255,216,255,217]).toString("base64"),context:" One bowl ",consent:PHOTO_CONSENT_VERSION});
+const photoHttpRequest=(body:unknown=photoBody(),headers:Record<string,string>={})=>new Request("http://127.0.0.1:4323/api/nutrition/photo-estimate",{method:"POST",headers:{"Content-Type":"application/json",origin:"http://127.0.0.1:4323",...headers},body:JSON.stringify(body)});
+function photoDeps(){const calls:string[]=[];const deps:PhotoDependencies={authenticate:async()=>{calls.push("auth");return {consume:async()=>{calls.push("quota");return true;}};},configured:()=>true,normalize:async()=>{calls.push("normalize");return "stripped-synthetic-jpeg";},analyze:async(image,context)=>{calls.push("analyze");assert.equal(image,"stripped-synthetic-jpeg");assert.equal(context,"One bowl");return photoResult();}};return {deps,calls};}
+test("photo API checks authentication, same-origin input and separate consent before provider use",async()=>{
+ let fixture=photoDeps();fixture.deps.authenticate=async()=>{throw new Error("private auth details");};let response=await photoRequest(photoHttpRequest(),fixture.deps);assert.equal(response.status,401);assert.deepEqual(fixture.calls,[]);assert(!JSON.stringify(await response.json()).includes("private auth"));
+ for(const [body,headers] of [[{...photoBody(),consent:"nutrition-choices-v1"},{}],[{...photoBody(),image:"https://private.example/photo.jpg"},{}],[{...photoBody(),context:"x".repeat(301)},{}],[{...photoBody(),filename:"personal-name.jpg"},{}],[photoBody(),{origin:"https://other.example"}] ] as [unknown,Record<string,string>][]){fixture=photoDeps();response=await photoRequest(photoHttpRequest(body,headers),fixture.deps);assert(response.status===400||response.status===403);assert(!fixture.calls.includes("quota"));assert(!fixture.calls.includes("analyze"));}
+ fixture=photoDeps();response=await photoRequest(new Request("http://127.0.0.1:4323/api/nutrition/photo-estimate"),fixture.deps);assert.equal(response.status,200);assert.deepEqual(await response.json(),{available:true});assert.deepEqual(fixture.calls,["auth"]);
+});
+test("photo API returns private results only after normalization/quota and handles failures without echoing images",async()=>{
+ let fixture=photoDeps();let response=await photoRequest(photoHttpRequest(),fixture.deps);assert.equal(response.status,200);assert.deepEqual(fixture.calls,["auth","normalize","quota","analyze"]);assert.equal(response.headers.get("cache-control"),"private, no-store");assert.equal(response.headers.get("vary"),"Cookie");const result=await response.json();assert(validPhotoAnalysis(result.analysis));assert(!JSON.stringify(result).includes(photoBody().image));
+ fixture=photoDeps();fixture.deps.authenticate=async()=>({consume:async()=>false});response=await photoRequest(photoHttpRequest(),fixture.deps);assert.equal(response.status,429);assert(!fixture.calls.includes("analyze"));
+ fixture=photoDeps();fixture.deps.analyze=async()=>{throw new Error("private photo and provider details");};response=await photoRequest(photoHttpRequest(),fixture.deps);assert.equal(response.status,502);assert(!JSON.stringify(await response.json()).includes("private photo"));
+ fixture=photoDeps();fixture.deps.configured=()=>false;response=await photoRequest(photoHttpRequest(),fixture.deps);assert.equal(response.status,503);assert.deepEqual(fixture.calls,["auth"]);
+});
+test("photo API bounds declared and streamed bytes without needing a Content-Length header",async()=>{
+ const fixture=photoDeps();let response=await photoRequest(photoHttpRequest(photoBody(),{"content-length":String(PHOTO_MAX_BODY_BYTES+1)}),fixture.deps);assert.equal(response.status,413);assert(!fixture.calls.includes("normalize"));
+ let cancelled=false;const stream=new ReadableStream<Uint8Array>({pull(c){c.enqueue(new Uint8Array(600000));},cancel(){cancelled=true;}});
+ const request=new Request("http://127.0.0.1:4323/api/nutrition/photo-estimate",{method:"POST",headers:{"Content-Type":"application/json"},body:stream,duplex:"half"} as RequestInit);response=await photoRequest(request,fixture.deps);assert.equal(response.status,413);assert(cancelled);assert(!fixture.calls.includes("quota"));
+});

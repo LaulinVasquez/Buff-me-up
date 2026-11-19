@@ -42,7 +42,7 @@ export type Database = {
       gym_save_meal_plan: {Args:{plan_name:string;plan:Json;request_token:string};Returns:Json};
       gym_save_meal: {Args:{target_meal_id:string|null;expected_revision:number|null;meal:Json|null;archive?:boolean};Returns:Json};
       gym_log_meal: {Args:{target_meal_id:string;expected_revision:number;servings:number;consumed_on:string;slot:string;client_timezone:string;request_token:string};Returns:Json};
-      gym_consume_nutrition_request: {Args:{request_kind:"food"|"ai"};Returns:boolean};
+      gym_consume_nutrition_request: {Args:{request_kind:"food"|"ai"|"photo"};Returns:boolean};
       gym_save_nutrition_preferences: {Args:{preferences:Json;expected_revision:number|null;skip_setup?:boolean};Returns:Json};
       gym_save_location: {Args:{target_gym_id:string|null;expected_updated_at:string|null;gym_name:string;available_equipment:string[]};Returns:string};
       gym_select_location: {Args:{target_gym_id:string|null};Returns:undefined};
